@@ -53,13 +53,13 @@
 <meta property="og:site_name" content="CrazySpy&#39;s blog">
 <meta property="og:description" content="ziplist主要用于存储长度受到限制的字符串和大小受到限制的数字。ziplist在源代码中没有直接的结构体定义，而是在ziplistNew函数中开辟了一组连续空间，并且对连续空间进行位级别的赋值，从而达到类似于结构体的功能。 ziplist数据结构：">
 <meta property="og:locale" content="zh">
-<meta property="og:image" content="https://newblog.jiangxiwen.me/image/Redis%E7%9A%84ziplist%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/ziplist.png">
-<meta property="og:image" content="https://newblog.jiangxiwen.me/image/Redis%E7%9A%84ziplist%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/ziplist_encoding.png">
+<meta property="og:image" content="https://newblog.jiangxiwen.me/images/Redis%E7%9A%84ziplist%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/ziplist.png">
+<meta property="og:image" content="https://newblog.jiangxiwen.me/images/Redis%E7%9A%84ziplist%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/ziplist_encoding.png">
 <meta property="article:published_time" content="2018-05-26T16:00:00.000Z">
-<meta property="article:modified_time" content="2019-12-25T15:13:57.588Z">
+<meta property="article:modified_time" content="2019-12-25T18:01:34.409Z">
 <meta property="article:author" content="CrazySpy">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://newblog.jiangxiwen.me/image/Redis%E7%9A%84ziplist%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/ziplist.png">
+<meta name="twitter:image" content="https://newblog.jiangxiwen.me/images/Redis%E7%9A%84ziplist%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/ziplist.png">
 
 <link rel="canonical" href="https://newblog.jiangxiwen.me/2018/05/27/Redis%E7%9A%84ziplist%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/">
 
@@ -227,7 +227,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-12-25 23:13:57" itemprop="dateModified" datetime="2019-12-25T23:13:57+08:00">2019-12-25</time>
+                <time title="Modified: 2019-12-26 02:01:34" itemprop="dateModified" datetime="2019-12-26T02:01:34+08:00">2019-12-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -259,7 +259,7 @@
 
       
         <p>ziplist主要用于存储长度受到限制的字符串和大小受到限制的数字。<br>ziplist在源代码中没有直接的结构体定义，而是在ziplistNew函数中开辟了一组连续空间，并且对连续空间进行位级别的赋值，从而达到类似于结构体的功能。</p>
-<p>ziplist数据结构：<br><img src="/image/Redis的ziplist数据结构/ziplist.png" alt=""><br><a id="more"></a><br>各个数据的含义：</p>
+<p>ziplist数据结构：<br><img src="/images/Redis的ziplist数据结构/ziplist.png" alt=""><br><a id="more"></a><br>各个数据的含义：</p>
 <ul>
 <li>ZIPLIST_BYTES：一个4字节数据，用于存放压缩表字节数。</li>
 <li>ZIPLIST_TAIL：最后一个entry距离表头的位置。如上图：head + ZIPLIST_TAIL = entry_tail</li>
@@ -270,7 +270,7 @@
 <p>根据ziplistInsert的定义，分析的出entry由以下的数据组成：</p>
 <ul>
 <li>prevlen：这个是前一个节点的长度，用于寻找某个节点的前节点。</li>
-<li>encoding：编码，表示了数据类型。具体格式如下：<br><img src="/image/Redis的ziplist数据结构/ziplist_encoding.png" alt=""></li>
+<li>encoding：编码，表示了数据类型。具体格式如下：<br><img src="/images/Redis的ziplist数据结构/ziplist_encoding.png" alt=""></li>
 </ul>
 <p>可以看到当entry存放字符串（字节数组）时，encoding可以反映出字符串的长度；entry存放整数时，可以反映整数的大小范围。</p>
 <ul>
@@ -375,7 +375,7 @@
         </a>
       </div>
       <div class="site-state-item site-state-categories">
-        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">categories</span>
       </div>
   </nav>

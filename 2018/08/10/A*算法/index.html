@@ -53,18 +53,18 @@
 <meta property="og:site_name" content="CrazySpy&#39;s blog">
 <meta property="og:description" content="poj有一道非常经典的题目:Knight Moves。大意是说每次移动“日”字型，最少移动多少次能达到目的地。学过算法的人都知道这是一题非常简单的bfs题。 今天我接触到了在hduoj上接触到了1560题。大意是要求一个最短序列，这个序列的子序列包含了给定的几个序列。 一开始我是想用暴力搜索结合剪枝的。题目中给定的子序列个数最多8个，每个序列最大长度为5，字符串由4中字符组成。这样所求的序列最长为">
 <meta property="og:locale" content="zh">
-<meta property="og:image" content="https://newblog.jiangxiwen.me/image/A*%E7%AE%97%E6%B3%95/A-Star1.png">
-<meta property="og:image" content="https://newblog.jiangxiwen.me/image/A*%E7%AE%97%E6%B3%95/A-Star2.png">
-<meta property="og:image" content="https://newblog.jiangxiwen.me/image/A*%E7%AE%97%E6%B3%95/A-Star3.png">
-<meta property="og:image" content="https://newblog.jiangxiwen.me/image/A*%E7%AE%97%E6%B3%95/A-Star4.png">
-<meta property="og:image" content="https://newblog.jiangxiwen.me/image/A*%E7%AE%97%E6%B3%95/A-Star5.png">
-<meta property="og:image" content="https://newblog.jiangxiwen.me/image/A*%E7%AE%97%E6%B3%95/A-Star6.png">
-<meta property="og:image" content="https://newblog.jiangxiwen.me/image/A*%E7%AE%97%E6%B3%95/Astar_progress_animation.gif">
+<meta property="og:image" content="https://newblog.jiangxiwen.me/images/A*%E7%AE%97%E6%B3%95/A-Star1.png">
+<meta property="og:image" content="https://newblog.jiangxiwen.me/images/A*%E7%AE%97%E6%B3%95/A-Star2.png">
+<meta property="og:image" content="https://newblog.jiangxiwen.me/images/A*%E7%AE%97%E6%B3%95/A-Star3.png">
+<meta property="og:image" content="https://newblog.jiangxiwen.me/images/A*%E7%AE%97%E6%B3%95/A-Star4.png">
+<meta property="og:image" content="https://newblog.jiangxiwen.me/images/A*%E7%AE%97%E6%B3%95/A-Star5.png">
+<meta property="og:image" content="https://newblog.jiangxiwen.me/images/A*%E7%AE%97%E6%B3%95/A-Star6.png">
+<meta property="og:image" content="https://newblog.jiangxiwen.me/images/A*%E7%AE%97%E6%B3%95/Astar_progress_animation.gif">
 <meta property="article:published_time" content="2018-08-09T16:00:00.000Z">
-<meta property="article:modified_time" content="2019-12-25T17:26:44.022Z">
+<meta property="article:modified_time" content="2019-12-25T18:01:53.014Z">
 <meta property="article:author" content="CrazySpy">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://newblog.jiangxiwen.me/image/A*%E7%AE%97%E6%B3%95/A-Star1.png">
+<meta name="twitter:image" content="https://newblog.jiangxiwen.me/images/A*%E7%AE%97%E6%B3%95/A-Star1.png">
 
 <link rel="canonical" href="https://newblog.jiangxiwen.me/2018/08/10/A*%E7%AE%97%E6%B3%95/">
 
@@ -232,7 +232,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-12-26 01:26:44" itemprop="dateModified" datetime="2019-12-26T01:26:44+08:00">2019-12-26</time>
+                <time title="Modified: 2019-12-26 02:01:53" itemprop="dateModified" datetime="2019-12-26T02:01:53+08:00">2019-12-26</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -269,12 +269,12 @@
 <h1 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h1><p>可能上面概念性的表述有一些难以理解，下面通过一个实例讲述A*算法。</p>
 <p>求起点到终点的最短距离。</p>
 <p>下面例子中，❤️表示终点，红色方框表示已经走过的节点（bfs中，已经走过的节点就不要再走了，这里的道理和bfs中的一样，走过就不用再走了），绿色方框表示可以走的节点，黑色是障碍物。方框中三个数，第一个数是f(n)，第二个是g(n)，第三个是h(n)。h(n)采用的启发函数是到目标节点的曼哈顿距离，因为到目标节点的花费肯定大于等于曼哈顿距离。</p>
-<p>起点是第四行第二列的节点。<br><img src="/image/A*算法/A-Star1.png" alt=""></p>
-<p>因为起点右边的节点F(h)最小，也就意味着起点到这个节点的花费和预计到终点的花费之和最小，也就是预计走这个节点的路径花费最小，所以优先考虑这个节点。而实际上一眼可以看出最短路径不可能经过这个节点。<br><img src="/image/A*算法/A-Star2.png" alt=""></p>
-<p>按照算法继续走下去，应该是这样的。<br><img src="/image/A*算法/A-Star3.png" alt=""><br><img src="/image/A*算法/A-Star4.png" alt=""></p>
-<p>在上面一张图的状态下，f(n)最小的未走过的节点是第三行第一列的那个节点，所以算法选择其继续走下去。<br><img src="/image/A*算法/A-Star5.png" alt=""></p>
-<p>通过走回路，可以确定一条最短路径。<br><img src="/image/A*算法/A-Star6.png" alt=""></p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>附上一张维基百科的gif用以帮助理解。<br><img src="/image/A*算法/Astar_progress_animation.gif" alt=""></p>
+<p>起点是第四行第二列的节点。<br><img src="/images/A*算法/A-Star1.png" alt=""></p>
+<p>因为起点右边的节点F(h)最小，也就意味着起点到这个节点的花费和预计到终点的花费之和最小，也就是预计走这个节点的路径花费最小，所以优先考虑这个节点。而实际上一眼可以看出最短路径不可能经过这个节点。<br><img src="/images/A*算法/A-Star2.png" alt=""></p>
+<p>按照算法继续走下去，应该是这样的。<br><img src="/images/A*算法/A-Star3.png" alt=""><br><img src="/images/A*算法/A-Star4.png" alt=""></p>
+<p>在上面一张图的状态下，f(n)最小的未走过的节点是第三行第一列的那个节点，所以算法选择其继续走下去。<br><img src="/images/A*算法/A-Star5.png" alt=""></p>
+<p>通过走回路，可以确定一条最短路径。<br><img src="/images/A*算法/A-Star6.png" alt=""></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>附上一张维基百科的gif用以帮助理解。<br><img src="/images/A*算法/Astar_progress_animation.gif" alt=""></p>
 <p>从图上可以看出A*算法在后期不太会向左上角（偏离目标节点的方向）进行搜索，这还是因为左上角方向会增大启发函数的值，导致算法不会偏向这边，而是选择右上角。</p>
 <p>但是也可以看出这套算法的弱点，就是如果启发函数值，也就是h(n)和实际值偏差很大，甚至出现h(n)越小，实际到终点需要的花费越大的情况，会导致A*算法的效率低下的问题，这也是bfs算法在竞赛中仍被使用的原因，要根据情景合理使用。</p>
 
@@ -377,7 +377,7 @@
         </a>
       </div>
       <div class="site-state-item site-state-categories">
-        <span class="site-state-item-count">14</span>
+        <span class="site-state-item-count">15</span>
         <span class="site-state-item-name">categories</span>
       </div>
   </nav>
