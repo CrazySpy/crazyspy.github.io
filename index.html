@@ -520,92 +520,6 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
-    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/06/01/%E7%B4%A0%E6%95%B0%E8%A1%A8%E7%9A%84%E6%9C%80%E4%BC%98%E5%AE%9E%E7%8E%B0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="CrazySpy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="CrazySpy's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/06/01/%E7%B4%A0%E6%95%B0%E8%A1%A8%E7%9A%84%E6%9C%80%E4%BC%98%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">素数表的最优实现</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-06-01 00:00:00" itemprop="dateCreated datePublished" datetime="2018-06-01T00:00:00+08:00">2018-06-01</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-12-25 23:22:51" itemprop="dateModified" datetime="2019-12-25T23:22:51+08:00">2019-12-25</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index">
-                    <span itemprop="name">算法</span>
-                  </a>
-                </span>
-                  , 
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E7%AE%97%E6%B3%95/%E6%95%B0%E8%AE%BA/" itemprop="url" rel="index">
-                    <span itemprop="name">数论</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>对于素数表的构建，基本思路是：除了1以外的正整数的倍数都不是素数。反之同理，素数不可能是某两个非1整数的积。<br>所以有以下代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= n; ++i) p[i] = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= n; ++i)</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i)</span><br><span class="line">p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
-<p>然后进行优化:<br>1.i的枚举至多只需要到sqrt(n) + 1即可<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i)</span><br><span class="line">p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
-<p>2.如果某个数不是素数，那么它的倍数可以用它的素因数表示，所以非素数可以排除<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line"><span class="keyword">if</span>(p[i]) <span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i) p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
-<p>3.j不必从i<em>2开始筛，在i=2时筛过;也不必在i</em>3时开始..;不必从i<em>(i-1)时开始；而是应该从i</em>i开始<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line"><span class="keyword">if</span>(p[i]) <span class="keyword">for</span>(<span class="keyword">int</span> j = i * i; j &lt;= n; j += i) p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
-<p>经过三轮优化得到的代码是最优的素数表实现代码。</p>
-
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
     <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/06/01/Eratosthenes%E7%AD%9B%E6%B3%95/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -684,6 +598,92 @@ LCM(a, b) &== a * b / GCD(a, b) \nonumber
             </div>
           <!--/noindex-->
         
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/06/01/%E7%B4%A0%E6%95%B0%E8%A1%A8%E7%9A%84%E6%9C%80%E4%BC%98%E5%AE%9E%E7%8E%B0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/06/01/%E7%B4%A0%E6%95%B0%E8%A1%A8%E7%9A%84%E6%9C%80%E4%BC%98%E5%AE%9E%E7%8E%B0/" class="post-title-link" itemprop="url">素数表的最优实现</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-06-01 00:00:00" itemprop="dateCreated datePublished" datetime="2018-06-01T00:00:00+08:00">2018-06-01</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2019-12-25 23:22:51" itemprop="dateModified" datetime="2019-12-25T23:22:51+08:00">2019-12-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95/" itemprop="url" rel="index">
+                    <span itemprop="name">算法</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%AE%97%E6%B3%95/%E6%95%B0%E8%AE%BA/" itemprop="url" rel="index">
+                    <span itemprop="name">数论</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>对于素数表的构建，基本思路是：除了1以外的正整数的倍数都不是素数。反之同理，素数不可能是某两个非1整数的积。<br>所以有以下代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= n; ++i) p[i] = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= n; ++i)</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i)</span><br><span class="line">p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
+<p>然后进行优化:<br>1.i的枚举至多只需要到sqrt(n) + 1即可<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i)</span><br><span class="line">p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
+<p>2.如果某个数不是素数，那么它的倍数可以用它的素因数表示，所以非素数可以排除<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line"><span class="keyword">if</span>(p[i]) <span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i) p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
+<p>3.j不必从i<em>2开始筛，在i=2时筛过;也不必在i</em>3时开始..;不必从i<em>(i-1)时开始；而是应该从i</em>i开始<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line"><span class="keyword">if</span>(p[i]) <span class="keyword">for</span>(<span class="keyword">int</span> j = i * i; j &lt;= n; j += i) p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
+<p>经过三轮优化得到的代码是最优的素数表实现代码。</p>
+
       
     </div>
 
