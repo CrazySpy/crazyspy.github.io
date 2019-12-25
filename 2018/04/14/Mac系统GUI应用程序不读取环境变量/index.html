@@ -46,15 +46,19 @@
   };
 </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="CrazySpy&#39;s blog">
-<meta property="og:url" content="https://newblog.jiangxiwen.me/archives/index.html">
+  <meta name="description" content="前几天brew upgrade指令把系统里的应用更新了一遍，其中包括python3。后来发现Macvim打不开，有闪退情况，用terminal看了下错误，我安装了YouCompleteMe插件，这个插件是基于python的，而python的encoding包找不到，根据网上的说法是brewhome里新的python3没有配置环境变量，于是把PYTHONPATH和PYTHONHOME环境变量在.zs">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mac系统GUI应用程序不读取环境变量">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/04/14/Mac%E7%B3%BB%E7%BB%9FGUI%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E4%B8%8D%E8%AF%BB%E5%8F%96%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/index.html">
 <meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="前几天brew upgrade指令把系统里的应用更新了一遍，其中包括python3。后来发现Macvim打不开，有闪退情况，用terminal看了下错误，我安装了YouCompleteMe插件，这个插件是基于python的，而python的encoding包找不到，根据网上的说法是brewhome里新的python3没有配置环境变量，于是把PYTHONPATH和PYTHONHOME环境变量在.zs">
 <meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-04-13T16:00:00.000Z">
+<meta property="article:modified_time" content="2019-12-25T14:46:31.419Z">
 <meta property="article:author" content="CrazySpy">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://newblog.jiangxiwen.me/archives/">
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/04/14/Mac%E7%B3%BB%E7%BB%9FGUI%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E4%B8%8D%E8%AF%BB%E5%8F%96%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/">
 
 
 <script id="page-configurations">
@@ -62,11 +66,11 @@
   CONFIG.page = {
     sidebar: "",
     isHome: false,
-    isPost: false
+    isPost: true
   };
 </script>
 
-  <title>Archive | CrazySpy's blog</title>
+  <title>Mac系统GUI应用程序不读取环境变量 | CrazySpy's blog</title>
   
 
 
@@ -160,235 +164,91 @@
           <div class="content">
             
 
+  <div class="posts-expand">
+      
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <span class="collection-header">Um..! 17 posts in total. Keep on posting.</span>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/04/14/Mac%E7%B3%BB%E7%BB%9FGUI%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E4%B8%8D%E8%AF%BB%E5%8F%96%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mac系统GUI应用程序不读取环境变量
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-04-14 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-14T00:00:00+08:00">2018-04-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2019-12-25 22:46:31" itemprop="dateModified" datetime="2019-12-25T22:46:31+08:00">2019-12-25</time>
+              </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <h1 class="collection-header">2019</h1>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2019-09-10T10:32:19+08:00"
-              content="2019-09-10">
-          09-10
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2019/09/10/%E5%8D%A1%E7%89%B9%E5%85%B0%E6%95%B0%E7%9A%84%E5%BA%94%E7%94%A8/" itemprop="url">
-            <span itemprop="name">卡特兰数的应用</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-    <div class="collection-year">
-      <h1 class="collection-header">2018</h1>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-08-10T00:00:00+08:00"
-              content="2018-08-10">
-          08-10
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/08/10/A*%E7%AE%97%E6%B3%95/" itemprop="url">
-            <span itemprop="name">A*算法</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-06-04T00:00:00+08:00"
-              content="2018-06-04">
-          06-04
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/06/04/%E6%AF%8D%E5%87%BD%E6%95%B0/" itemprop="url">
-            <span itemprop="name">母函数</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-06-03T00:00:00+08:00"
-              content="2018-06-03">
-          06-03
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/06/03/%E5%A4%A7%E6%95%B0%E4%B9%98%E6%B3%95/" itemprop="url">
-            <span itemprop="name">大数乘法</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-06-01T00:00:00+08:00"
-              content="2018-06-01">
-          06-01
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/06/01/%E7%B4%A0%E6%95%B0%E8%A1%A8%E7%9A%84%E6%9C%80%E4%BC%98%E5%AE%9E%E7%8E%B0/" itemprop="url">
-            <span itemprop="name">素数表的最优实现</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-06-01T00:00:00+08:00"
-              content="2018-06-01">
-          06-01
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/06/01/Eratosthenes%E7%AD%9B%E6%B3%95/" itemprop="url">
-            <span itemprop="name">Eratosthenes筛法</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-05-27T00:00:00+08:00"
-              content="2018-05-27">
-          05-27
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/05/27/Redis%E7%9A%84ziplist%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url">
-            <span itemprop="name">Redis的ziplist数据结构</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-05-27T00:00:00+08:00"
-              content="2018-05-27">
-          05-27
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/05/27/ziplist%E7%9A%84%E8%81%94%E7%BA%A7%E6%9B%B4%E6%96%B0%EF%BC%88cascade%20update%EF%BC%89/" itemprop="url">
-            <span itemprop="name">ziplist的联级更新（cascade update）</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-04-21T00:00:00+08:00"
-              content="2018-04-21">
-          04-21
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/04/21/MySql%E4%B8%ADorder%E8%A1%A8%E5%88%9B%E5%BB%BA%E5%A4%B1%E8%B4%A5/" itemprop="url">
-            <span itemprop="name">MySql中order表创建失败</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-04-15T00:00:00+08:00"
-              content="2018-04-15">
-          04-15
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/04/15/C++%E4%B8%ADsigned%E5%92%8Cunsigned%E7%9A%84%E5%A4%A7%E5%B0%8F%E6%AF%94%E8%BE%83/" itemprop="url">
-            <span itemprop="name">C++中signed和unsigned的大小比较</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
+        <p>前几天brew upgrade指令把系统里的应用更新了一遍，其中包括python3。后来发现Macvim打不开，有闪退情况，用terminal看了下错误，我安装了YouCompleteMe插件，这个插件是基于python的，而python的encoding包找不到，根据网上的说法是brewhome里新的python3没有配置环境变量，于是把PYTHONPATH和PYTHONHOME环境变量在.zshrc（我用的是zsh）里面配了以下，结果发生了很诡异的事情，在terminal中可以打开Macvim，而我在finder中打开它就闪退，当时Google百度都没相关案例，只能先搁置。<br><a id="more"></a><br>今天想到了个方案，我先把youcompleteme禁用了，然后发现terminal和finder中都能打开，我觉得可能是finder中打开Macvim没有读取到上面设置的两个环境变量。然后分别在两种情况下打开的Macvim中用命令行echo $PYTHONPATH，发现确实是如我上面的猜测，PYTHONPATH仅仅在terminal打开的情况下能读取到。知道问题就Google解决方案了。<br>然后我用的是macOS High Sierra，网上说的什么 /etc/launchd.conf在10.10的时候就没了，最后用了下面的命令解决的</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">launchctl setenv 环境变量名 环境变量内容</span><br></pre></td></tr></table></figure>
+<p>例如我的系统就设置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">launchctl setenv PYTHONPATH /usr/<span class="built_in">local</span>/Cellar/python/3.6.5/Frameworks/Python.framework/Versions/3.6/bin</span><br></pre></td></tr></table></figure>
+<h1 id="重启不失效的设置方法"><a href="#重启不失效的设置方法" class="headerlink" title="重启不失效的设置方法"></a>重启不失效的设置方法</h1><p>自Mountain Lion以来，之前原有的environment.plist的方法已经确定失效了。新的有效的方法是在/etc/launchd.conf中添加指令设置环境变量。<br>这个文件默认并不存在，可以自己建立。其内容则与launchctl执行的指令的格式相同。如上述设置可在/etc/launchd.conf中添加如下内容：<br>setenv JAVA_VERSION 1.6<br>需要注意的是，在launchd.conf中的命令有一些限制。首先是不能进行环境变量的引用。比如再设置JAVA_HOME环境变量的话，不能使用类似/System/Library/Frameworks/JavaVM.Framework/$JAVA_VERSION/Home的方式来引用之前设置的JAVA_VERSION环境变量，必须明确写出1.6。同时环境变量的内容中也不允许出现空格。<br>launchd.conf仅在系统启动时被调用，因此修改完成后需要重启才能看到效果。<br>此方法转载自:<a href="http://zodiacg.net/2013/05/set-path-under-mac/" target="_blank" rel="noopener">http://zodiacg.net/2013/05/set-path-under-mac/</a></p>
 
     </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/04/12/C++%E7%9A%84%E5%B7%A6%E7%A7%BB%E5%92%8C%E5%8F%B3%E7%A7%BB/" rel="prev" title="C++的左移和右移">
+      <i class="fa fa-chevron-left"></i> C++的左移和右移
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/04/14/%E8%B7%B3%E8%B7%83%E8%A1%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90/" rel="next" title="跳跃表数据结构分析">
+      跳跃表数据结构分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
   </div>
-  
-  
-  
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="extend next" rel="next" href="/archives/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
-  </nav>
-
 
 
           </div>
@@ -439,6 +299,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#重启不失效的设置方法"><span class="nav-number">1.</span> <span class="nav-text">重启不失效的设置方法</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 

@@ -46,15 +46,19 @@
   };
 </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="CrazySpy&#39;s blog">
-<meta property="og:url" content="https://newblog.jiangxiwen.me/archives/index.html">
+  <meta name="description" content="有这样的一段代码，请说出其运行结果：123456789101112#include &lt;iostream&gt;;using namespace std;int main()&amp;#123;    int a &#x3D; -1;    if (0x80000000 &gt; a)        cout &gt;&gt; &quot;hello\n&quot;;    else        cout &gt;&gt; &quot;1">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C++中signed和unsigned的大小比较">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/04/15/C++%E4%B8%ADsigned%E5%92%8Cunsigned%E7%9A%84%E5%A4%A7%E5%B0%8F%E6%AF%94%E8%BE%83/index.html">
 <meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="有这样的一段代码，请说出其运行结果：123456789101112#include &lt;iostream&gt;;using namespace std;int main()&amp;#123;    int a &#x3D; -1;    if (0x80000000 &gt; a)        cout &gt;&gt; &quot;hello\n&quot;;    else        cout &gt;&gt; &quot;1">
 <meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-04-14T16:00:00.000Z">
+<meta property="article:modified_time" content="2019-12-25T14:51:12.350Z">
 <meta property="article:author" content="CrazySpy">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://newblog.jiangxiwen.me/archives/">
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/04/15/C++%E4%B8%ADsigned%E5%92%8Cunsigned%E7%9A%84%E5%A4%A7%E5%B0%8F%E6%AF%94%E8%BE%83/">
 
 
 <script id="page-configurations">
@@ -62,11 +66,11 @@
   CONFIG.page = {
     sidebar: "",
     isHome: false,
-    isPost: false
+    isPost: true
   };
 </script>
 
-  <title>Archive | CrazySpy's blog</title>
+  <title>C++中signed和unsigned的大小比较 | CrazySpy's blog</title>
   
 
 
@@ -160,235 +164,99 @@
           <div class="content">
             
 
+  <div class="posts-expand">
+      
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <span class="collection-header">Um..! 17 posts in total. Keep on posting.</span>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/04/15/C++%E4%B8%ADsigned%E5%92%8Cunsigned%E7%9A%84%E5%A4%A7%E5%B0%8F%E6%AF%94%E8%BE%83/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          C++中signed和unsigned的大小比较
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-04-15 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-15T00:00:00+08:00">2018-04-15</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2019-12-25 22:51:12" itemprop="dateModified" datetime="2019-12-25T22:51:12+08:00">2019-12-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++`</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <h1 class="collection-header">2019</h1>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2019-09-10T10:32:19+08:00"
-              content="2019-09-10">
-          09-10
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2019/09/10/%E5%8D%A1%E7%89%B9%E5%85%B0%E6%95%B0%E7%9A%84%E5%BA%94%E7%94%A8/" itemprop="url">
-            <span itemprop="name">卡特兰数的应用</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-    <div class="collection-year">
-      <h1 class="collection-header">2018</h1>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-08-10T00:00:00+08:00"
-              content="2018-08-10">
-          08-10
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/08/10/A*%E7%AE%97%E6%B3%95/" itemprop="url">
-            <span itemprop="name">A*算法</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-06-04T00:00:00+08:00"
-              content="2018-06-04">
-          06-04
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/06/04/%E6%AF%8D%E5%87%BD%E6%95%B0/" itemprop="url">
-            <span itemprop="name">母函数</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-06-03T00:00:00+08:00"
-              content="2018-06-03">
-          06-03
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/06/03/%E5%A4%A7%E6%95%B0%E4%B9%98%E6%B3%95/" itemprop="url">
-            <span itemprop="name">大数乘法</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-06-01T00:00:00+08:00"
-              content="2018-06-01">
-          06-01
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/06/01/%E7%B4%A0%E6%95%B0%E8%A1%A8%E7%9A%84%E6%9C%80%E4%BC%98%E5%AE%9E%E7%8E%B0/" itemprop="url">
-            <span itemprop="name">素数表的最优实现</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-06-01T00:00:00+08:00"
-              content="2018-06-01">
-          06-01
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/06/01/Eratosthenes%E7%AD%9B%E6%B3%95/" itemprop="url">
-            <span itemprop="name">Eratosthenes筛法</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-05-27T00:00:00+08:00"
-              content="2018-05-27">
-          05-27
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/05/27/Redis%E7%9A%84ziplist%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url">
-            <span itemprop="name">Redis的ziplist数据结构</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-05-27T00:00:00+08:00"
-              content="2018-05-27">
-          05-27
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/05/27/ziplist%E7%9A%84%E8%81%94%E7%BA%A7%E6%9B%B4%E6%96%B0%EF%BC%88cascade%20update%EF%BC%89/" itemprop="url">
-            <span itemprop="name">ziplist的联级更新（cascade update）</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-04-21T00:00:00+08:00"
-              content="2018-04-21">
-          04-21
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/04/21/MySql%E4%B8%ADorder%E8%A1%A8%E5%88%9B%E5%BB%BA%E5%A4%B1%E8%B4%A5/" itemprop="url">
-            <span itemprop="name">MySql中order表创建失败</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-04-15T00:00:00+08:00"
-              content="2018-04-15">
-          04-15
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/04/15/C++%E4%B8%ADsigned%E5%92%8Cunsigned%E7%9A%84%E5%A4%A7%E5%B0%8F%E6%AF%94%E8%BE%83/" itemprop="url">
-            <span itemprop="name">C++中signed和unsigned的大小比较</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
+        <p>有这样的一段代码，请说出其运行结果：<D-r><br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="number">0x80000000</span> &gt; a)</span><br><span class="line">        <span class="built_in">cout</span> &gt;&gt; <span class="string">"hello\n"</span>;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">cout</span> &gt;&gt; <span class="string">"111111\n"</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br><a id="more"></a><br>上面程序运行的结果是111111</p>
+<p>对于十六进制的整数，如果字面量（即以unsigned int来看）超出了signed int的范围，编译器则尝试以unsigned int作为其类型。由于0x80000000转换成unsigned int在signed int的范围外，而它在unsigned int的范围内，所以将其当作unsigned int。<br>当unsigned和signed进行大小比较时，signed会转换成unsigned，这样a就会变成0xFFFFFFFF的unsigned的整数，这是一个很大的数字（2^32 - 1，是unsigned int的最大值），所以b&gt;a。&lt;/p&gt;</p>
 
     </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/04/14/%E8%B7%B3%E8%B7%83%E8%A1%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90/" rel="prev" title="跳跃表数据结构分析">
+      <i class="fa fa-chevron-left"></i> 跳跃表数据结构分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/04/21/MySql%E4%B8%ADorder%E8%A1%A8%E5%88%9B%E5%BB%BA%E5%A4%B1%E8%B4%A5/" rel="next" title="MySql中order表创建失败">
+      MySql中order表创建失败 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
   </div>
-  
-  
-  
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="extend next" rel="next" href="/archives/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
-  </nav>
-
 
 
           </div>

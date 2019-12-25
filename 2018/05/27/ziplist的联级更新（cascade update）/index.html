@@ -46,15 +46,19 @@
   };
 </script>
 
-  <meta property="og:type" content="website">
-<meta property="og:title" content="CrazySpy&#39;s blog">
-<meta property="og:url" content="https://newblog.jiangxiwen.me/archives/index.html">
+  <meta name="description" content="前面在讲ziplist中压缩节点时，提到过其中有一个数据量叫prevlen，这个是存储了前一个节点的大小，它的长度是根据前一个节点实际大小。如果前一个节点大小在254位以下，则prevlen为1字节；如果前一个节点大小大于等于254位，则prevlen为5字节，并且第1字节数据为254，第2-5字节数据为实际大小。 另外ziplist还支持任意位置插入节点，这个是通过ziplistInsert函数">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ziplist的联级更新（cascade update）">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/05/27/ziplist%E7%9A%84%E8%81%94%E7%BA%A7%E6%9B%B4%E6%96%B0%EF%BC%88cascade%20update%EF%BC%89/index.html">
 <meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="前面在讲ziplist中压缩节点时，提到过其中有一个数据量叫prevlen，这个是存储了前一个节点的大小，它的长度是根据前一个节点实际大小。如果前一个节点大小在254位以下，则prevlen为1字节；如果前一个节点大小大于等于254位，则prevlen为5字节，并且第1字节数据为254，第2-5字节数据为实际大小。 另外ziplist还支持任意位置插入节点，这个是通过ziplistInsert函数">
 <meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-05-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2019-12-25T15:19:38.814Z">
 <meta property="article:author" content="CrazySpy">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://newblog.jiangxiwen.me/archives/">
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/05/27/ziplist%E7%9A%84%E8%81%94%E7%BA%A7%E6%9B%B4%E6%96%B0%EF%BC%88cascade%20update%EF%BC%89/">
 
 
 <script id="page-configurations">
@@ -62,11 +66,11 @@
   CONFIG.page = {
     sidebar: "",
     isHome: false,
-    isPost: false
+    isPost: true
   };
 </script>
 
-  <title>Archive | CrazySpy's blog</title>
+  <title>ziplist的联级更新（cascade update） | CrazySpy's blog</title>
   
 
 
@@ -160,235 +164,106 @@
           <div class="content">
             
 
+  <div class="posts-expand">
+      
   
   
-  
-  <div class="post-block">
-    <div class="posts-collapse">
-      <div class="collection-title">
-        <span class="collection-header">Um..! 17 posts in total. Keep on posting.</span>
-      </div>
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/05/27/ziplist%E7%9A%84%E8%81%94%E7%BA%A7%E6%9B%B4%E6%96%B0%EF%BC%88cascade%20update%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ziplist的联级更新（cascade update）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-05-27 00:00:00" itemprop="dateCreated datePublished" datetime="2018-05-27T00:00:00+08:00">2018-05-27</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2019-12-25 23:19:38" itemprop="dateModified" datetime="2019-12-25T23:19:38+08:00">2019-12-25</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis源码分析</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/ziplist/" itemprop="url" rel="index">
+                    <span itemprop="name">ziplist</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
-    <div class="collection-year">
-      <h1 class="collection-header">2019</h1>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2019-09-10T10:32:19+08:00"
-              content="2019-09-10">
-          09-10
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2019/09/10/%E5%8D%A1%E7%89%B9%E5%85%B0%E6%95%B0%E7%9A%84%E5%BA%94%E7%94%A8/" itemprop="url">
-            <span itemprop="name">卡特兰数的应用</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-    <div class="collection-year">
-      <h1 class="collection-header">2018</h1>
-    </div>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-08-10T00:00:00+08:00"
-              content="2018-08-10">
-          08-10
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/08/10/A*%E7%AE%97%E6%B3%95/" itemprop="url">
-            <span itemprop="name">A*算法</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-06-04T00:00:00+08:00"
-              content="2018-06-04">
-          06-04
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/06/04/%E6%AF%8D%E5%87%BD%E6%95%B0/" itemprop="url">
-            <span itemprop="name">母函数</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-06-03T00:00:00+08:00"
-              content="2018-06-03">
-          06-03
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/06/03/%E5%A4%A7%E6%95%B0%E4%B9%98%E6%B3%95/" itemprop="url">
-            <span itemprop="name">大数乘法</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-06-01T00:00:00+08:00"
-              content="2018-06-01">
-          06-01
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/06/01/%E7%B4%A0%E6%95%B0%E8%A1%A8%E7%9A%84%E6%9C%80%E4%BC%98%E5%AE%9E%E7%8E%B0/" itemprop="url">
-            <span itemprop="name">素数表的最优实现</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-06-01T00:00:00+08:00"
-              content="2018-06-01">
-          06-01
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/06/01/Eratosthenes%E7%AD%9B%E6%B3%95/" itemprop="url">
-            <span itemprop="name">Eratosthenes筛法</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-05-27T00:00:00+08:00"
-              content="2018-05-27">
-          05-27
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/05/27/Redis%E7%9A%84ziplist%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" itemprop="url">
-            <span itemprop="name">Redis的ziplist数据结构</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-05-27T00:00:00+08:00"
-              content="2018-05-27">
-          05-27
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/05/27/ziplist%E7%9A%84%E8%81%94%E7%BA%A7%E6%9B%B4%E6%96%B0%EF%BC%88cascade%20update%EF%BC%89/" itemprop="url">
-            <span itemprop="name">ziplist的联级更新（cascade update）</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-04-21T00:00:00+08:00"
-              content="2018-04-21">
-          04-21
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/04/21/MySql%E4%B8%ADorder%E8%A1%A8%E5%88%9B%E5%BB%BA%E5%A4%B1%E8%B4%A5/" itemprop="url">
-            <span itemprop="name">MySql中order表创建失败</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
-  <article itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
-
-      <div class="post-meta">
-        <time itemprop="dateCreated"
-              datetime="2018-04-15T00:00:00+08:00"
-              content="2018-04-15">
-          04-15
-        </time>
-      </div>
-
-      <h2 class="post-title">
-          <a class="post-title-link" href="/2018/04/15/C++%E4%B8%ADsigned%E5%92%8Cunsigned%E7%9A%84%E5%A4%A7%E5%B0%8F%E6%AF%94%E8%BE%83/" itemprop="url">
-            <span itemprop="name">C++中signed和unsigned的大小比较</span>
-          </a>
-      </h2>
-
-    </header>
-  </article>
-
+        <p>前面在讲ziplist中压缩节点时，提到过其中有一个数据量叫prevlen，这个是存储了前一个节点的大小，它的长度是根据前一个节点实际大小。如果前一个节点大小在254位以下，则prevlen为1字节；如果前一个节点大小大于等于254位，则prevlen为5字节，并且第1字节数据为254，第2-5字节数据为实际大小。</p>
+<p>另外ziplist还支持任意位置插入节点，这个是通过ziplistInsert函数实现的，具体可以自行研究其实现。</p>
+<p>这时考虑一个极端情况：有一个压缩表有entry1,entry2,entry3节点，大小分别为250位，250位,250位。然后我在entry1前插入一个节点entry0，大小为254位。此时entry1的prevlen就要更新，从1位变成了5位，此时entry1的大小变成了254位。因为entry1大小的改变，entry2的prevlen也要改变，变成5位…如此连锁更新下去。这就叫ziplist的联级更新(cascade update)。<br>它的具体实现是在ziplistCascadeUpdate函数中，大概的流程就是判断当前节点的prevlen能不能放得下上一个节点的大小，能就退出联级更新，否则就进行扩大操作，直到最后一个节点。具体写法请自行查看相应代码。</p>
 
     </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/04/21/MySql%E4%B8%ADorder%E8%A1%A8%E5%88%9B%E5%BB%BA%E5%A4%B1%E8%B4%A5/" rel="prev" title="MySql中order表创建失败">
+      <i class="fa fa-chevron-left"></i> MySql中order表创建失败
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/05/27/Redis%E7%9A%84ziplist%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="next" title="Redis的ziplist数据结构">
+      Redis的ziplist数据结构 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
   </div>
-  
-  
-  
-
-  
-  <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/archives/page/2/">2</a><a class="extend next" rel="next" href="/archives/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
-  </nav>
-
 
 
           </div>
