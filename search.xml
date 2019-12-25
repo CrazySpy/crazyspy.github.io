@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>卡特兰数的应用</title>
+    <url>/2019/09/10/%E5%8D%A1%E7%89%B9%E5%85%B0%E6%95%B0%E7%9A%84%E5%BA%94%E7%94%A8/</url>
+    <content><![CDATA[<p>2015年考研有一题：先序遍历为abcd的不同二叉树的个数是（）</p>
+<p>对于这一题，先明确：先序遍历和中序遍历确定唯一的二叉树。所以这一题相当于求中序遍历结果有几种，也或者说四个节点的二叉树有几种形状。</p>
+<p>这是很常见的一种卡特兰数的应用。一开始书后答案写的是用入栈出栈的方式解释，让我有些摸不着头脑。后来网上搜索了下资料，了解了一下卡特兰数。<br><a id="more"></a><br>卡特兰数的形式是一种递归：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+g(n)
+&=g(0) \cdot g(n-1)+g(1) \cdot g(n-2)+...+g(n-1) \cdot g(0) \nonumber\\
+&=\sum_{i=1}^{n}g(i-1) \cdot g(n-i) \nonumber\\
+&=\frac{C_{2n}^n}{n+1} \nonumber
+\end{align}</script><p>它的计算过程这里不去追究，重点对于两种应用进行记录：出栈序列的种数以及n个节点的二叉树形状的种数。</p>
+<h1 id="出栈序列的种数"><a href="#出栈序列的种数" class="headerlink" title="出栈序列的种数"></a>出栈序列的种数</h1><p>先考虑如果进栈序列是a1 a2 … an，g(n)为n项序列出栈的种数。如果第一个出栈的项为ak，那么此时出栈的种类就有f(k)=g(k-1)g(n-k)，也就是前k-1项的出栈种数和后n-k项的出栈种数的乘积。</p>
+<p>因此可得整个序列的出栈的种数就是：</p>
+<script type="math/tex; mode=display">
+g(n)=\sum_{i=1}^{n}f(i)=\sum_{i=1}^{n}g(i-1) \cdot g(n-i)</script><p>也就是等于卡特兰数。</p>
+<h1 id="n个节点的二叉树形状种类"><a href="#n个节点的二叉树形状种类" class="headerlink" title="n个节点的二叉树形状种类"></a>n个节点的二叉树形状种类</h1><p>对于n个节点的二叉树形状的种类问题，思考方式和出栈种类的思考方式差不多。</p>
+<p>考虑一个节点N，以N为根的二叉树有n个节点，有g(n)种组合方式。那么g(n)就是左子树的形状种数和右子树形状种数的乘积。因此类似可得：</p>
+<script type="math/tex; mode=display">
+g(n)=\sum_{i=1}^{n}g(i-1) \cdot g(n-i)</script><p>因此可得n个节点的树形状的种数就是卡特兰数。</p>
+]]></content>
+      <categories>
+        <category>组合数学</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>A*算法</title>
+    <url>/2018/08/10/A*%E7%AE%97%E6%B3%95/</url>
+    <content><![CDATA[<p>poj有一道非常经典的题目:Knight Moves。大意是说每次移动“日”字型，最少移动多少次能达到目的地。学过算法的人都知道这是一题非常简单的bfs题。</p>
+<p>今天我接触到了在hduoj上接触到了1560题。大意是要求一个最短序列，这个序列的子序列包含了给定的几个序列。</p>
+<p>一开始我是想用暴力搜索结合剪枝的。题目中给定的子序列个数最多8个，每个序列最大长度为5，字符串由4中字符组成。这样所求的序列最长为40，如果用暴力搜索可能会达到<script type="math/tex">4^{40}</script>次，这个预期太可怕了（虽然剪枝会减少这一数字）。后来discuss中提示，使用A*算法。<br>A*算法在以前的接触当中更多的是用在路径搜索上，例如上面的poj的那道题。没有想到A*算法是可以用在这道hduoj题上的。</p>
+<a id="more"></a>
+<h1 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h1><p>首先我们来回顾一下A*算法。为了相对准确表述，我对维基百科相关词条进行翻译，词条地址：A* search algorithm</p>
+<p>A*算法又被称作为最好优先算法(best-first search)，这意味着这个算法通过在所有路径中寻找最少消耗的路径来解决问题，这个最少消耗可能是最短的路径、最少的时间等等。它最先考虑可能是最少消耗路径的路径，这是使用权重图(weighted graph)的数据结构计算得出的，大概的算法步骤：从图的某一个指定节点出发，根据下一步能走的节点构建一个路径树，然后下一步选择其中预计最优的节点走下去，重复构建这种路径树，直到其中某条路径能走到预先设定好的那个目标节点。</p>
+<p>在每次的主循环迭代中，A*算法需要决定下一步走到哪个节点。这个在bfs(广度优先)算法中是不存在的。广度优先算法对于所有可以走的节点是一视同仁，而A*算法则是要考虑可能是最好路径一部分的那条路径。</p>
+<p>A*算法的可能最优路径是通过如下公式得出的：</p>
+<script type="math/tex; mode=display">f(n) = g(n) + h(n)</script><p>n是图中的某一个节点坐标；g(n)是从起始节点到n节点的最少花费；h(n)是一个启发式值，估计了n到目标节点的最少花费。这个启发式函数是根据问题决定的，当问题是求最短路径时，启发函数必须是可接受的，这也就是说这个函数永远不会高估实际到目标节点的最小花费。</p>
+<h1 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h1><p>可能上面概念性的表述有一些难以理解，下面通过一个实例讲述A*算法。</p>
+<p>求起点到终点的最短距离。</p>
+<p>下面例子中，❤️表示终点，红色方框表示已经走过的节点（bfs中，已经走过的节点就不要再走了，这里的道理和bfs中的一样，走过就不用再走了），绿色方框表示可以走的节点，黑色是障碍物。方框中三个数，第一个数是f(n)，第二个是g(n)，第三个是h(n)。h(n)采用的启发函数是到目标节点的曼哈顿距离，因为到目标节点的花费肯定大于等于曼哈顿距离。</p>
+<p>起点是第四行第二列的节点。<br><img src="/image/A*算法/A-Star1.png" alt=""></p>
+<p>因为起点右边的节点F(h)最小，也就意味着起点到这个节点的花费和预计到终点的花费之和最小，也就是预计走这个节点的路径花费最小，所以优先考虑这个节点。而实际上一眼可以看出最短路径不可能经过这个节点。<br><img src="/image/A*算法/A-Star2.png" alt=""></p>
+<p>按照算法继续走下去，应该是这样的。<br><img src="/image/A*算法/A-Star3.png" alt=""><br><img src="/image/A*算法/A-Star4.png" alt=""></p>
+<p>在上面一张图的状态下，f(n)最小的未走过的节点是第三行第一列的那个节点，所以算法选择其继续走下去。<br><img src="/image/A*算法/A-Star5.png" alt=""></p>
+<p>通过走回路，可以确定一条最短路径。<br><img src="/image/A*算法/A-Star6.png" alt=""></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>附上一张维基百科的gif用以帮助理解。<br><img src="/image/A*算法/Astar_progress_animation.gif" alt=""></p>
+<p>从图上可以看出A*算法在后期不太会向左上角（偏离目标节点的方向）进行搜索，这还是因为左上角方向会增大启发函数的值，导致算法不会偏向这边，而是选择右上角。</p>
+<p>但是也可以看出这套算法的弱点，就是如果启发函数值，也就是h(n)和实际值偏差很大，甚至出现h(n)越小，实际到终点需要的花费越大的情况，会导致A*算法的效率低下的问题，这也是bfs算法在竞赛中仍被使用的原因，要根据情景合理使用。</p>
+]]></content>
+      <categories>
+        <category>算法</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>母函数</title>
+    <url>/2018/06/04/%E6%AF%8D%E5%87%BD%E6%95%B0/</url>
+    <content><![CDATA[<p>在数学中，某个序列的母函数(Generating function，又称生成函数)是一种形式幂级数，其每一项的系数可以提供关于这个序列的信息。<br>使用母函数解决问题的方法称为母函数方法。母函数可分为很多种，包括普通母函数、指数母函数、L级数、贝尔级数和狄利克雷级数。对每个序列都可以写出以上每个类型的一个母函数。构造母函数的目的一般是为了解决某个特定的问题，因此选用何种母函数要看序列本身的特性和问题的类型。<br><a id="more"></a><br>在算法比赛中母函数通常解决类似如下的问题：给5张1元，4张2元，3张5元，要得到15元，有多少种组合？某些时候会规定至少使用3张1元、1张2元、0张5元。某些时候会规定有无数张1元、2元、5元。</p>
+<p>首先构造如下的多项式乘积：</p>
+<script type="math/tex; mode=display">
+\begin{align}
+&(x^{value[0] * min[0]} + x^{value[0] * (min[0] + 1)} + ... + x^{value[0] * max[0]}) \nonumber \\
+*&(x^{value[1] * min[1]} + x^{value[1] * (min[1] + 1)} + ... + x^{value[1] * max[1]})\nonumber \\
+&...\nonumber \\
+*&(x^{value[N] * min[N]} + x^{value[N] * (min[N] + 1)} + ... + x^{value[N] * max[N]}) \nonumber 
+\end{align}</script><p>其中value[i]表示该乘积表达式第i个因子的权重，对应于具体问题的每个物品的价值或者权重。min[i]表示该乘积表达式第i个因子的起始系数，对应于具体问题中的每个物品的最少个数，即最少要取多少个。max[i]表示该乘积表达式第i个因子的终止系数，对应于具体问题中的每个物品的最多个数，即最多要取多少个。x没有实际意义，可以理解为为了凑成母函数需要的幂级数而添加的。这样的多项式乘积求出来的式子中，均为<script type="math/tex">a*x^{k}</script>的形式，其中x还是无意义；a代表了能得到k权重的方法有a个。</p>
+<p>举个例子：给1张1元，1张2元，3张5元，要得到18元，有多少种组合？</p>
+<p>我们先构造多项式乘积：</p>
+<script type="math/tex; mode=display">
+\begin{aligned}
+&(x^{1*0}+x^{1*1})*(x^{2*0}+x^{2*1})*(x^{5*0}+x^{5*1}+x^{5*2}+x^{5*3}) \nonumber \\
+=&(1+x)*(1+x^{2})*(1+x^{5}+x^{10}+x^{15})\nonumber \\
+=&1+x+x^{2}+x^{2}+x^{5}+x^{6}+x^{7}+x^{8}+x^{10}+x^{11}+x^{12}+x^{13}+x^{15}+x^{16}+x^{17}+x^{18} \nonumber 
+\end{aligned}</script><p>因为<script type="math/tex">x^{18}</script>的系数为1，所以有一种组合。</p>
+<p>具体到程序，我在网上找到了下面的模板：首先因为比较难直接文字说明，我就先说一下以下代码注释中数学术语的约定（毕竟不是数学专业，而且我语文也很差）。<script type="math/tex">(1+x^{2})*(1+x^{6}+x^{12})*(x^{6}+x^{12})</script>为例<script type="math/tex">(1+x^{2})</script>为一个项，<script type="math/tex">(1+x^{6}+x^{12})</script>又为另一个项。以此类推<script type="math/tex">(1+x^{6}+x^{12})</script>中，<script type="math/tex">x^{6}</script>为该项中的一个数，1为另一个数，以此类推。</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">//a为索引为指数的项的系数，b为中间结果。</span></span><br><span class="line"><span class="keyword">int</span> a[MAX],b[MAX];</span><br><span class="line"><span class="comment">//初始化a</span></span><br><span class="line"><span class="built_in">memset</span>(a,<span class="number">0</span>,<span class="keyword">sizeof</span>(a));</span><br><span class="line"><span class="keyword">int</span> n = <span class="number">10</span>; <span class="comment">//表示有几种因子，也就是说有几种物品</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> P = <span class="number">15</span>; <span class="comment">//P是可能的最大指数</span></span><br><span class="line">a[<span class="number">0</span>]=<span class="number">1</span>;</span><br><span class="line"><span class="keyword">for</span> (<span class="keyword">int</span> i=<span class="number">0</span>;i&lt;=n;i++)<span class="comment">//循环每个因子，就是现在是第几项与之前的结果相乘</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">memset</span>(b,<span class="number">0</span>,<span class="keyword">sizeof</span>(b));</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> j=<span class="built_in">min</span>[i];j&lt;=<span class="built_in">max</span>[i]&amp;&amp;j*value[i]&lt;=P;j++)<span class="comment">//在这个项里面的选了几个几次幂,换到题目里就是选了i种物品j个。所以实际增加的权重是value[i] * j</span></span><br><span class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> k=<span class="number">0</span>;k+j*value[i]&lt;=P;k++)<span class="comment">//上层循环选的j*value[i]次幂要和前几项的乘积的每个数都乘，k是之前结果中选择的指数</span></span><br><span class="line">            b[k+j*value[i]]+=a[k];<span class="comment">//k + j * value[i]是j*value[i]次幂和k次幂相乘后的指数，这个指数的系数是在前几项的乘积的相同指数的数的系数上加上a[k],因为还没有乘到的项中的数的系数都为1，所以只要加a[k](即使要加也是a[k]*1)</span></span><br><span class="line">    <span class="built_in">memcpy</span>(a,b,<span class="keyword">sizeof</span>(b));<span class="comment">//b赋值给a</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+]]></content>
+      <categories>
+        <category>数论</category>
+        <category>算法</category>
+        <category>组合数学</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>大数乘法</title>
+    <url>/2018/06/03/%E5%A4%A7%E6%95%B0%E4%B9%98%E6%B3%95/</url>
+    <content><![CDATA[<p>先贴题目：<a href="http://acm.hdu.edu.cn/showproblem.php?pid=1042" target="_blank" rel="noopener">http://acm.hdu.edu.cn/showproblem.php?pid=1042</a></p>
+<p>题意比较简单，求N!，N可能达到10000。<br><a id="more"></a><br>大数和正常数的乘法，算法如下</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> result[<span class="number">100000</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">multiply</span><span class="params">(<span class="keyword">int</span> num,<span class="keyword">int</span> w)</span></span>&#123;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">int</span> jin = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; w; ++i)&#123;</span><br><span class="line">		<span class="keyword">int</span> a = result[i];</span><br><span class="line">		<span class="keyword">int</span> t = num * a + jin;</span><br><span class="line">		result[i] = t % <span class="number">10</span>;</span><br><span class="line">		jin = t / <span class="number">10</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span>(jin)&#123;</span><br><span class="line">		result[w] = jin % <span class="number">10</span>;</span><br><span class="line">		jin /= <span class="number">10</span>;</span><br><span class="line">		++w;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> w;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="built_in">memset</span>(result,<span class="number">0</span>,<span class="keyword">sizeof</span>(result));</span><br><span class="line">	result[<span class="number">0</span>] = <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">int</span> N;</span><br><span class="line">	<span class="keyword">int</span> w = <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">while</span>(<span class="built_in">scanf</span>(<span class="string">"%d"</span>,&amp;N) != EOF)&#123;</span><br><span class="line">		multiply(N,w);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> i = w - <span class="number">1</span>; i &gt;= <span class="number">0</span>; --i)&#123;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">"%d"</span>,result[i]);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面算法中，result中存放了一个大数乘数的倒序，main中的N(multiply中的num)是存放了另一个大数，w是result的长度。这样可以进行大数和一个int的乘法。</p>
+<p>上述乘法的算法非常有意思，和一般的竖式乘法有一点不一样，请仔细揣摩。</p>
+<p>如果两个数都是大数，那么算法如下：<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstdio&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;cstring&gt;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">rev</span><span class="params">(<span class="keyword">char</span> *current)</span></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> len = <span class="built_in">strlen</span>(current);</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; len / <span class="number">2</span>; ++i)&#123;</span><br><span class="line">		<span class="keyword">char</span> t = current[i];</span><br><span class="line">		current[i] = current[len - <span class="number">1</span> - i];</span><br><span class="line">		current[len - <span class="number">1</span> - i] = t;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">char</span> temp[<span class="number">100000</span>];<span class="comment">//累加器，临时变量</span></span><br><span class="line"><span class="keyword">char</span> result[<span class="number">100000</span>];<span class="comment">//一个乘数（上次的计算结果）</span></span><br><span class="line"><span class="keyword">char</span> input[<span class="number">100000</span>];<span class="comment">//另一个乘数</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">multiply</span><span class="params">(<span class="keyword">char</span> *num)</span></span>&#123;</span><br><span class="line">	<span class="built_in">memset</span>(temp,<span class="number">0</span>,<span class="keyword">sizeof</span>(temp));</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; (<span class="keyword">int</span>)<span class="built_in">strlen</span>(result); ++i)&#123;</span><br><span class="line">		<span class="keyword">int</span> a = result[i] - <span class="string">'0'</span>;</span><br><span class="line">		<span class="keyword">int</span> jin = <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> j = <span class="number">0</span>; j &lt; (<span class="keyword">int</span>)<span class="built_in">strlen</span>(num); ++j)&#123;</span><br><span class="line">			<span class="keyword">int</span> b = num[j] - <span class="string">'0'</span>;</span><br><span class="line"></span><br><span class="line">			<span class="keyword">if</span>(temp[i + j] == <span class="string">'\0'</span>) temp[i + j] = <span class="string">'0'</span>;</span><br><span class="line">			<span class="keyword">int</span> mult = a * b + temp[i + j] - <span class="string">'0'</span> + jin;</span><br><span class="line"></span><br><span class="line">			temp[i + j] = mult % <span class="number">10</span> + <span class="string">'0'</span>;</span><br><span class="line">			jin = mult / <span class="number">10</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">int</span> p = <span class="built_in">strlen</span>(input) + i;</span><br><span class="line">		<span class="keyword">while</span>(jin)&#123;</span><br><span class="line">			temp[p++] = jin % <span class="number">10</span> + <span class="string">'0'</span>;</span><br><span class="line">			jin /= <span class="number">10</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">memcpy</span>(result,temp,<span class="keyword">sizeof</span>(temp));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span>&#123;</span><br><span class="line">	<span class="built_in">memset</span>(result,<span class="number">0</span>,<span class="keyword">sizeof</span>(result));</span><br><span class="line">	result[<span class="number">0</span>] = <span class="string">'1'</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span>(<span class="built_in">scanf</span>(<span class="string">"%s"</span>,input) != EOF)&#123;</span><br><span class="line">		rev(input);</span><br><span class="line">		multiply(input);</span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="built_in">strlen</span>(result) - <span class="number">1</span>; i &gt;= <span class="number">0</span>; --i)&#123;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">"%c"</span>,result[i]);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">"\n"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>这个算法是完全模拟竖式计算的。</p>
+]]></content>
+      <categories>
+        <category>算法</category>
+        <category>数论</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Eratosthenes筛法</title>
+    <url>/2018/06/01/Eratosthenes%E7%AD%9B%E6%B3%95/</url>
+    <content><![CDATA[<p>HDU-1019：<a href="http://acm.hdu.edu.cn/showproblem.php?pid=1019" target="_blank" rel="noopener">http://acm.hdu.edu.cn/showproblem.php?pid=1019</a></p>
+<p>大意就是讲求几个数的最小公约数，保证结果在long int范围内。</p>
+<p>原来的思路是使用</p>
+<script type="math/tex; mode=display">
+\begin{align}
+LCM(\ LCM(a, \ b), \ c) &== \ LCM(\ a, \ b, \ c) \nonumber \\
+LCM(a, b) &== a * b / GCD(a, b) \nonumber
+\end{align}</script><p>这两个公式求出。但是考虑到LCM(a,b)中，虽然a和b是在long int 范围内，但是LCM(a,b)不一定在。如果用long long int，引入c，LCM(a,b,c)不一定在long long int内，所以这个方法放弃。<br><a id="more"></a></p>
+<p>想到之前看到过一个Eratosthenes筛法，思路就是构建素数表，然后根据</p>
+<script type="math/tex; mode=display">
+\begin{align}
+a&=p_{1}^{n_{a1}}p_{2}^{n_{a2}}p_{3}^{n_{a3}}...p_{m}^{n_{am}} \nonumber \\
+b&=p_{1}^{n_{b1}}p_{2}^{n_{b2}}p_{3}^{n_{b3}}...p_{m}^{n_{bm}} \ \  (p_{1}，p_{2}...p_{m}均为素数) \nonumber \\
+LCM(a,b)&=p_{1}^{max(n_{a1},n_{b1})}p_{2}^{max(n_{a2},n_{b2})}...p_{m}^{max(n_{am},n_{bm})} \nonumber
+\end{align}</script><p>素数表的最优实现可以参考这篇博客：<a href="../素数表的最优实现">素数表的最优实现</a><br>这个原理得出LCM(a,b)的素因数分解结果，从而得出最后的结论。</p>
+]]></content>
+      <categories>
+        <category>算法</category>
+        <category>数论</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>素数表的最优实现</title>
+    <url>/2018/06/01/%E7%B4%A0%E6%95%B0%E8%A1%A8%E7%9A%84%E6%9C%80%E4%BC%98%E5%AE%9E%E7%8E%B0/</url>
+    <content><![CDATA[<p>对于素数表的构建，基本思路是：除了1以外的正整数的倍数都不是素数。反之同理，素数不可能是某两个非1整数的积。<br>所以有以下代码：<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= n; ++i) p[i] = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= n; ++i)</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i)</span><br><span class="line">p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
+<p>然后进行优化:<br>1.i的枚举至多只需要到sqrt(n) + 1即可<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i)</span><br><span class="line">p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
+<p>2.如果某个数不是素数，那么它的倍数可以用它的素因数表示，所以非素数可以排除<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line"><span class="keyword">if</span>(p[i]) <span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i) p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
+<p>3.j不必从i<em>2开始筛，在i=2时筛过;也不必在i</em>3时开始..;不必从i<em>(i-1)时开始；而是应该从i</em>i开始<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line"><span class="keyword">if</span>(p[i]) <span class="keyword">for</span>(<span class="keyword">int</span> j = i * i; j &lt;= n; j += i) p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
+<p>经过三轮优化得到的代码是最优的素数表实现代码。</p>
+]]></content>
+      <categories>
+        <category>算法</category>
+        <category>数论</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Redis的ziplist数据结构</title>
+    <url>/2018/05/27/Redis%E7%9A%84ziplist%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/</url>
+    <content><![CDATA[<p>ziplist主要用于存储长度受到限制的字符串和大小受到限制的数字。<br>ziplist在源代码中没有直接的结构体定义，而是在ziplistNew函数中开辟了一组连续空间，并且对连续空间进行位级别的赋值，从而达到类似于结构体的功能。</p>
+<p>ziplist数据结构：<br><img src="/image/Redis的ziplist数据结构/ziplist.png" alt=""><br><a id="more"></a><br>各个数据的含义：</p>
+<ul>
+<li>ZIPLIST_BYTES：一个4字节数据，用于存放压缩表字节数。</li>
+<li>ZIPLIST_TAIL：最后一个entry距离表头的位置。如上图：head + ZIPLIST_TAIL = entry_tail</li>
+<li>ZIPLIST_LENGTH：entry个数。因为只有2字节，当数值小于等于UINT16_MAX则代表真是的entry个数，否则需要遍历得出真实个数。</li>
+<li>ZIP_END：表的尾，定值是255，用来遍历压缩表时作为结束标记。</li>
+</ul>
+<p>ziplist在源代码中也没有直接的结构体定义存储在压缩表中的entry结构(zlentry不是的)。而是在插入数据的时候进行开辟的相关操作。</p>
+<p>根据ziplistInsert的定义，分析的出entry由以下的数据组成：</p>
+<ul>
+<li>prevlen：这个是前一个节点的长度，用于寻找某个节点的前节点。</li>
+<li>encoding：编码，表示了数据类型。具体格式如下：<br><img src="/image/Redis的ziplist数据结构/ziplist_encoding.png" alt=""></li>
+</ul>
+<p>可以看到当entry存放字符串（字节数组）时，encoding可以反映出字符串的长度；entry存放整数时，可以反映整数的大小范围。</p>
+<ul>
+<li>content：存放了具体的数据。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Redis源码分析</category>
+        <category>ziplist</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>ziplist的联级更新（cascade update）</title>
+    <url>/2018/05/27/ziplist%E7%9A%84%E8%81%94%E7%BA%A7%E6%9B%B4%E6%96%B0%EF%BC%88cascade%20update%EF%BC%89/</url>
+    <content><![CDATA[<p>前面在讲ziplist中压缩节点时，提到过其中有一个数据量叫prevlen，这个是存储了前一个节点的大小，它的长度是根据前一个节点实际大小。如果前一个节点大小在254位以下，则prevlen为1字节；如果前一个节点大小大于等于254位，则prevlen为5字节，并且第1字节数据为254，第2-5字节数据为实际大小。</p>
+<p>另外ziplist还支持任意位置插入节点，这个是通过ziplistInsert函数实现的，具体可以自行研究其实现。</p>
+<p>这时考虑一个极端情况：有一个压缩表有entry1,entry2,entry3节点，大小分别为250位，250位,250位。然后我在entry1前插入一个节点entry0，大小为254位。此时entry1的prevlen就要更新，从1位变成了5位，此时entry1的大小变成了254位。因为entry1大小的改变，entry2的prevlen也要改变，变成5位…如此连锁更新下去。这就叫ziplist的联级更新(cascade update)。<br>它的具体实现是在ziplistCascadeUpdate函数中，大概的流程就是判断当前节点的prevlen能不能放得下上一个节点的大小，能就退出联级更新，否则就进行扩大操作，直到最后一个节点。具体写法请自行查看相应代码。</p>
+]]></content>
+      <categories>
+        <category>Redis源码分析</category>
+        <category>ziplist</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>MySql中order表创建失败</title>
+    <url>/2018/04/21/MySql%E4%B8%ADorder%E8%A1%A8%E5%88%9B%E5%BB%BA%E5%A4%B1%E8%B4%A5/</url>
+    <content><![CDATA[<p>今天在试图创建order表的时候出现了问题，怎么都创建不成功。不是语法问题。</p>
+<p>order是sql关键字，创建它的表要`符号</p>
+]]></content>
+      <categories>
+        <category>SQL</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>C++中signed和unsigned的大小比较</title>
+    <url>/2018/04/15/C++%E4%B8%ADsigned%E5%92%8Cunsigned%E7%9A%84%E5%A4%A7%E5%B0%8F%E6%AF%94%E8%BE%83/</url>
+    <content><![CDATA[<p>有这样的一段代码，请说出其运行结果：<D-r><br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;iostream&gt;;</span></span></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> a = <span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">if</span> (<span class="number">0x80000000</span> &gt; a)</span><br><span class="line">        <span class="built_in">cout</span> &gt;&gt; <span class="string">"hello\n"</span>;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="built_in">cout</span> &gt;&gt; <span class="string">"111111\n"</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br><a id="more"></a><br>上面程序运行的结果是111111</p>
+<p>对于十六进制的整数，如果字面量（即以unsigned int来看）超出了signed int的范围，编译器则尝试以unsigned int作为其类型。由于0x80000000转换成unsigned int在signed int的范围外，而它在unsigned int的范围内，所以将其当作unsigned int。<br>当unsigned和signed进行大小比较时，signed会转换成unsigned，这样a就会变成0xFFFFFFFF的unsigned的整数，这是一个很大的数字（2^32 - 1，是unsigned int的最大值），所以b&gt;a。&lt;/p&gt;</p>
+]]></content>
+      <categories>
+        <category>C/C++`</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>Mac系统GUI应用程序不读取环境变量</title>
+    <url>/2018/04/14/Mac%E7%B3%BB%E7%BB%9FGUI%E5%BA%94%E7%94%A8%E7%A8%8B%E5%BA%8F%E4%B8%8D%E8%AF%BB%E5%8F%96%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/</url>
+    <content><![CDATA[<p>前几天brew upgrade指令把系统里的应用更新了一遍，其中包括python3。后来发现Macvim打不开，有闪退情况，用terminal看了下错误，我安装了YouCompleteMe插件，这个插件是基于python的，而python的encoding包找不到，根据网上的说法是brewhome里新的python3没有配置环境变量，于是把PYTHONPATH和PYTHONHOME环境变量在.zshrc（我用的是zsh）里面配了以下，结果发生了很诡异的事情，在terminal中可以打开Macvim，而我在finder中打开它就闪退，当时Google百度都没相关案例，只能先搁置。<br><a id="more"></a><br>今天想到了个方案，我先把youcompleteme禁用了，然后发现terminal和finder中都能打开，我觉得可能是finder中打开Macvim没有读取到上面设置的两个环境变量。然后分别在两种情况下打开的Macvim中用命令行echo $PYTHONPATH，发现确实是如我上面的猜测，PYTHONPATH仅仅在terminal打开的情况下能读取到。知道问题就Google解决方案了。<br>然后我用的是macOS High Sierra，网上说的什么 /etc/launchd.conf在10.10的时候就没了，最后用了下面的命令解决的</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">launchctl setenv 环境变量名 环境变量内容</span><br></pre></td></tr></table></figure>
+<p>例如我的系统就设置</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">launchctl setenv PYTHONPATH /usr/<span class="built_in">local</span>/Cellar/python/3.6.5/Frameworks/Python.framework/Versions/3.6/bin</span><br></pre></td></tr></table></figure>
+<h1 id="重启不失效的设置方法"><a href="#重启不失效的设置方法" class="headerlink" title="重启不失效的设置方法"></a>重启不失效的设置方法</h1><p>自Mountain Lion以来，之前原有的environment.plist的方法已经确定失效了。新的有效的方法是在/etc/launchd.conf中添加指令设置环境变量。<br>这个文件默认并不存在，可以自己建立。其内容则与launchctl执行的指令的格式相同。如上述设置可在/etc/launchd.conf中添加如下内容：<br>setenv JAVA_VERSION 1.6<br>需要注意的是，在launchd.conf中的命令有一些限制。首先是不能进行环境变量的引用。比如再设置JAVA_HOME环境变量的话，不能使用类似/System/Library/Frameworks/JavaVM.Framework/$JAVA_VERSION/Home的方式来引用之前设置的JAVA_VERSION环境变量，必须明确写出1.6。同时环境变量的内容中也不允许出现空格。<br>launchd.conf仅在系统启动时被调用，因此修改完成后需要重启才能看到效果。<br>此方法转载自:<a href="http://zodiacg.net/2013/05/set-path-under-mac/" target="_blank" rel="noopener">http://zodiacg.net/2013/05/set-path-under-mac/</a></p>
+]]></content>
+  </entry>
+  <entry>
+    <title>跳跃表数据结构分析</title>
+    <url>/2018/04/14/%E8%B7%B3%E8%B7%83%E8%A1%A8%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<p>Redis中的跳跃表数据结构是通过两个结构体实现的：<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* ZSETs use a specialized version of Skiplists */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">zskiplistNode</span> &#123;</span></span><br><span class="line">	sds ele; <span class="comment">/* 节点存放的数据 */</span></span><br><span class="line">	<span class="keyword">double</span> score; <span class="comment">/* 节点排序依据 */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">zskiplistNode</span> *<span class="title">backward</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">zskiplistLevel</span> &#123;</span></span><br><span class="line">		<span class="class"><span class="keyword">struct</span> <span class="title">zskiplistNode</span> *<span class="title">forward</span>;</span></span><br><span class="line">		<span class="keyword">unsigned</span> <span class="keyword">int</span> span;</span><br><span class="line">	&#125; level[]; <span class="comment">/* 节点的层数 */</span></span><br><span class="line">&#125; zskiplistNode;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">zskiplist</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">zskiplistNode</span> *<span class="title">header</span>, *<span class="title">tail</span>;</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> length;</span><br><span class="line">	<span class="keyword">int</span> level; <span class="comment">/* 表最大层数 */</span></span><br><span class="line">&#125; zskiplist;</span><br></pre></td></tr></table></figure><br>zskiplist结构体是跳跃表整体的数据结构，它里面存储了跳跃表的头和尾，以及跳跃表的最大长度（节点个数）和节点的最大层数。<br><a id="more"></a></p>
+<p>zskiplistNode结构体则是跳跃表节点结构体。ele存储数据；score存储节点排序依据；backward则是存放了上一个节点（不一定是前驱，只是score小于并最接近当前节点，或者是score等于当前节点而ele小于并最接近当前节点的ele）；后驱结构体level，用于存储所有的后驱，分层存储，并且存储了当前节点的当前层到下一个当前层的节点的跨度。</p>
+<p>我们用一张图来展示跳跃表的结构：<br><img src="/image/跳跃表数据结构分析/zskiplist.png" alt=""><br>这是一个length为10，level为4的跳跃表。<br>由上图可以看到，表的头结点不存储数据，Redis中的跳跃表也是如此，另外尾节点始终指向空。</p>
+<p>另外，根据Redis对于跳跃表的Create函数（zslCreate函数）可以得知，每个节点最大拥有ZSKIPLIST_MAXLEVEL（32）层，所以这避免了跳跃表无限制增加层数的问题。</p>
+]]></content>
+      <categories>
+        <category>Redis源码分析</category>
+        <category>zskiplist</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>C++的左移和右移</title>
+    <url>/2018/04/12/C++%E7%9A%84%E5%B7%A6%E7%A7%BB%E5%92%8C%E5%8F%B3%E7%A7%BB/</url>
+    <content><![CDATA[<p>今天在做《深入理解计算机系统》时有这样一道题</p>
+<p>Problem 2.23<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">fun1</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">word</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="keyword">return</span> (<span class="keyword">int</span>)((<span class="keyword">word</span> &lt;&lt; <span class="number">24</span>) &gt;&gt; <span class="number">24</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">fun2</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">word</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line"><span class="keyword">return</span> ((<span class="keyword">int</span>) <span class="keyword">word</span> &lt;&lt; <span class="number">24</span>) &gt;&gt; <span class="number">24</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>求w=0x000000C9时fun1(w)与fun2(w)<br><a id="more"></a></p>
+<p>首先w先化成0000 0000 0000 0000 0000 0000 1100 1001<br>然后fun1(w)没什么问题，答案还是0x000000C9</p>
+<p>fun2(w)的答案让我有一些意外。<br>(int)w &lt;&lt; 24 = 1100 1001 0000 0000 0000 0000 0000 0000(B) 然后再&gt;&gt;24，原本以为是和左移类似，将每一位向右移，补0，这样的话得到的是0000 0000 0000 0000 0000 0000 1100 1001，也就是0x000000C9。结果错的，答案是0xFFFFFFC9。</p>
+<p>考虑了下，发生这种情况是因为C/C++中左移是逻辑左移，而右移不是逻辑右移，是算数右移。<br>这样算出来应该是1111 1111 1111 1111 1111 1111 1100 1001也就是0xFFFFFFC9</p>
+<p>接下来简单说一下逻辑右移和算数右移的区别，逻辑右移就是单纯高位补0。而算数右移要看符号位，符号位是1则每次右移补1，符号位为0则每次右移补0，unsigned因为没有符号位（或者理解成符号位始终为0），所以unsigned类型的逻辑左移和逻辑右移始终补0。<br>那上面的例子，原来w是unsigned类型的，因为转换成了signed int了，所以是有符号位，而且&lt;&lt;24操作使得符号位为1，所以每次右移补符号位的1。</p>
+]]></content>
+      <categories>
+        <category>C/C++</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>size_t类型导致的异常</title>
+    <url>/2018/04/12/size_t%E7%B1%BB%E5%9E%8B%E5%AF%BC%E8%87%B4%E7%9A%84%E5%BC%82%E5%B8%B8/</url>
+    <content><![CDATA[<p>《深入理解计算机系统》有这样一道题:<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">strlonger</span><span class="params">(<span class="keyword">char</span> *s, <span class="keyword">char</span> *t)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">strlen</span>(s) - <span class="built_in">strlen</span>(t) &gt; <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这是一个用来判断s是否比t字符串长的一个函数。但是这个函数是有bug的。<br><a id="more"></a></p>
+<p>第一眼我是看不出bug在哪里，后来看了解释：<br>strlen(char *s)这个函数的返回值是size_t类型的，size_t是一种unsigned int，所以当strlonger中的s小于t时，它们相减值也是unsigned，这样只有当两者长度相等时，strlonger函数才可能返回0。</p>
+]]></content>
+  </entry>
+  <entry>
+    <title>sds数据结构分析</title>
+    <url>/2018/04/10/sds%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<p>sds是redis中用来存储动态字符串的数据结构。<a id="more"></a>其利用了五种容量不一的数据结构存储字符串数据。<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> __<span class="title">attribute__</span> ((__<span class="title">packed__</span>)) <span class="title">sdshdr5</span> &#123;</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> flags; <span class="comment">/* 3 lsb of type, and 5 msb of string length */</span></span><br><span class="line">	<span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> __<span class="title">attribute__</span> ((__<span class="title">packed__</span>)) <span class="title">sdshdr8</span> &#123;</span></span><br><span class="line">	<span class="keyword">uint8_t</span> len; <span class="comment">/* used */</span></span><br><span class="line">	<span class="keyword">uint8_t</span> alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">	<span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> __<span class="title">attribute__</span> ((__<span class="title">packed__</span>)) <span class="title">sdshdr16</span> &#123;</span></span><br><span class="line">	<span class="keyword">uint16_t</span> len; <span class="comment">/* used */</span></span><br><span class="line">	<span class="keyword">uint16_t</span> alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">	<span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> __<span class="title">attribute__</span> ((__<span class="title">packed__</span>)) <span class="title">sdshdr32</span> &#123;</span></span><br><span class="line">	<span class="keyword">uint32_t</span> len; <span class="comment">/* used */</span></span><br><span class="line">	<span class="keyword">uint32_t</span> alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">	<span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> __<span class="title">attribute__</span> ((__<span class="title">packed__</span>)) <span class="title">sdshdr64</span> &#123;</span></span><br><span class="line">	<span class="keyword">uint64_t</span> len; <span class="comment">/* used */</span></span><br><span class="line">	<span class="keyword">uint64_t</span> alloc; <span class="comment">/* excluding the header and null terminator */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">char</span> flags; <span class="comment">/* 3 lsb of type, 5 unused bits */</span></span><br><span class="line">	<span class="keyword">char</span> buf[];</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>五种数据结构大同小异。除了sdshdr5以外都有len、alloc、flags以及一个buf数组。</p>
+<p>除去sdshdr5的其余四种数据结构，每种数据结构的前三个成员变量包含了数据的信息，称之为header。<br>根据注释可以很容易明白：len是结构体中buf的已用长度；alloc是申请的buf的空间大小；flags的低三位存放了sds的类型，高五位则是未使用的空间，没有任何的意义。flags的低三位的数据与SDS_TYPE_MASK（值为7）的与运算可以得知当前sds的类型，具体什么类型参见下方宏定义：<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SDS_TYPE_5 0</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SDS_TYPE_8 1</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SDS_TYPE_16 2</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SDS_TYPE_32 3</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> SDS_TYPE_64 4</span></span><br></pre></td></tr></table></figure></p>
+<p>对于sdshdr5的数据结构，它的flags成员变量的低三位全为空，用来与SDS_TYPE_MASK（值为7）的与运算得到0来表示这是一个sdshdr5的数据结构，高五位却是有意义的，意义和其它数据结构的len是一样的，用来表示buf的已使用长度。</p>
+]]></content>
+      <categories>
+        <category>Redis源码分析</category>
+        <category>sds</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>dictScan函数分析</title>
+    <url>/2018/04/08/dictScan%E5%87%BD%E6%95%B0%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<p>dictScan的定义如下:</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="title">dictScan</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">		dict *d,</span></span></span><br><span class="line"><span class="function"><span class="params">		<span class="keyword">unsigned</span> <span class="keyword">long</span> v,</span></span></span><br><span class="line"><span class="function"><span class="params">		dictScanFunction *fn,</span></span></span><br><span class="line"><span class="function"><span class="params">		dictScanBucketFunction* bucketfn,</span></span></span><br><span class="line"><span class="function"><span class="params">		<span class="keyword">void</span> *privdata)</span></span></span><br></pre></td></tr></table></figure>
+<p>这里的扫描分为两个步骤，第一步对桶执行用户自定义函数(bucketfn)，再对桶内每个节点执行用户自定义函数(fn)。</p>
+<p>当进行dictScan时没有进行rehash，那么只要先对0号表的需要scan的桶进行用户自定义的操作，然后对于桶内节点进行遍历执行自定义函数即可。</p>
+<p>如果正在进行rehash，这时候会比较复杂。<br><a id="more"></a><br>正在rehash时的scan代码：<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">t0 = &amp;d-&gt;ht[<span class="number">0</span>];</span><br><span class="line">t1 = &amp;d-&gt;ht[<span class="number">1</span>];</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Make sure t0 is the smaller and t1 is the bigger table */</span></span><br><span class="line"><span class="keyword">if</span> (t0-&gt;<span class="built_in">size</span> &gt; t1-&gt;<span class="built_in">size</span>) &#123; <span class="comment">//这样可以把哈希表扩大和缩小统一看成扩大</span></span><br><span class="line">	t0 = &amp;d-&gt;ht[<span class="number">1</span>];</span><br><span class="line">	t1 = &amp;d-&gt;ht[<span class="number">0</span>];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">m0 = t0-&gt;sizemask;</span><br><span class="line">m1 = t1-&gt;sizemask;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Emit entries at cursor */</span></span><br><span class="line"><span class="keyword">if</span> (bucketfn) bucketfn(privdata, &amp;t0-&gt;table[v &amp; m0]);</span><br><span class="line">de = t0-&gt;table[v &amp; m0];</span><br><span class="line"><span class="keyword">while</span> (de) &#123;</span><br><span class="line">	next = de-&gt;next;</span><br><span class="line">	fn(privdata, de);</span><br><span class="line">	de = next;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Iterate over indices in larger table that are the expansion</span></span><br><span class="line"><span class="comment"> * of the index pointed to by the cursor in the smaller table */</span></span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">	<span class="comment">/* Emit entries at cursor */</span></span><br><span class="line">	<span class="keyword">if</span> (bucketfn) bucketfn(privdata, &amp;t1-&gt;table[v &amp; m1]);</span><br><span class="line">	de = t1-&gt;table[v &amp; m1];</span><br><span class="line">	<span class="keyword">while</span> (de) &#123;</span><br><span class="line">		next = de-&gt;next;</span><br><span class="line">		fn(privdata, de);</span><br><span class="line">		de = next;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Increment bits not covered by the smaller mask */</span></span><br><span class="line">	v = (((v | m0) + <span class="number">1</span>) &amp; ~m0) | (v &amp; m0);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Continue while bits covered by mask difference is non-zero */</span></span><br><span class="line">&#125; <span class="keyword">while</span> (v &amp; (m0 ^ m1));</span><br></pre></td></tr></table></figure></p>
+<p>t0、t1指针指向0号和1号哈希表，但是t0指向0号和1号表里的大小较小的那个，t1执行另一个，具体原因下面分析。m0、m1指向t0、t1指向的哈希表的大小掩码(sizemask)。大小掩码根据分析dictht(dictHashTable)的数据结构可以知道，是哈希表可以存放的桶的数量-1。</p>
+<p>dictht的数据结构如下：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">dictht</span> &#123;</span></span><br><span class="line">	dictEntry **table; <span class="comment">//指向表的第一个哈希桶，指向第一个桶的第一个节点</span></span><br><span class="line">	<span class="comment">/* 哈希表的情况 */</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="built_in">size</span>; <span class="comment">//桶的数量</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> sizemask; <span class="comment">//桶数量的掩码，掩码用于hashFunction(key)结果如果超过size，则将结果与sizemask做一个&amp;运算，这样将哈希结果框定到size内</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> used; <span class="comment">//节点的数量</span></span><br><span class="line">&#125; dictht;</span><br></pre></td></tr></table></figure>
+<p>首先还是和没有rehash的操作一样，对t0指向的表(注意不一定是0号表。下面简称t0，t1类似)的指定桶(v号)执行用户自定义的桶操作，并且对桶内哈希节点进行用户自定义操作。</p>
+<p>但是由于在rehash时有一部分数据可能在t1的相应的桶中，所以要对t1的相应的桶中的数据进行扫描，这样才能扫描完整。</p>
+<p>t1表的扫描代码如下：</p>
+<figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* Iterate over indices in larger table that are the expansion</span></span><br><span class="line"><span class="comment"> * of the index pointed to by the cursor in the smaller table */</span></span><br><span class="line"><span class="keyword">do</span> &#123;</span><br><span class="line">	<span class="comment">/* Emit entries at cursor */</span></span><br><span class="line">	<span class="keyword">if</span> (bucketfn) bucketfn(privdata, &amp;t1-&gt;table[v &amp; m1]);</span><br><span class="line">	de = t1-&gt;table[v &amp; m1];</span><br><span class="line">	<span class="keyword">while</span> (de) &#123;</span><br><span class="line">		next = de-&gt;next;</span><br><span class="line">		fn(privdata, de);</span><br><span class="line">		de = next;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Increment bits not covered by the smaller mask */</span></span><br><span class="line">	v = (((v | m0) + <span class="number">1</span>) &amp; ~m0) | (v &amp; m0);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* Continue while bits covered by mask difference is non-zero */</span></span><br><span class="line">&#125; <span class="keyword">while</span> (v &amp; (m0 ^ m1));</span><br></pre></td></tr></table></figure>
+<p>和之前一样，每次都要执行一个桶的自定义函数和并且对桶内节点扫描一遍，重点在于：<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line">v = (((v | m0) + <span class="number">1</span>) &amp; ~m0) | (v &amp; m0);</span><br></pre></td></tr></table></figure></p>
+<p>在尝试理解这套算法之前，先明确以下的事实：</p>
+<p>1.一个哈希节点的索引是由hashFunction(val) &amp; sizemask计算得出的，sizemask是为2^n-1。</p>
+<p>2.hashFunction(val)&amp;m0 和 hashFunction(val)&amp;m1 的差别在高位，在m0的位数的范围内是一样的。 举个例子:<br>hashFunction(val) = 9(D) = 1001(B)<br>m0 = 3(D) = 11(B)<br>m1 = 15(D) = 1111(B)<br>hashFunction(val) &amp; m0 = 1001 &amp; 0011 = 0001(B) 即在t0表内索引是1(D)<br>hashFunction(val) &amp; m1 = 1001 &amp; 1111 = 1001(B) 即在t1表内索引是9(D)<br>它们在m0的位数(m0是2位)范围内是一样的，都是01。<br>由2可推得对于t0到t1是扩展的情况时，只要考虑m0位数+1~m1位数这个扩展位数的部分，枚举这段空间的0或1情况即可。<br>例如:<br>还是上述的条件，只要再考虑第3位(m0位数+1，m0两位)~第4位(m1位数)的枚举，即0001、0101、1001、1101在t1中的位置。</p>
+<p>明确了上面的内容之后，这个算法的精妙之处就逐渐显现出来了。</p>
+<p>上面算法的思路就是在v的[m0的位数+1,m1的位数]位枚举情况，而v的低m0的位不变。例如上面的例子，v初值为0001(B),低两位(m0的位数)不变，剩下的高两位进行枚举，根据上面的算法，v就得到0001(v初始值)、1001、0101、1101。<br>再由<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">while</span> (v &amp; (m0 ^ m1))</span><br></pre></td></tr></table></figure><br>这行代码判断，v的[m0的位数+1,m1的位数]位的每一位是否都是0，如果是，那么就相当于t1表已经扫描完了。还是上面的例子，当v枚举到了原点：0001的时候退出枚举。</p>
+<p>接下来就要把下一个枚举的v计算出来，这时候就是v的[m0的位数+1,m1的位数]位不变，都置0，v的低m0的位数的几位执行倒转+1倒转回去的操作。这也是最后一部分代码所要表达的就是在m0的位数的范围内将当前的v倒转+1再倒转，找到下一个要在t0和t1都进行扫描的索引号。代码如下:<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* Set unmasked bits so incrementing the reversed cursor</span></span><br><span class="line"><span class="comment"> * operates on the masked bits of the smaller table */</span></span><br><span class="line">v |= ~m0;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* Increment the reverse cursor */</span></span><br><span class="line">v = rev(v);</span><br><span class="line">v++;</span><br><span class="line">v = rev(v);</span><br></pre></td></tr></table></figure><br>这里的rev函数就是上面所说的高低位互相调换的操作。</p>
+<p>它的具体实现也贴出来：<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="title">rev</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">long</span> v)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> s = <span class="number">8</span> * <span class="keyword">sizeof</span>(v); <span class="comment">// bit size; must be power of 2</span></span><br><span class="line">	<span class="keyword">unsigned</span> <span class="keyword">long</span> mask = ~<span class="number">0</span>;</span><br><span class="line">	<span class="keyword">while</span> ((s &gt;&gt;= <span class="number">1</span>) &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		mask ^= (mask &lt;&lt; s); v = ((v &gt;&gt; s) &amp; mask) | ((v &lt;&lt; s) &amp; ~mask);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> v;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过该算法，最后当v的位数大于m1的位数，相当于把0号表、1号表都扫描完了。这时v &amp; m1 == 0。</p>
+<p>这个算法可以保证每个节点都被扫描到，有可能会有节点重复被访问，但是节点重复访问存在于rehash到更小的表时，这种情况在这套算法里是不存在的，因为这里手动将t0指向较小的表，这样始终就是rehash扩大的情况，不会存在重复访问的问题，这也是为什么上面要进行t0指向较小的表的原因。</p>
+<p>rehash到小表会导致重复访问的例子：<br>sizemask(0号表) = 1111(B)<br>sizemask(1号表) = 111(B)<br>0号表有桶0000 1000<br>1号表的000桶至少会在扫描如上两个桶的时候都被访问到。</p>
+]]></content>
+      <categories>
+        <category>Redis源码分析</category>
+        <category>dict</category>
+      </categories>
+  </entry>
+  <entry>
+    <title>dict的rehash机制</title>
+    <url>/2018/04/08/dict%E7%9A%84rehash%E6%9C%BA%E5%88%B6/</url>
+    <content><![CDATA[<p>dict的rehash是用于将数据分布在更大或更小的哈希表内。<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">int</span> empty_visits = n*<span class="number">10</span>; <span class="comment">/* Max number of empty buckets to visit. */</span></span><br></pre></td></tr></table></figure><br>框定了这一次rehash的桶的数量，为用户自定义的n的10倍。这样做是防止单次rehash消耗太多时间，影响其他的操作，分次操作可以提高并发效率。<br>节点被rehash之后就会从0号表移除，并且添加到1号表相应的桶中。所以当0号表变成空的时候，所有数据都已经rehash到了1号表中，这样本轮rehash完成，返回0。否则就返回1，还需要下次rehash以完成本轮rehash。</p>
+<a id="more"></a>
+<p>rehash的条件：<br>在添加元素的dictAddRaw函数中调用的_dictKeyIndex函数中，会对是否满足rehash条件进行判断，并在如果需要rehash时进行rehash(调用_dictExpandIfNeeded函数)。<br>_dictExpandIfNeeded代码如下：<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="comment">/* Expand the hash table if needed */</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span> _dictExpandIfNeeded(dict *d)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">/* Incremental rehashing already in progress. Return. */</span></span><br><span class="line">	<span class="keyword">if</span> (dictIsRehashing(d)) <span class="keyword">return</span> DICT_OK;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* If the hash table is empty expand it to the initial size. */</span></span><br><span class="line">	<span class="keyword">if</span> (d-&gt;ht[<span class="number">0</span>].<span class="built_in">size</span> == <span class="number">0</span>) <span class="keyword">return</span> dictExpand(d, DICT_HT_INITIAL_SIZE);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* If we reached the 1:1 ratio, and we are allowed to resize the hash</span></span><br><span class="line"><span class="comment">	 * table (global setting) or we should avoid it but the ratio between</span></span><br><span class="line"><span class="comment">	 * elements/buckets is over the "safe" threshold, we resize doubling</span></span><br><span class="line"><span class="comment">	 * the number of buckets. */</span></span><br><span class="line">	<span class="comment">//默认是即使dict_can_resize关闭，已使用桶的数量是桶数量的5倍进行强制rehash。如果没有关闭则是超过桶数量就进行rehash</span></span><br><span class="line">	<span class="keyword">if</span> (d-&gt;ht[<span class="number">0</span>].used &gt;= d-&gt;ht[<span class="number">0</span>].<span class="built_in">size</span> &amp;&amp;</span><br><span class="line">			(dict_can_resize ||</span><br><span class="line">			 d-&gt;ht[<span class="number">0</span>].used/d-&gt;ht[<span class="number">0</span>].<span class="built_in">size</span> &gt; dict_force_resize_ratio))</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">return</span> dictExpand(d, d-&gt;ht[<span class="number">0</span>].used*<span class="number">2</span>); <span class="comment">//扩展到已使用桶数量的两倍</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> DICT_OK;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，正在rehash时则不进行是否需要rehash的判断。而如果0号哈希表数据为空，则将哈希表扩展成最小的尺寸（根据DICT_HT_INITIAL_SIZE的宏定义，最小尺寸为4）。如果开启了dict_can_resize，当0号表的平均桶内数据量为1时，就进行rehash。如果没有开启，则会根据dict_force_resize_ratio（默认为5）宏定义，进行强制哈希。<br>每次哈希将表容量*2，这样表的容量可以保证是2^n，对于dictScan有重要作用。关于这部分可以参考之前的文章。</p>
+]]></content>
+      <categories>
+        <category>Redis源码分析</category>
+        <category>dict</category>
+      </categories>
+  </entry>
+</search>
