@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="前面讲到，指针对对象如果拥有权，我们可以使用unique_ptr；如果指针指向的对象可以分享，那么我们使用shared_ptr。但是在实际上因为shared_ptr对于指向的对象是不知情的，因此就会造成对象已经销毁但是shared_ptr不知情的情况。为了规避这种情况，我们可以使用weak_ptr来判断指向的对象是否已经被销毁。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="weak_ptr的使用">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/10/12/weak_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="前面讲到，指针对对象如果拥有权，我们可以使用unique_ptr；如果指针指向的对象可以分享，那么我们使用shared_ptr。但是在实际上因为shared_ptr对于指向的对象是不知情的，因此就会造成对象已经销毁但是shared_ptr不知情的情况。为了规避这种情况，我们可以使用weak_ptr来判断指向的对象是否已经被销毁。">
+<meta property="og:locale" content="zh">
+<meta property="og:image" content="https://newblog.jiangxiwen.me/images/weak_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/1.png">
+<meta property="article:published_time" content="2018-10-12T08:23:47.000Z">
+<meta property="article:modified_time" content="2020-01-03T08:23:33.780Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://newblog.jiangxiwen.me/images/weak_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/1.png">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/10/12/weak_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>weak_ptr的使用 | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/12/weak_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          weak_ptr的使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-10-12 16:23:47" itemprop="dateCreated datePublished" datetime="2018-10-12T16:23:47+08:00">2018-10-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-03 16:23:33" itemprop="dateModified" datetime="2020-01-03T16:23:33+08:00">2020-01-03</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>前面讲到，指针对对象如果拥有权，我们可以使用unique_ptr；如果指针指向的对象可以分享，那么我们使用shared_ptr。但是在实际上因为shared_ptr对于指向的对象是不知情的，因此就会造成对象已经销毁但是shared_ptr不知情的情况。为了规避这种情况，我们可以使用weak_ptr来判断指向的对象是否已经被销毁。<br><a id="more"></a></p>
+<h1 id="使用方法"><a href="#使用方法" class="headerlink" title="使用方法"></a>使用方法</h1><p>使用示例代码如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> spw = <span class="built_in">std</span>::make_shared&lt;Widget&gt;(); <span class="comment">// make_shared的用法</span></span><br><span class="line"><span class="built_in">std</span>::weak_ptr&lt;Widget&gt; wpw(spw); <span class="comment">// 初始化weak_ptr，使用shared_ptr作为参数</span></span><br><span class="line"></span><br><span class="line">spw = <span class="literal">nullptr</span>; <span class="comment">// spw指向空指针，那么原来的spw指向的对象就销毁了，也就是wpw现在指向了一个已经销毁的空间</span></span><br><span class="line"><span class="keyword">if</span>(wpw.expired()) <span class="comment">// wpw是否指向了一个销毁的对象</span></span><br><span class="line">&#123; </span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>如果想让检测是否存在并如果存在就访问指向的对象的操作拥有原子性，我们可以使用lock函数。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt; spw1 = wpw.lock(); <span class="comment">// 如果wpw的对象应被销毁，那么就返回空指针(nullptr)。否则就返回wpw指向的对象</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h1><p>在《Effective Modern C++》这本书当中，给出了两个使用shared_ptr的例子。一个是缓存池，一个是观察者模式。</p>
+<p>缓存池的应用如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;<span class="keyword">const</span> Widget&gt; fastLoadWidget(WidgetID id)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">static</span> <span class="built_in">std</span>::<span class="built_in">unordered_map</span>&lt;WidgetID, <span class="built_in">std</span>::weak_ptr&lt;<span class="keyword">const</span> Widget&gt;&gt; cache; <span class="comment">// 缓存池，静态类型</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">auto</span> objPtr = cache[id].lock(); <span class="comment">// 如果缓存存在，objPtr就是一个指向缓存的shared_ptr，否则就是指向nullptr</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span>(!objPtr)</span><br><span class="line">	&#123;</span><br><span class="line">		objPtr = loadWidget(id); <span class="comment">// 如果缓存不存在就获取Widget，并且存到缓存中</span></span><br><span class="line">		cache[id] = objPtr;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> objPtr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上面的例子中，我们cache中存储的是一个weak_ptr。因为考虑到调用者在获取到对缓存的访问后可能会销毁缓存，因此我们使用weak_ptr来判断缓存表中的指针是否指向可用对象。</p>
+<p>另外观察者模式中，subject中存放了observer的指针，当subject的状态发生变化，它就会调用observer的相关通知函数，observer是通过指针存放在subject中。而subject对于observer的是否存在可以通过weak_ptr来判断。</p>
+<p>对于如下的关系模型，我们也可以使用weak_ptr<br><img src="/images/weak_ptr的使用/1.png" alt=""><br>在上面模型中，A-&gt;B和C-&gt;B都使用了shared_ptr，这时如果B-&gt;A也要一个指针，这个指针的类型改用什么类型呢？<br>我们来讨论：</p>
+<ul>
+<li>如果使用传统的指针:当A-&gt;B销毁了,这时B中存放的是一个指向A的野指针。</li>
+<li>如果使用shared_ptr:当A-&gt;B销毁了，因为还存在C-&gt;B，所以B不会被自动销毁，所以B同样存在一个指向A的野指针。</li>
+<li>如果使用weak_ptr:如上面所说，A-&gt;B销毁了，A已经不存在了，这时存在的是一个B-&gt;A的weak_ptr，它因为A不存在而成为了nullptr，所以weak_ptr合适。</li>
+</ul>
+<h1 id="weak-ptr的控制块"><a href="#weak-ptr的控制块" class="headerlink" title="weak_ptr的控制块"></a>weak_ptr的控制块</h1><p>weak_ptr拥有和shared_ptr一样的控制块，但是weak_ptr不会影响控制块的引用计数，并且还拥有一个弱计数器(weak count)记录了有多少weak_ptr指向了这个对象。通过这两个计数器，我们可以做到判断指向的对象是否被销毁。<br>当一个shared_ptr被销毁，那么引用计数会减一，这时如果引用计数变为0，它就会检查弱计数器是否为0，如果为0，那么就销毁这个对象与控制块。如果不为0，就会不销毁控制块，至于对象是否销毁，我们会在<a href="/智能指针中make_xxx函数和new的使用.html">智能指针中make_xxx函数和new的使用</a>进行讨论。<br>每次使用weak_ptr时，weak_ptr会检查是否引用计数为0，为0那么就会返回nullptr。如果不为0就返回对象。weak_ptr在销毁时会检查引用计数和弱计数器是否同时为0，如果同时为0，那么就销毁控制器（和对象）。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/10/09/shared_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/" rel="prev" title="shared_ptr的使用">
+      <i class="fa fa-chevron-left"></i> shared_ptr的使用
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/10/14/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E4%B8%ADmake_xxx%E5%87%BD%E6%95%B0%E5%92%8Cnew%E7%9A%84%E4%BD%BF%E7%94%A8/" rel="next" title="智能指针中make_xxx函数和new的使用">
+      智能指针中make_xxx函数和new的使用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#使用方法"><span class="nav-number">1.</span> <span class="nav-text">使用方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用场景"><span class="nav-number">2.</span> <span class="nav-text">使用场景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#weak-ptr的控制块"><span class="nav-number">3.</span> <span class="nav-text">weak_ptr的控制块</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

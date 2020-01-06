@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="前面讲到过unique_ptr的使用，它对指向的对象是有拥有权的，也就是说，unique_ptr被销毁，那么指向的对象也销毁，并且指向的对象不可共享。但是有时候我们需要对指向的对象进行共享，这时候就要用到C++11中另外一个智能指针—shared_ptr了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shared_ptr的使用">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/10/09/shared_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="前面讲到过unique_ptr的使用，它对指向的对象是有拥有权的，也就是说，unique_ptr被销毁，那么指向的对象也销毁，并且指向的对象不可共享。但是有时候我们需要对指向的对象进行共享，这时候就要用到C++11中另外一个智能指针—shared_ptr了。">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-10-09T13:57:23.000Z">
+<meta property="article:modified_time" content="2020-01-02T10:00:22.708Z">
+<meta property="article:author" content="CrazySpy">
+<meta property="article:tag" content="Effective Modern C++">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/10/09/shared_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>shared_ptr的使用 | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/09/shared_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          shared_ptr的使用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-10-09 21:57:23" itemprop="dateCreated datePublished" datetime="2018-10-09T21:57:23+08:00">2018-10-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-02 18:00:22" itemprop="dateModified" datetime="2020-01-02T18:00:22+08:00">2020-01-02</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>前面讲到过unique_ptr的使用，它对指向的对象是有拥有权的，也就是说，unique_ptr被销毁，那么指向的对象也销毁，并且指向的对象不可共享。但是有时候我们需要对指向的对象进行共享，这时候就要用到C++11中另外一个智能指针—shared_ptr了。<br><a id="more"></a></p>
+<h1 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h1><p>shared_ptr的原则很简单，就是当指向的对象没有其它shared_ptr需要访问，就把指向的对象销毁。它的实现是依赖于一个引用计数器，记录了当前有多少没有销毁的shared_ptr指向这个对象。因此，shared_ptr的大小和unique_ptr不同，shared_ptr因为这个引用计数器而稍微大一些，准确地说是两倍于普通指针的大小，两个普通指针一个指向被指向的对象，一个指向引用计数器（准确的说应该是控制块Control Block，后面会说）。对于这个引用计数器，当有新的shared_ptr指向了某个对象，则引用计数器就加一。如果某个shared_ptr销毁了，则引用计数器减一，并且检查，是否引用计数器为0，若为0，则代表没有其它的shared_ptr指向这个对象，因此就将这个对象销毁。 另外对于引用计数器的操作是原子的。这确保了在多线程中shared_ptr的线程安全。移动构造的shared_ptr不会引起对应的引用计数器加一，正也因为移动构造的shared_ptr因为不对引用计数器进行加减，所以往往这个操作要快于复制构造的shared_ptr。</p>
+<h1 id="自定义销毁过程"><a href="#自定义销毁过程" class="headerlink" title="自定义销毁过程"></a>自定义销毁过程</h1><p>和unique_ptr一样，shared_ptr可以自定义销毁过程。但是shared_ptr不需要将销毁过程的类型作为它自己类型的一部分，也就是不需要在模板参数中定义销毁过程的类型。代码如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span> &#123;</span> &#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">deleteFunc</span><span class="params">(Widget *pw)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">delete</span> pw;</span><br><span class="line">	<span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"Widget object deleted!"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> customDeleter = [](Widget *pw) </span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">delete</span> pw;</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; <span class="string">"Widget object deleted!"</span> &lt;&lt; <span class="built_in">std</span>::<span class="built_in">endl</span>;</span><br><span class="line">	&#125;;</span><br><span class="line">	<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt; pw1(<span class="keyword">new</span> Widget, customDeleter);</span><br><span class="line">	<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt; pw2(<span class="keyword">new</span> Widget, deleteFunc);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>和unique_ptr不同，不论销毁过程是是函数还是函数对象都不会使shared_ptr变大。这是因为shared_ptr通过两个指针，一个指向被指向的对象，另一个指向一个控制块，这个控制块中存放了引用计数器(reference count)以记录被引用次数、弱计数器(weak count)以及其它的额外数据，这个额外数据就包括了自定义的销毁过程以及空间分配器等。</p>
+<h1 id="使用shared-ptr的建议"><a href="#使用shared-ptr的建议" class="headerlink" title="使用shared_ptr的建议"></a>使用shared_ptr的建议</h1><p>shared_ptr不知道是否有其它的shared_ptr指向了和自己一样的对象，所以对于shared_ptr，要知道如下的规则:</p>
+<ul>
+<li>使用std::make_share是会新建一个控制块。所以使用这个函数的对象一定是要第一次被shared_ptr指向。</li>
+<li>从一个对对象有拥有权的指针(如unique_ptr或者auto_ptr)转换成shared_ptr时，是会新建控制块的。因为有拥有权的指针是没有控制块的(unique_ptr可以参见<a href="/2018/10/07/unique_ptr的使用/">unique_ptr的使用</a>)。所以对于构造从这种指针转换来的shared_ptr时，是会新建一个控制块的。</li>
+<li>从传统的指针转换来的shared_ptr是有控制块的。如果你想创建一个已经shard_ptr指向已经拥有控制块的对象时，你应该是使用shared_ptr或者weak_ptr来创建，而不是一个传统指针。使用shared_ptr或者weak_ptr构造shared_ptr时，是不会新建控制块的。</li>
+</ul>
+<p><strong>用一个传统指针构造多个shared_ptr也是非常不好的。</strong>因为这样会构造多个控制块，当其中一个控制块的引用计数器为0时，就会销毁指向的对象，这样其它指向这个的shared_ptr就会成为野指针。这样会导致未定义行为。例如下面的代码，这样做是非常不好的：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> pw = <span class="keyword">new</span> Widget;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt; pw1(pw);</span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt; pw2(pw);</span><br></pre></td></tr></table></figure><br>这样做就会导致有一个Widget对象有两个控制块。所以你要避免使用传统的指针构造shared_ptr，使用std::make_shared是一种替代方式，但是使用std::make_shared在需要使用自定义的销毁过程时则没有办法自定义销毁过程。另外还可以使用new构造新的对象作为shared_ptr的构造函数的参数。对于复制shared_ptr也可以使用一个shared_ptr作为构造的参数。</p>
+<p>不光传统指针构造shared_ptr可能会导致一个对象多个控制块，对this的不正确使用也可能导致一个对象多个控制块。下面代码:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt;&gt; processedWidgets;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">process</span><span class="params">()</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			processedWidgets.emplace_back(<span class="keyword">this</span>);</span><br><span class="line">		&#125;</span><br><span class="line">&#125;; </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> pw1 = <span class="keyword">new</span> Widget;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt; pw2(pw1);</span><br><span class="line">	pw1-&gt;<span class="built_in">process</span>();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>shared_ptr首先肯定不知道是不是有别的shared_ptr指向要指向的对象，所以每次构造shared_ptr的时候都要新建控制块。在Widget的成员函数process中，它想processedWidgets中插入了一个shared_ptr，指向pw1的对象。然后再main函数中的pw2又以pw1的对象为指向的对象，并且pw2不知道已经在processedWidget中有一个shared_ptr了，这样就导致两个shared_ptr都有各自的控制块，并且都指向同一个对象，所以造成了错误。<br>要解决这样的问题，可以使用std::enable_shared_from_this类，这个类中的shared_from_this方法可以使其继承类完成类似于上述的操作，并且不会造成一个对象多个控制块的问题。代码如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt;&gt; processedWidgets;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span> :</span> <span class="keyword">public</span> <span class="built_in">std</span>::enable_shared_from_this&lt;Widget&gt;</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">process</span><span class="params">()</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			processedWidgets.emplace_back(shared_from_this());</span><br><span class="line">		&#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> pw1 = <span class="keyword">new</span> Widget;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt; pw2(pw1);</span><br><span class="line">	pw1-&gt;<span class="built_in">process</span>();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">``` </span><br><span class="line">这个类中的shared\_from\_this方法会寻找<span class="keyword">this</span>的控制块，如果当前对象的控制块还不存在，那么就会导致未定义行为。所以为了保证不发生这种未定义行为，上述代码我们还会进行改进:</span><br><span class="line">```c++</span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt;&gt; processedWidgets;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span>:</span> <span class="keyword">public</span> <span class="built_in">std</span>::enable_shared_from_this&lt;Widget&gt;</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">static</span> <span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt; create() <span class="comment">// factory method</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">auto</span> pw = <span class="keyword">new</span> Widget();</span><br><span class="line"></span><br><span class="line">			<span class="keyword">return</span> <span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt;(pw);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">process</span><span class="params">()</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			processedWidgets.emplace_back(shared_from_this());</span><br><span class="line">		&#125; </span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		Widget() = <span class="keyword">default</span>;</span><br><span class="line">		Widget(<span class="keyword">const</span> Widget&amp;) = <span class="keyword">default</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> pw = Widget::create();</span><br><span class="line"></span><br><span class="line">	pw-&gt;<span class="built_in">process</span>(); </span><br><span class="line">	<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt; pw2(pw);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>使用工厂方法，强制将新构造的对象在工厂方法中返回一个shared_ptr，使得Widget的对象从诞生起就有shared_ptr指向。这样就不会发生shared_from_this在执行时出现this对象没有控制块导致的未定义行为。</p>
+<p>shared_ptr中使用了原子的引用计数器，而控制块比你想象的要复杂得多，例如使用了虚函数保证指向的对象能真正删除等。这些操作看上去都会导致shared_ptr比传统的指针慢很多，但是实际上不用担心，原子的引用计数器操作使用了特殊的机器指令，只要一条指令就能完成对其的操作，对于调用虚函数销毁被指向的对象，这个操作对于一个被指向的对象来说只会执行一次。</p>
+<p>当你不知道指针和对象的关系时，使用unique_ptr通常是更好的，因为unique_ptr可以方便的转换成shared_ptr，并且它更像传统的指针。</p>
+<p>shared_ptr和unique_ptr有一个很大的区别就是shared_ptr不支持数组操作，它没有[]操作，在默认的销毁过程中没有对数组的delete[]操作。所以建议的方法是使用std::array这类的内建数组代替传统数组。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/Effective-Modern-C/" rel="tag"># Effective Modern C++</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/10/07/unique_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/" rel="prev" title="unique_ptr的使用">
+      <i class="fa fa-chevron-left"></i> unique_ptr的使用
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/10/12/weak_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/" rel="next" title="weak_ptr的使用">
+      weak_ptr的使用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#基本介绍"><span class="nav-number">1.</span> <span class="nav-text">基本介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#自定义销毁过程"><span class="nav-number">2.</span> <span class="nav-text">自定义销毁过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用shared-ptr的建议"><span class="nav-number">3.</span> <span class="nav-text">使用shared_ptr的建议</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

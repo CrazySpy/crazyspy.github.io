@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="为了定义一个T类型的右值引用，我们通常使用T&amp;&amp;。但是通常使用了T&amp;&amp;，并不代表你使用了右值引用。123456789void f(Widget&amp;&amp; param); &#x2F;&#x2F; 右值引用Widget&amp;&amp; var1 &#x3D; Widget(); &#x2F;&#x2F; 右值引用auto&amp;&amp; var2 &#x3D; var1; &#x2F;&#x2F; 非右值引用template&amp;l">
+<meta property="og:type" content="article">
+<meta property="og:title" content="区别全体引用和右值引用">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/10/20/%E5%8C%BA%E5%88%AB%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E5%92%8C%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="为了定义一个T类型的右值引用，我们通常使用T&amp;&amp;。但是通常使用了T&amp;&amp;，并不代表你使用了右值引用。123456789void f(Widget&amp;&amp; param); &#x2F;&#x2F; 右值引用Widget&amp;&amp; var1 &#x3D; Widget(); &#x2F;&#x2F; 右值引用auto&amp;&amp; var2 &#x3D; var1; &#x2F;&#x2F; 非右值引用template&amp;l">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-10-20T08:37:02.000Z">
+<meta property="article:modified_time" content="2020-01-06T15:19:56.385Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/10/20/%E5%8C%BA%E5%88%AB%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E5%92%8C%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>区别全体引用和右值引用 | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/20/%E5%8C%BA%E5%88%AB%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E5%92%8C%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          区别全体引用和右值引用
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-10-20 16:37:02" itemprop="dateCreated datePublished" datetime="2018-10-20T16:37:02+08:00">2018-10-20</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-06 23:19:56" itemprop="dateModified" datetime="2020-01-06T23:19:56+08:00">2020-01-06</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>为了定义一个T类型的右值引用，我们通常使用T&amp;&amp;。但是通常使用了T&amp;&amp;，并不代表你使用了右值引用。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(Widget&amp;&amp; param)</span></span>; <span class="comment">// 右值引用</span></span><br><span class="line">Widget&amp;&amp; var1 = Widget(); <span class="comment">// 右值引用</span></span><br><span class="line"><span class="keyword">auto</span>&amp;&amp; var2 = var1; <span class="comment">// 非右值引用</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;T&gt;&amp;&amp; param)</span></span>; <span class="comment">// 右值引用</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(T&amp;&amp; param)</span></span>; <span class="comment">// 非右值引用</span></span><br></pre></td></tr></table></figure><br>事实上，T&amp;&amp;有两层意思。第一层就是普通的右值引用，它绑定了一个右值。另一种是既可能是右值引用，也有可能是左值引用。这种情况下，代码的形式和右值引用很像，都是T&amp;&amp;，但是实际上可能表现得和T&amp;一样。而且，它还可以绑定const和非const对象、volatile和非volatile对象，甚至const和volatile都有的对象。它们可以绑定任何对象。这样的灵活引用值得拥有它独有的名字，我们称之为全体引用(universal reference)。因为它的使用通常伴随着std::forward，所以在部分C++社区中，还称它为forward reference。<br><a id="more"></a></p>
+<p>全体引用一般两种情况中出现的比较多，一种是模板函数中形参的类型，还有一种是在auto中出现。这两种情况都是出现在类型推测当中。<strong>如果&amp;&amp;不是出现在类型推测当中，那么就不是全体引用，而是普通的右值引用</strong>:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(Widget&amp;&amp; param)</span></span>; <span class="comment">// 普通右值引用</span></span><br><span class="line">Widget&amp;&amp; var1 = Widget(); <span class="comment">// 普通右值引用</span></span><br></pre></td></tr></table></figure></p>
+<p><strong>判断是否是全体引用，是否有类型推测是必须的，但不是充分的。引用的格式必须是严格的T&amp;&amp;的。</strong>在下面的代码中，就不是全体引用:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;T&gt;&amp;&amp; param)</span></span>; <span class="comment">// 这是一个右值引用</span></span><br></pre></td></tr></table></figure><br>因为上面的代码没有严格的拥有T&amp;&amp;这种形式，所以上面的代码不是全体引用。</p>
+<p>const也会导致引用不是全体引用:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">(<span class="keyword">const</span> T&amp;&amp; param)</span></span>; <span class="comment">// param 是一个右值引用</span></span><br></pre></td></tr></table></figure><br>上面的代码，一是在模板中，二是有严格的T&amp;&amp;格式，你可能觉得它是一个全体引用，但事实上它是一个右值引用。<strong>根据C++11标准，只有非const的&amp;&amp;在模板类型推测时才遵守全体引用的规定。</strong><a href="https://stackoverflow.com/questions/38814939/why-adding-const-makes-the-universal-reference-as-rvalue" target="_blank" rel="noopener">stackoverflow相关解答</a></p>
+<p>还有如下的代码:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">T</span>, <span class="title">class</span> <span class="title">Allocator</span> = <span class="title">allocator</span>&lt;T&gt;&gt;</span></span><br><span class="line"><span class="class"><span class="title">class</span> <span class="title">vector</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">push_back</span><span class="params">(T&amp;&amp; x)</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>在push_back中它有正确的全体引用的格式，但是它没有类型推测，因为推测的类型在vector初始化的时候就已经决定了。</p>
+<p>而vector::emplace_back函数就是右值引用了:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">T</span>, <span class="title">class</span> <span class="title">Allocator</span> = <span class="title">allocator</span>&lt;T&gt;&gt;</span></span><br><span class="line"><span class="class"><span class="title">class</span> <span class="title">vector</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		...</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span>... <span class="title">Args</span>&gt;</span></span><br><span class="line"><span class="class">		<span class="title">void</span> <span class="title">emplace_back</span>(<span class="title">Args</span>... <span class="title">args</span>);</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>这里没有使用T&amp;&amp;的格式，但是它还是全体引用。上面所说的T&amp;&amp;中的T代表的是类型推测的类名，不是一个定式T。</p>
+<p>上面还说过auto也可以是全体引用。准确的说，auto&amp;&amp;类型的变量是一个全体引用，因为类型推测发生了并且拥有正确的格式。auto全体引用没有模板函数参数的全体引用使用的那么多，但是它们在C++11标准中相辅相成，在C++14中更是对于双方有重要的互补作用，因为C++14中lambda表达式中可以声明auto&amp;&amp;参数。例如，如果你想要写一个C++14lambda表达式来记录时间，你可以这样做:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> timeFuncInvocation = [](<span class="keyword">auto</span>&amp;&amp; func, <span class="keyword">auto</span>&amp;&amp;... params) </span><br><span class="line">&#123; </span><br><span class="line">	<span class="comment">//start timer; </span></span><br><span class="line">	</span><br><span class="line">	<span class="built_in">std</span>::forward&lt;<span class="keyword">decltype</span>(func)&gt;(func)( <span class="built_in">std</span>::forward&lt;<span class="keyword">decltype</span>(params)&gt;(params)... ); </span><br><span class="line"></span><br><span class="line">	<span class="comment">//stop timer and record elapsed time; </span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>func是一个全体引用，它可以绑定任何可调用的左值或右值对象。params是零个或多个全体引用。因为auto的全体引用，使得timeFuncInvocation可以测量任意函数的执行时间。</p>
+<p>最后要说的是，本章讲述的关于全体引用的基础都是抽象概念。隐含的定则被称为引用冲突(reference collapsing)，这个会在后面讲到。当然这个定则不会影响抽象概念的的实用性。区分右值引用和全体引用将有有助于你准确阅读代码，并且避免你与你的合作伙伴写代码时产生二义性。 </p>
+<p><strong>总结</strong></p>
+<ul>
+<li>如果一个函数的模板类型参数中是T&amp;&amp;这样的格式，或者一个对象被声明为auto&amp;&amp;，那么这个参数或者对象是一个全体引用。</li>
+<li>如果类型声明不是严格的type&amp;&amp;格式的，或者不是类型推测的，type&amp;&amp;就是一个右值引用而已。</li>
+<li>全体引用如果被一个右值初始化，那么它就类似于右值引用。如果被一个左值初始化，那么就类似于左值引用。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/10/18/%E7%90%86%E8%A7%A3std_move%E5%92%8Cstd_forward/" rel="prev" title="理解std::move和std::forward">
+      <i class="fa fa-chevron-left"></i> 理解std::move和std::forward
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/09/10/%E5%8D%A1%E7%89%B9%E5%85%B0%E6%95%B0%E7%9A%84%E5%BA%94%E7%94%A8/" rel="next" title="卡特兰数的应用">
+      卡特兰数的应用 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">38</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
