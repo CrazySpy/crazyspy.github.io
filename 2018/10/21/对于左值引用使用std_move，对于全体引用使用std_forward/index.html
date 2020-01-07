@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="右值引用只会绑定到将要被移动的对象上。对于一个右值引用的参数，可以肯定被引用的对象是要被移动过来的:12345class Widget&amp;#123;	public:		Widget(Widget&amp;&amp; rhs);&amp;#125;;如上面的代码中，你可能想要传递对象给函数调用，为了利用右值的优势你就想要用移动操作。为了你想实现上面的功能，你就需要将绑定的对象转换成右值形式。我们使用std::">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对于左值引用使用std::move，对于全体引用使用std::forward">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/10/21/%E5%AF%B9%E4%BA%8E%E5%B7%A6%E5%80%BC%E5%BC%95%E7%94%A8%E4%BD%BF%E7%94%A8std_move%EF%BC%8C%E5%AF%B9%E4%BA%8E%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E4%BD%BF%E7%94%A8std_forward/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="右值引用只会绑定到将要被移动的对象上。对于一个右值引用的参数，可以肯定被引用的对象是要被移动过来的:12345class Widget&amp;#123;	public:		Widget(Widget&amp;&amp; rhs);&amp;#125;;如上面的代码中，你可能想要传递对象给函数调用，为了利用右值的优势你就想要用移动操作。为了你想实现上面的功能，你就需要将绑定的对象转换成右值形式。我们使用std::">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-10-20T16:58:16.000Z">
+<meta property="article:modified_time" content="2020-01-07T14:24:42.743Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/10/21/%E5%AF%B9%E4%BA%8E%E5%B7%A6%E5%80%BC%E5%BC%95%E7%94%A8%E4%BD%BF%E7%94%A8std_move%EF%BC%8C%E5%AF%B9%E4%BA%8E%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E4%BD%BF%E7%94%A8std_forward/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>对于左值引用使用std::move，对于全体引用使用std::forward | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/21/%E5%AF%B9%E4%BA%8E%E5%B7%A6%E5%80%BC%E5%BC%95%E7%94%A8%E4%BD%BF%E7%94%A8std_move%EF%BC%8C%E5%AF%B9%E4%BA%8E%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E4%BD%BF%E7%94%A8std_forward/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          对于左值引用使用std::move，对于全体引用使用std::forward
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-10-21 00:58:16" itemprop="dateCreated datePublished" datetime="2018-10-21T00:58:16+08:00">2018-10-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-07 22:24:42" itemprop="dateModified" datetime="2020-01-07T22:24:42+08:00">2020-01-07</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>右值引用只会绑定到将要被移动的对象上。对于一个右值引用的参数，可以肯定被引用的对象是要被移动过来的:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		Widget(Widget&amp;&amp; rhs);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>如上面的代码中，你可能想要传递对象给函数调用，为了利用右值的优势你就想要用移动操作。为了你想实现上面的功能，你就需要将绑定的对象转换成右值形式。我们使用std::move来完成这项工作:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		Widget(Widget&amp;&amp; rhs) : name(<span class="built_in">std</span>::<span class="built_in">move</span>(rhs.name)), p(<span class="built_in">std</span>::<span class="built_in">move</span>(rhs.p)) &#123; &#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;SomeDataStructure&gt; p;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>另外，一个全体引用可能被绑定到一个可移动的对象。当右值绑定到全体引用时，全体引用就成了一个右值应用，这时应该使用std::forward:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="keyword">void</span> <span class="title">setName</span><span class="params">(T&amp;&amp; newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			name = <span class="built_in">std</span>::forward&lt;T&gt;(newName);</span><br><span class="line">		&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>上面的两种情况说明：右值引用的变量通过std::move转发，而全体引用使用的右值通过std::forward转发。<br><a id="more"></a></p>
+<p>在<a href="/2018/10/18/理解std_move和std_forward">理解std::move和std::forward</a>中介绍了std::forward对于右值引用可以带来正确的代码，但是会把源码变得繁冗，非常容易导致错误并且不符合语言习惯，也呼吁尽量避免使用std::forward。但是如果这里对全体引用使用std::move，这可能会导致意外地修改左值:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="keyword">void</span> <span class="title">setName</span><span class="params">(T&amp;&amp; newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			name = <span class="built_in">std</span>::<span class="built_in">move</span>(newName); <span class="comment">// 使用了std::move转换一个全体引用 </span></span><br><span class="line">		&#125;</span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> name; <span class="comment">//std::shared_ptr&lt;SomeDataStructure&gt; p;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="function"><span class="built_in">string</span> <span class="title">getWidgetName</span><span class="params">()</span></span>; <span class="comment">// 用于产生Widget的名称</span></span><br><span class="line">Widget w;</span><br><span class="line"><span class="keyword">auto</span> n = getWidgetName();</span><br><span class="line">w.setName(n); <span class="comment">// 本地变量n的值被移动到了w.name中</span></span><br></pre></td></tr></table></figure><br>上面的代码中，因为setName中使用了std::move，本地变量n的数据就被移动进了w.name当中，本地变量变空。</p>
+<p>当然你可能认为上面代码不合理，setName不应该声明它的参数为全体引用，或者这样写会使引用不可以是const的，因为setName很明显不应该修改它参数的值。所以你就想到了使用重载来解决上面的两个不足之处:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">setName</span><span class="params">(<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			name = newName;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">setName</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">string</span>&amp;&amp; newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			name = <span class="built_in">std</span>::<span class="built_in">move</span>(newName);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>这样就可以给引用加上const以避免值被修改。这样的确可以运行，但是有很多的不足。首先因为使用了两个函数替代了一个单独的模板，需要编写和维护更多的代码。另外代码效率也非常低下。当如下使用setName时:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">w.setName(<span class="string">"Adela Novak"</span>);</span><br></pre></td></tr></table></figure><br>如果是仅使用了全体引用为参数的setName，模板类型将会推断为const char<em>，字符串“Adela Novak”将会被传递给setName，在setName中将会调用w内部的std::string的赋值操作符。w的数据成员因此会直接从字符串赋值过去，没有任何的临时变量产生。<br>而使用重载的setName就会产生一个临时的std::string对象，用于作为setName的参数，然后这个参数会被移动到w的成员中。因此一个对于setName的调用最终会调用std::string的构造函数(创建临时的std::string)、一次std::string移动赋值操作(把newName移动到w.name中去)、一次std::string的销毁操作(销毁那个临时的std::string)。这是一个比直接调用const char</em>指针需要更加高昂代价的操作。</p>
+<p><strong>因此，使用一对对于左值和右值重载的函数替换使用全体引用的模板函数会导致更高昂的运行代价。</strong></p>
+<p>使用一对重载函数代替全体引用为参数的模板函数还会导致代码修改变得更加复杂。上面代码中Widget::setName只有一个参数，所以只需要两个重载函数。但是如果函数有更多的参数，每一个都可能是左值或者右值，那么n个参数就需要<script type="math/tex">2^n</script>个重载函数。而且有的函数的参数个数是不定的，例如:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">T</span>, <span class="title">class</span>... <span class="title">Args</span>&gt; <span class="title">shared_ptr</span>&lt;T&gt; <span class="title">make_shared</span>(<span class="title">Args</span>&amp;&amp;... <span class="title">args</span>);</span></span><br></pre></td></tr></table></figure><br>像这样的函数，分左值和右值重载就没有办法了，只能使用全体引用了。</p>
+<p>因为std::move会导致原变量边空，而有时候我们希望在一个函数中多次使用被右值引用或者全体引用绑定的对象，这就要使用之前这个对象没有被移动，这时我们就需要对最后一次使用的引用使用std::move或者std::forward，例如:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setSignText</span><span class="params">(T&amp;&amp; <span class="built_in">text</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	sign.setText(<span class="built_in">text</span>);</span><br><span class="line">	<span class="keyword">auto</span> now = <span class="built_in">std</span>::chrono::system_clock::now();</span><br><span class="line">	signHistory.add(now, <span class="built_in">std</span>::forward&lt;T&gt;(<span class="built_in">text</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>因为我们希望在signHistory.add中使用text，这就要确保setText肯定不会修改text。然后是对全体引用使用了std::forward。</p>
+<p>std::move和std::forward类似，但是有时候你可能想使用的是std::move_if_noexcept（具体参看:<a href="/2018/09/30/noexcept关键字的使用">noexcept关键字的使用</a> ）代替std::move。</p>
+<p>如果一个函数的返回值是一个值，并且这个值被绑定到了一个右值引用或者一个全体引用，那么请使用std::move或者std::forward返回这个值。例如:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Matrix <span class="keyword">operator</span>+(Matrix&amp;&amp; lhs, <span class="keyword">const</span> Matrix&amp; rhs)</span><br><span class="line">&#123;</span><br><span class="line">	lhs += rhs;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">std</span>::<span class="built_in">move</span>(lhs); <span class="comment">// 把lhs移动到返回值当中，右值引用使用std::move</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>通过转换lhs为return语句(通过std::move)，lhs将移动到函数的返回值的位置<br>如果忽略调用std::move，也就是代码如下时:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Matrix <span class="keyword">operator</span>+(Matrix&amp;&amp; lhs, <span class="keyword">const</span> Matrix&amp; rhs)</span><br><span class="line">&#123;</span><br><span class="line">	lhs += rhs;</span><br><span class="line">	<span class="keyword">return</span> lhs;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>lhs因为是左值，编译器将它复制到函数返回值的位置。假设Matrix支持移动构造，在return语句中使用std::move将会使代码效率更高。</p>
+<p>如果Matrix不支持移动，这样的转换也不会有什么副作用，因为右值只是会被通过复制构造复制走。如果Matrix之后又支持了移动，“+”操作符将会将会在编译时自动变得更优。在返回右值引用或者全体引用时使用std::move或者std::forward时没有什么坏处，反而只有好处。<br>根据上面的理论，有人就认为：如果对右值引用参数使用std::move可以将复制到函数返回位置变成移动到函数返回位置，那么为什么不能将函数的本地变量也通过移动的方式移动到函数返回位置作为返回呢？例如:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Widget <span class="title">makeWidget</span><span class="params">()</span> <span class="comment">// “复制”版本的makeWidget</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Widget w;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> w; <span class="comment">// “复制”本地变量w到函数返回位置</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>变成<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Widget <span class="title">makeWidget</span><span class="params">()</span> <span class="comment">// 移动版本的makeWidget</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Widget w;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">std</span>::<span class="built_in">move</span>(w); <span class="comment">// 移动本地变量w到函数返回位置（请不要这样做）</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>但事实上这样做是有瑕疵的。C++标准委员会已经提前想到了这个问题，委员会在标准中对于本地变量作为返回值时做了特殊的优化，它们通过返回这个本地变量的内存地址对代码进行优化，这样避免了复制到函数返回位置的一次操作。这个优化被称作RVO(return value optimization)，并且是被C++标准明确规定的。<br>这样一个好东西是非常有讲究的，因为你肯定希望在适当的地方使用这个省略复制的操作，并且不会影响到程序的行为。在C++标准中这样规定：同时满足以下两个条件时，编译器可以不复制（或者移动）返回值的函数的返回的本地对象（包括本地变量以及return语句创建的临时对象，但不包括函数的参数）：</p>
+<ol>
+<li>本地对象的类型和函数返回的本地对象类型一致。</li>
+<li>是本地对象作为函数的返回值。</li>
+</ol>
+<p>所以当我们返回到上面的两种makeWidget中。首先两者都是可行的代码。但是每个正规的C++编译器都会使用RVO来避免对w的复制。这也就是说复制版本的makeWidget并不会在返回的时候复制w。</p>
+<p>而移动版本的则会按照预期的去做，将w移动到函数的返回值的位置。那么为什么编译器不会根据RVO不移动呢？答案是它不能这样做。因为上面的条件2中规定了是本地对象作为返回值，而移动版本的makeWidget返回右值引用。因此不可以在这里应用RVO。</p>
+<p>当然实际的编码环境复杂，很多情况下你感觉还是需要使用std::move，但即使这样也建议考虑RVO。因为RVO中还这么说，如果编译器没有办法实现忽略复制，那么被返回的对象将会被当做一个右值来对待。标准中RVO如果被使用，将会在复制忽略和隐式调用std::move中二选一。所以下面的代码要不然会忽略复制，要不然就自动添加std::move:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Widget <span class="title">makeWidget</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	Widget w;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">return</span> w;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这也就意味着，如果你使用了std::move()作为函数返回值，根据RVO这样不会优化你的代码，反而可能阻碍优化（杜绝了RVO）。</p>
+<p>使用std::move在几种情况下可以使代码优化，例如传参的时候，被调用的函数还调用函数并且使用传进来的参数作为将被调用函数的参数。但是在作为返回表达式的一部分时，如果要使用RVO，那么就不建议使用std::move了。</p>
+<p><strong>总结</strong></p>
+<ul>
+<li>在最后一次使用某个引用时，当这个引用是右值引用时使用std::move，是全体引用时使用std::forward。</li>
+<li>当某个右值引用或全体引用被函数以返回值的方式返回时，建议对右值引用使用std::move、对全体引用使用std::forward。</li>
+<li>不要对本地对象使用std::move或std::forward。因为返回值优化（RVO）会优化它们。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/10/20/%E5%8C%BA%E5%88%AB%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E5%92%8C%E5%8F%B3%E5%80%BC%E5%BC%95%E7%94%A8/" rel="prev" title="区别全体引用和右值引用">
+      <i class="fa fa-chevron-left"></i> 区别全体引用和右值引用
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/10/22/%E9%81%BF%E5%85%8D%E9%87%8D%E8%BD%BD%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E4%B8%BA%E5%8F%82%E6%95%B0%E7%9A%84%E5%87%BD%E6%95%B0/" rel="next" title="避免重载全体引用为参数的函数">
+      避免重载全体引用为参数的函数 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+<script type="text/x-mathjax-config">
+
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$', '$'], ['\\(', '\\)'] ],
+      processEscapes: true,
+      skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    },
+    TeX: {
+      equationNumbers: {
+        autoNumber: 'AMS'
+      }
+    }
+  });
+
+  MathJax.Hub.Register.StartupHook('TeX Jax Ready', function() {
+    MathJax.InputJax.TeX.prefilterHooks.Add(function(data) {
+      if (data.display) {
+        var next = data.script.nextSibling;
+        while (next && next.nodeName.toLowerCase() === '#text') {
+          next = next.nextSibling;
+        }
+        if (next && next.nodeName.toLowerCase() === 'br') {
+          next.parentNode.removeChild(next);
+        }
+      }
+    });
+  });
+
+  MathJax.Hub.Queue(function() {
+    var all = MathJax.Hub.getAllJax(), i;
+    for (i = 0; i < all.length; i += 1) {
+      element = document.getElementById(all[i].inputID + '-Frame').parentNode;
+      if (element.nodeName.toLowerCase() == 'li') {
+        element = element.parentNode;
+      }
+      element.classList.add('has-jax');
+    }
+  });
+</script>
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mathjax@2/MathJax.js?config=TeX-AMS-MML_HTMLorMML', () => {
+    MathJax.Hub.Typeset();
+  }, window.MathJax);
+</script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+    
+
+  
+
+</body>
+</html>
