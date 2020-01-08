@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="在之前(避免重载全体引用为参数的函数)我们说到要尽量避免重载参数为全体引用的函数。但是又讲到，重载全体引用为参数的函数有时可以给我们带来很多好处，例如当函数需要转发大量的参数时。所以这一章节我们讲解几种能让程序达到我们满意效果的几种方法，本质就是避免重载全体引用为参数的函数，或者应用参数类型匹配限制。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="重载参数为全体引用的函数的替代方法">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/10/25/%E9%87%8D%E8%BD%BD%E5%8F%82%E6%95%B0%E4%B8%BA%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E7%9A%84%E5%87%BD%E6%95%B0%E7%9A%84%E6%9B%BF%E4%BB%A3%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="在之前(避免重载全体引用为参数的函数)我们说到要尽量避免重载参数为全体引用的函数。但是又讲到，重载全体引用为参数的函数有时可以给我们带来很多好处，例如当函数需要转发大量的参数时。所以这一章节我们讲解几种能让程序达到我们满意效果的几种方法，本质就是避免重载全体引用为参数的函数，或者应用参数类型匹配限制。">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-10-25T13:39:35.000Z">
+<meta property="article:modified_time" content="2020-01-08T10:14:46.445Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/10/25/%E9%87%8D%E8%BD%BD%E5%8F%82%E6%95%B0%E4%B8%BA%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E7%9A%84%E5%87%BD%E6%95%B0%E7%9A%84%E6%9B%BF%E4%BB%A3%E6%96%B9%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>重载参数为全体引用的函数的替代方法 | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/25/%E9%87%8D%E8%BD%BD%E5%8F%82%E6%95%B0%E4%B8%BA%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E7%9A%84%E5%87%BD%E6%95%B0%E7%9A%84%E6%9B%BF%E4%BB%A3%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          重载参数为全体引用的函数的替代方法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-10-25 21:39:35" itemprop="dateCreated datePublished" datetime="2018-10-25T21:39:35+08:00">2018-10-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-08 18:14:46" itemprop="dateModified" datetime="2020-01-08T18:14:46+08:00">2020-01-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在之前(<a href="/2018/10/22/避免重载全体引用为参数的函数/">避免重载全体引用为参数的函数</a>)我们说到要尽量避免重载参数为全体引用的函数。但是又讲到，重载全体引用为参数的函数有时可以给我们带来很多好处，例如当函数需要转发大量的参数时。所以这一章节我们讲解几种能让程序达到我们满意效果的几种方法，本质就是避免重载全体引用为参数的函数，或者应用参数类型匹配限制。<br><a id="more"></a></p>
+<h1 id="禁止重载"><a href="#禁止重载" class="headerlink" title="禁止重载"></a>禁止重载</h1><p>在<a href="/2018/10/22/避免重载全体引用为参数的函数/">避免重载全体引用为参数的函数</a>中我们把使用std::string和idx进行记录添加的函数起两个名字，避免了重载。例如:logAndAddName和logAndAddIdx，这样就可以互不影响地工作了。但是这种方法对于被重载的函数是构造函数却是没有用的，因为构造函数的名字是C++语言定死的，没有办法重新起。而且没有理由要抛弃重载。</p>
+<h1 id="通过const-T-amp-传递"><a href="#通过const-T-amp-传递" class="headerlink" title="通过const T&amp;传递"></a>通过const T&amp;传递</h1><p>一个替代方法是使用C++98语法，把通过全体引用传递变成通过const类型的左值类型传递。但是这种方法并不是非常高效。</p>
+<h1 id="通过值传递"><a href="#通过值传递" class="headerlink" title="通过值传递"></a>通过值传递</h1><p>我们可以使用通过值传递替代通过引用传递来简化代码。这样做的一些建议将会在后面给出。我先简单用代码展示一下代码怎么写:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		explicit Person(std::string n) : name(std::move(n)) &#123; &#125; </span><br><span class="line">		explicit Person(int idx) : name(nameFromIdx(idx)) &#123; &#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>因为构造函数中的std::string的构造函数是不接受整数的，包括int和类int参数，所以将会自动调用参数为int的重载函数。以此类推，如果参数是可以构造std::string的，就会调用参数为std::string的重载函数。<br>这里顺便提及一下，如果参数是0或者NULL，将会调用参数为int的重载函数。如果不知道具体原因可以参考:<a href="/2018/09/25/尽量使用nullptr替代0和NULL/">尽量使用nullptr替代0和NULL</a>。</p>
+<h1 id="使用传递标记"><a href="#使用传递标记" class="headerlink" title="使用传递标记"></a>使用传递标记</h1><p>上面介绍的通过const的左值引用和通过值的方式传递都无法支持完美转发。如果你是要使用完美转发才使用的全体引用那就没有办法使用上面两种方法了。然而我们不想拒绝重载和全体引用，我们该如何避免对参数为全体引用的函数的重载呢？<br>有一个新的方法，叫做传递标记。当调用重载函数时，编译器会先选择参数最佳的调用，这个参数最佳会把参数的组合考虑在内，不是单纯地看参数类型是否最合适。所以当一个全体引用参数变成了一个类型完美的函数后，这个函数的其它非全体引用参数也是参数列表中的一部分，通过其它的参数达到调用非全体引用的重载函数。这就是这个方法的基本思路，下面使用一个例子:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">multiset</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; names;</span><br><span class="line"></span><br><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="keyword">void</span> <span class="title">logAndAdd</span><span class="params">(T&amp;&amp; name)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> now = <span class="built_in">std</span>::chrono::system_clock::now();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">log</span>(now, <span class="string">"logAndAdd"</span>);</span><br><span class="line"></span><br><span class="line">	names.emplace(<span class="built_in">std</span>::forward&lt;T&gt;(name));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>接下来我们将加入对index的支持。因为参数为index时使用的逻辑和std::string时是不一样的，因此需要将两种情况下的逻辑写到两个函数里，一个函数支持整数为参数，一个函数支持非整数的操作。而logAndAdd用来转发到相应的函数。<br>两个函数可以其同一个名字，例如logAndAddImpl，因此要使用到重载。其中一个函数要使用全体引用，不过我们会给这两个函数第二个参数，用来防止我们落入之前所说的混乱当中。这个第二个参数成为了选择哪个函数调用的关键。代码如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="keyword">void</span> <span class="title">logAndAdd</span><span class="params">(T&amp;&amp; name)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	logAndAddImpl(</span><br><span class="line">		<span class="built_in">std</span>::forward&lt;T&gt;(name),</span><br><span class="line">		<span class="built_in">std</span>::is_integeral&lt;T&gt;()</span><br><span class="line">	); <span class="comment">// 有细微瑕疵</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>上面的代码有细微的瑕疵。如果T为整数的引用，那么将会调用参数为非整数的logAndAddImpl。因为整数的引用不是整数。所以整改后的代码如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="keyword">void</span> <span class="title">logAndAdd</span><span class="params">(T&amp;&amp; name)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	logAndAddImpl(</span><br><span class="line">		<span class="built_in">std</span>::forward&lt;T&gt;(name),</span><br><span class="line">		<span class="built_in">std</span>::is_integeral&lt;<span class="keyword">typename</span> <span class="built_in">std</span>::remove_reference&lt;T&gt;::type&gt;()</span><br><span class="line">	);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>C++14中可以写成std::remove_reference_t。</p>
+<p>而logAndAddImpl有两个重载函数，我们这样写:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">logAndAddImpl</span><span class="params">(T&amp;&amp; name, <span class="built_in">std</span>::false_type)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> now = <span class="built_in">std</span>::chrono::system_clock::now();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">log</span>(now, <span class="string">"logAndAdd"</span>);</span><br><span class="line"></span><br><span class="line">	names.emplace(<span class="built_in">std</span>::forward&lt;T&gt;(name));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="function"><span class="built_in">string</span> <span class="title">nameFromIdx</span><span class="params">(<span class="keyword">int</span> idx)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">logAndAddImpl</span><span class="params">(<span class="keyword">int</span> idx, <span class="built_in">std</span>::true_type)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	logAndAdd(nameFromIdx(idx));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>logAndAdd传递一个布尔型给logAndAddImpl函数，但是true和false是运行时的值，所以我们需要使用一个编译时的布尔型来选择调用哪个logAndAddImpl。在标准库中提供了std::true_type和std::false_type来表示运行时的true和false。</p>
+<p>在index的logAndAddImpl重载函数中，我们通过将std::string传递给logAndAdd函数可以避免在两个重载函数中都要编写写日志的代码。<br>在这种设计方式中，std::true_type和std::false_type就是标记。标记的目的是用来强制调用某个我们想要的重载函数。它们在运行时是没有任何作用的，因此编译器在编译时会将这个标记忽略掉。这是一种模板元编程的正常技巧，你接触当代的C++代码越多了你就会发现这个方法很常见。<br>标记传递的方法在运行时没有任何不同，只是可以让我们没有问题地结合全体引用和重载。转发函数logAddAdd的参数中是一个没有限制的全体引用，但是这个函数没有使用重载。而在实际的逻辑函数logAndAddImpl中，我们使用了重载，并且其中一个使用了全体引用作为了参数。但是我们还使用了第二个参数作为标记，也就是编译器在选择重载函数的时候不光看第一个全体引用函数，还看第二个标记参数。此时全体引用是否完美匹配参数就显得不那么重要了。</p>
+<h1 id="在使用全体引用的模板上加限制"><a href="#在使用全体引用的模板上加限制" class="headerlink" title="在使用全体引用的模板上加限制"></a>在使用全体引用的模板上加限制</h1><p>传递标记的中心思想就是一个非重载函数作为对外接口，通过调用这个接口转发到逻辑函数上去。创建一个非重载的转发函数非常简单，但是在之前我们考虑了一个问题，一个完美转发构造函数可能会拦截对编译器自动生成的默认复制构造函数和默认移动函数，即使写了一个构造函数并且使用传递标记的方法，有些构造还是通过编译器自动生成的函数进行，从而绕过了传递标记的方法。</p>
+<p>但是，最严重的问题不是默认生成的函数会屏蔽标记传递函数的使用，而是标记传递函数可能会屏蔽默认生成的函数。有时你可能希望调用复制构造函数以复制某个类型数据的左值。但是如果某个构造函数使用了全体引用作为参数会导致这个构造函数在复制非const左值时一直被调用。还有，如果一个类的构造函数是完美转发构造函数，那么它的继承类调用的复制或构造函数将会一直调用这个完美转发函数函数。<br>正好这时你想使用编译器自动生成的和全体引用的结合，那么标记转发就不适合你了，你需要使用一种技术可以让你选择模板函数的生成使用条件，这就是std::enable_if。 std::enable_if提供了一种方法可以强制编译器使某些特定的类型模板函数不生成，也就是让它们不可用(disable)。默认情况下，任何类型都是可以通过模板函数生成的，但是你可以通过std::enable_if使得部分类型在特定情况下不可以生成。在<a href="/2018/10/22/避免重载全体引用为参数的函数/">避免重载全体引用为参数的函数</a>的例子中，我们可以使用std::enable_if这样编写Person的构造函数:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;</span><br><span class="line">			<span class="keyword">typename</span> T,</span><br><span class="line">			<span class="keyword">typename</span> = <span class="keyword">typename</span> <span class="built_in">std</span>::enable_if&lt;condition&gt;::type</span><br><span class="line">		&gt; <span class="keyword">explicit</span> Person(T&amp;&amp; n);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>为了理解在代码中发生了什么，建议自行了解std::enable_if做了什么，你可以通过搜索“SFINAE”来找到相关内容。我们着重了解一下condition的表达。<br>condition条件如果想指定T不是Person是，模板函数可以生成代码的话，我们可以通过使用模板代码段std::is_same，因此condition就替换成!std::is_same::value。上面的condition非常接近正确代码了，因为我们没有考虑T为Person&amp;时，也就是当调用代码如下时:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Person <span class="title">p</span><span class="params">(<span class="string">"Nancy"</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">cloneOfP</span><span class="params">(p)</span></span>;</span><br></pre></td></tr></table></figure><br>cloneOfP从对象p复制一个对象。因为上面的构造函数的参数是全体引用，因此T被推测为Person&amp;。而在std::enable_if的条件中，!std::is_same::value的值为真，因此上面的cloneOfP调用的是这个全体引用为参数的构造函数。而实际上本意是调用默认复制构造函数。<br>另外这个问题也可以引申到T为const、volatile的情况。我们可以统一使用std::decay::type使T去除掉const、volatile和引用。具体的代码如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;</span><br><span class="line">			<span class="keyword">typename</span> T,</span><br><span class="line">			<span class="keyword">typename</span> = <span class="keyword">typename</span> <span class="built_in">std</span>::enable_if&lt; </span><br><span class="line">				!<span class="built_in">std</span>::is_same&lt;</span><br><span class="line">					Person, </span><br><span class="line">					<span class="keyword">typename</span> <span class="built_in">std</span>::decay&lt;T&gt;::type </span><br><span class="line">				&gt;::value </span><br><span class="line">			&gt;::type </span><br><span class="line">		&gt; <span class="keyword">explicit</span> Person(T&amp;&amp; n); </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>这种格式非常难懂，这也是为什么我最后介绍这个方法。如果你能很好地理解&lt;&gt;符号是非常好的，不过之前的几种方法可以替代这个方法的话就请使用前几种方法。在上面的代码中，如果从一个Person构造一个新的Person对象，不论之前的Person对象是左值还是右值、const或者非const、volatile或者非volatile都将不会影响调用全体引用的构造函数。</p>
+<p>这样就结束了么？不！这里还疏忽了一点。对于从Person继承的类，并且定义了复制构造和移动构造函数，如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SpecialPerson</span> :</span> <span class="keyword">public</span> Person</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		SpecialPerson(<span class="keyword">const</span> SpecialPerson&amp; rhs) <span class="comment">// 复制构造函数，调用基类的转发构造函数</span></span><br><span class="line">			:Person(rhs) &#123; &#125;</span><br><span class="line"></span><br><span class="line">		SpecialPerson(SpecialPerson&amp;&amp; rhs) <span class="comment">// 移动构造函数，调用基类的转发函数</span></span><br><span class="line">			:Person(<span class="built_in">std</span>::<span class="built_in">move</span>(rhs)) &#123; &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>我们向基类Person传递了SpecialPeron，我们希望调用基类的复制和移动函数，但是我们传给了基类SpecialPerson对象，不是Person对象，这就造成问题，它们的类型是不同的。如果我们构造了一个SpecialPerson，在构造函数中构造基类Person时就会调用上面的模板函数生成的参数完美的函数。这样传进去的就是SpecialPerson对象，而不是Person对象，调用的就是Person的完美转发函数而不是默认的复制和移动构造函数。我们可以使用std::is_base_of::value解决问题，它会在T2是T1的派生类时为真。对于我们上面的Person的模板构造函数，我们希望是当T为T的派生类的时候不使用模板构造函数。因此我们可以这样补充上面的代码:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;</span><br><span class="line">			<span class="keyword">typename</span> T,</span><br><span class="line">			<span class="keyword">typename</span> = <span class="keyword">typename</span> <span class="built_in">std</span>::enable_if&lt;</span><br><span class="line">				!<span class="built_in">std</span>::is_base_of&lt;</span><br><span class="line">					Person,</span><br><span class="line">					<span class="keyword">typename</span> <span class="built_in">std</span>::decay&lt;T&gt;::type</span><br><span class="line">				&gt;</span><br><span class="line">			&gt;::type</span><br><span class="line">		&gt; <span class="keyword">explicit</span> Person(T&amp;&amp; n);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>现在我们完成了C++11风格的代码，如果想要使用C++14的代码，我们可以用这样的代码:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;</span><br><span class="line">			<span class="keyword">typename</span> T,</span><br><span class="line">			<span class="keyword">typename</span> = <span class="built_in">std</span>::<span class="keyword">enable_if_t</span>&lt;</span><br><span class="line">				!<span class="built_in">std</span>::is_base_of&lt;</span><br><span class="line">					Person,</span><br><span class="line">					<span class="built_in">std</span>::<span class="keyword">decay_t</span>&lt;T&gt;</span><br><span class="line">				&gt;::value</span><br><span class="line">			&gt;</span><br><span class="line">		&gt; <span class="keyword">explicit</span> Person(T&amp;&amp; n);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>上面的代码对于Person的复制和移动已经完美了。但是如果我们这时引入了int为参数的构造函数，我们怎么修改？其实很类似了:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;</span><br><span class="line">			<span class="keyword">typename</span> T,</span><br><span class="line">			<span class="keyword">typename</span> = <span class="built_in">std</span>::<span class="keyword">enable_if_t</span>&lt;</span><br><span class="line">				!<span class="built_in">std</span>::is_base_of&lt;</span><br><span class="line">					Person,</span><br><span class="line">					<span class="built_in">std</span>::<span class="keyword">decay_t</span>&lt;T&gt;</span><br><span class="line">				&gt;::value</span><br><span class="line">				&amp;&amp; !<span class="built_in">std</span>::is_integral&lt;<span class="built_in">std</span>::remove_reference&lt;T&gt;&gt;::value</span><br><span class="line">			&gt;</span><br><span class="line">		&gt; <span class="keyword">explicit</span> Person(T&amp;&amp; n);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>好了代码非常漂亮，也非常有非常高的效率。这种方法可以应用到重载无法避免的情况下。</p>
+<h1 id="权衡"><a href="#权衡" class="headerlink" title="权衡"></a>权衡</h1><p>前三种方法都是使用指定参数类型的函数，后两种方法使用了完美转发，因此可以不指定参数类型。<br>因为完美转发避免了用于转换到指定的参数类型的临时变量，所以它使程序更高效。比如在上面Person类的构造函数中，我们使用了完美转移使得字面的“Nancy”直到构造新对象的std::string时才构造一个std::string。</p>
+<p>但是完美转发有它的不足。第一，有一些参数不可以使用完美转发，即使它们可以被传递到指定类型的函数中；第二，在错误信息的可理解度上。当传过去一个不可用的参数时，编译器可能生成一个很难理解的错误信息。我们可以static_assert来自定义错误信息，当然还是要结合std::is_constructible。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;</span><br><span class="line">			<span class="keyword">typename</span> T,</span><br><span class="line">			<span class="keyword">typename</span> = <span class="built_in">std</span>::<span class="keyword">enable_if_t</span>&lt;</span><br><span class="line">				!<span class="built_in">std</span>::is_base_of&lt;Person, <span class="built_in">std</span>::<span class="keyword">decay_t</span>&lt;T&gt; &gt;::value</span><br><span class="line">				&amp;&amp; !<span class="built_in">std</span>::is_integral&lt;<span class="built_in">std</span>::remove_reference&lt;T&gt;&gt;::value</span><br><span class="line">			&gt;</span><br><span class="line">		&gt; <span class="keyword">explicit</span> Person(T&amp;&amp; n) : name(<span class="built_in">std</span>::forward&lt;T&gt;(n))</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">static_assert</span>(</span><br><span class="line">				<span class="built_in">std</span>::is_constructible&lt;<span class="built_in">std</span>::<span class="built_in">string</span>, T&gt;::value,</span><br><span class="line">				<span class="string">"Parameter n cannot be used to construct a std::string"</span></span><br><span class="line">			);</span><br><span class="line"></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">Person <span class="title">p</span><span class="params">(<span class="string">u"Jackson"</span>)</span></span>; <span class="comment">// char16_t</span></span><br></pre></td></tr></table></figure><br>static_assert在发现T类型不可以作为参数构造std::string时，会显示阅读良好的消息。不过上面的构造函数会因为初始化列表中name的初始化导致错误，也就是会导致static_assert的错误出现在大量的原本的错误之后。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><ul>
+<li>避免全体引用和其重载结合的方法包括使用不同的函数名、传递const类型的左值引用、传递值和使用转发标记方法。</li>
+<li>通过std::enable_if限制模板时，可以同时使用全体引用和其重载。但是这个方法控制了编译器使用选择引用重载函数的条件。</li>
+<li>全体引用参数通常有更高效的好处，但是通常在可使用性上有劣势。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/10/22/%E9%81%BF%E5%85%8D%E9%87%8D%E8%BD%BD%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E4%B8%BA%E5%8F%82%E6%95%B0%E7%9A%84%E5%87%BD%E6%95%B0/" rel="prev" title="避免重载全体引用为参数的函数">
+      <i class="fa fa-chevron-left"></i> 避免重载全体引用为参数的函数
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/10/28/%E7%90%86%E8%A7%A3%E5%BC%95%E7%94%A8%E6%8A%98%E5%8F%A0/" rel="next" title="理解引用折叠">
+      理解引用折叠 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#禁止重载"><span class="nav-number">1.</span> <span class="nav-text">禁止重载</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#通过const-T-amp-传递"><span class="nav-number">2.</span> <span class="nav-text">通过const T&amp;传递</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#通过值传递"><span class="nav-number">3.</span> <span class="nav-text">通过值传递</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用传递标记"><span class="nav-number">4.</span> <span class="nav-text">使用传递标记</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#在使用全体引用的模板上加限制"><span class="nav-number">5.</span> <span class="nav-text">在使用全体引用的模板上加限制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#权衡"><span class="nav-number">6.</span> <span class="nav-text">权衡</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">43</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

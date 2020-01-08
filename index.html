@@ -275,6 +275,268 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/30/%E8%A6%81%E5%81%87%E8%AE%BE%E7%A7%BB%E5%8A%A8%E6%93%8D%E4%BD%9C%E6%98%AF%E4%B8%8D%E5%AD%98%E5%9C%A8%E7%9A%84%E3%80%81%E9%AB%98%E4%BB%A3%E4%BB%B7%E7%9A%84%E4%BB%A5%E5%8F%8A%E6%B2%A1%E6%9C%89%E8%A2%AB%E4%BD%BF%E7%94%A8%E7%9A%84/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/10/30/%E8%A6%81%E5%81%87%E8%AE%BE%E7%A7%BB%E5%8A%A8%E6%93%8D%E4%BD%9C%E6%98%AF%E4%B8%8D%E5%AD%98%E5%9C%A8%E7%9A%84%E3%80%81%E9%AB%98%E4%BB%A3%E4%BB%B7%E7%9A%84%E4%BB%A5%E5%8F%8A%E6%B2%A1%E6%9C%89%E8%A2%AB%E4%BD%BF%E7%94%A8%E7%9A%84/" class="post-title-link" itemprop="url">要假设移动操作是不存在的、高代价的以及没有被使用的</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-10-30 14:26:30" itemprop="dateCreated datePublished" datetime="2018-10-30T14:26:30+08:00">2018-10-30</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-08 23:46:02" itemprop="dateModified" datetime="2020-01-08T23:46:02+08:00">2020-01-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>移动语义是C++11中的重要功能。移动操作有着和移动指针一样低的代价，对于临时对象的复制操作很高效，以致于临时对象的复制成为了一种优化级别的操作。移动语义不光如此，它还要求编译器在合适情况下自动用移动替换复制。如果你将C++98代码使用C++11编译器编译，你很有可能会发现它运行得更快了。</p>
+<p>让我们先从许多不支持移动语义的类型开始。C++11标准库重构了C++98的标准库，为移动操作比复制操作快的类型添加了移动操作，并且为库内的组件补全了需要的操作。如果你没有为使用C++11而修改任何代码，这时使用支持移动操作C++编译器就变得有益了，因为C++11编译器会在缺少移动操作的类里自动生成移动操作，但是编译器只会在没有定义复制操作、移动操作和析构函数的类中这么去做，数据成员或者基类禁用了移动操作的类也将会禁止编译器自动生成移动操作。因此对于那些没有明确支持移动和没有使用编译器自动生成的移动操作的类型，我们不应该相信对其使用C++11编译器会相较C++98有怎么样的提升。<br>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/10/30/%E8%A6%81%E5%81%87%E8%AE%BE%E7%A7%BB%E5%8A%A8%E6%93%8D%E4%BD%9C%E6%98%AF%E4%B8%8D%E5%AD%98%E5%9C%A8%E7%9A%84%E3%80%81%E9%AB%98%E4%BB%A3%E4%BB%B7%E7%9A%84%E4%BB%A5%E5%8F%8A%E6%B2%A1%E6%9C%89%E8%A2%AB%E4%BD%BF%E7%94%A8%E7%9A%84/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/28/%E7%90%86%E8%A7%A3%E5%BC%95%E7%94%A8%E6%8A%98%E5%8F%A0/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/10/28/%E7%90%86%E8%A7%A3%E5%BC%95%E7%94%A8%E6%8A%98%E5%8F%A0/" class="post-title-link" itemprop="url">理解引用折叠</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-10-28 23:00:53" itemprop="dateCreated datePublished" datetime="2018-10-28T23:00:53+08:00">2018-10-28</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-08 23:48:00" itemprop="dateModified" datetime="2020-01-08T23:48:00+08:00">2020-01-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>之前我们讲过，模板函数的参数如果为全体引用，那么实参的引用类型取决于实参是左值还是右值。例如下面的代码:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">func</span><span class="params">(T&amp;&amp; param)</span></span>;</span><br></pre></td></tr></table></figure><br>模板参数类型T被编码为什么类型取决于实参是左值还是右值。当左值作为实参，那么T将会被推断为左值引用；当右值作为实参，那么T将会被推断为非引用。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Widget <span class="title">widgetFactory</span><span class="params">()</span></span>; <span class="comment">// 函数返回了一个右值</span></span><br><span class="line"></span><br><span class="line">Widget w; <span class="comment">// 一个左值</span></span><br><span class="line"></span><br><span class="line">func(w); <span class="comment">// 使用了左值作为实参，T被推断为Widget&amp;</span></span><br><span class="line"></span><br><span class="line">func(widgetFactory()); <span class="comment">// 使用右值作为了实参，T被推断为Widget</span></span><br></pre></td></tr></table></figure><br>对于func的两个调用，都是传递了Widget，但是因为其中一个Widget是左值，另一个是右值，T被推断为了不同的类型了。这个也决定了全体引用被推断为左值引用还是右值引用，而且这也是std::forward的依赖机制。<br>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/10/28/%E7%90%86%E8%A7%A3%E5%BC%95%E7%94%A8%E6%8A%98%E5%8F%A0/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/25/%E9%87%8D%E8%BD%BD%E5%8F%82%E6%95%B0%E4%B8%BA%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E7%9A%84%E5%87%BD%E6%95%B0%E7%9A%84%E6%9B%BF%E4%BB%A3%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/10/25/%E9%87%8D%E8%BD%BD%E5%8F%82%E6%95%B0%E4%B8%BA%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E7%9A%84%E5%87%BD%E6%95%B0%E7%9A%84%E6%9B%BF%E4%BB%A3%E6%96%B9%E6%B3%95/" class="post-title-link" itemprop="url">重载参数为全体引用的函数的替代方法</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-10-25 21:39:35" itemprop="dateCreated datePublished" datetime="2018-10-25T21:39:35+08:00">2018-10-25</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-08 18:14:46" itemprop="dateModified" datetime="2020-01-08T18:14:46+08:00">2020-01-08</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在之前(<a href="/2018/10/22/避免重载全体引用为参数的函数/">避免重载全体引用为参数的函数</a>)我们说到要尽量避免重载参数为全体引用的函数。但是又讲到，重载全体引用为参数的函数有时可以给我们带来很多好处，例如当函数需要转发大量的参数时。所以这一章节我们讲解几种能让程序达到我们满意效果的几种方法，本质就是避免重载全体引用为参数的函数，或者应用参数类型匹配限制。<br>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/10/25/%E9%87%8D%E8%BD%BD%E5%8F%82%E6%95%B0%E4%B8%BA%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E7%9A%84%E5%87%BD%E6%95%B0%E7%9A%84%E6%9B%BF%E4%BB%A3%E6%96%B9%E6%B3%95/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
     <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/22/%E9%81%BF%E5%85%8D%E9%87%8D%E8%BD%BD%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E4%B8%BA%E5%8F%82%E6%95%B0%E7%9A%84%E5%87%BD%E6%95%B0/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -306,7 +568,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-07 23:35:31" itemprop="dateModified" datetime="2020-01-07T23:35:31+08:00">2020-01-07</time>
+                <time title="Modified: 2020-01-08 23:48:52" itemprop="dateModified" datetime="2020-01-08T23:48:52+08:00">2020-01-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -337,20 +599,15 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>有这样一段代码用于在日志中记录当前的时间和日期，然后添加名字到整体的一个数据结构中:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">multiset</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; names;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">logAndAdd</span><span class="params">(<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; name)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> now = <span class="built_in">std</span>::chrono::system_clock::now();</span><br><span class="line">	</span><br><span class="line">	<span class="built_in">log</span>(now, <span class="string">"logAndAdd"</span>);</span><br><span class="line">	</span><br><span class="line">	names.emplace(name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>考虑如下的调用之后，你会发现代码的效率并不是很高:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="function"><span class="built_in">string</span> <span class="title">petName</span><span class="params">(<span class="string">"Darla"</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">logAddAdd(petName);</span><br><span class="line"></span><br><span class="line">logAndAdd(<span class="built_in">std</span>::<span class="built_in">string</span>(<span class="string">"Persephone"</span>));</span><br><span class="line"></span><br><span class="line">logAddAdd(<span class="string">"Patty Dog"</span>);</span><br></pre></td></tr></table></figure><br>在第一个调用中，petName被绑定到了引用参数name。在logAndAdd中，name被赋值给了names.emplace函数。因为name是左值，所以name被复制到了names里。这个复制是没有办法避免的，因为name是一个左值引用。<br>在第二个调用中，参数name绑定到了由“Persephone”显式构造的std::string上，这是一个右值。name本身是一个左值，所以被复制到了names中。但是理论上我们可以感觉到，这个name可以移动到names中，因为name引用的是一个右值。<br>在第三个调用中，参数name绑定了一个右值，但是这一次的std::string是隐式从“Patty Dog”构造的。然后就和第二次调用一样，把name复制到names中。因为这一次使用的是直接使用字面的字符串，所以没有必要创造这个临时的std::string，而是应该将这个字面的字符串直接传给emplace函数来构造一个std::string。所以在第三种调用中完全没有必要使用任何的复制和移动std::string的操作。</p>
-<p>为了提高上述代码的效率，我们可以使用下面这个使用了全体引用的代码:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="keyword">void</span> <span class="title">logAndAdd</span><span class="params">(T&amp;&amp; name)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> now = <span class="built_in">std</span>::chrono::system_clock::now();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">log</span>(now, <span class="string">"logAndAdd"</span>); names.emplace(<span class="built_in">std</span>::forward&lt;T&gt;(name));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="function"><span class="built_in">string</span> <span class="title">petName</span><span class="params">(<span class="string">"Darla"</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">logAddAdd(petName);</span><br><span class="line"></span><br><span class="line">logAndAdd(<span class="built_in">std</span>::<span class="built_in">string</span>(<span class="string">"Persephone"</span>));</span><br><span class="line"></span><br><span class="line">logAddAdd(<span class="string">"Patty Dog"</span>);</span><br></pre></td></tr></table></figure><br>效率可以得到提升。</p>
-<p>如果这时候重载一个方法可以用id来代替name进行logAndAdd，并且这个id是int类型的，这时候我们如果对logAndAdd函数进行重载，那么就应该是这样的:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="function"><span class="built_in">string</span> <span class="title">nameFormIdx</span><span class="params">(<span class="keyword">int</span> idx)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">logAndAdd</span><span class="params">(<span class="keyword">int</span> idx)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> now = <span class="built_in">std</span>::chrono::system_clock::now();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">log</span>(now, <span class="string">"logAndAdd"</span>);</span><br><span class="line"></span><br><span class="line">	names.emplace(nameFromIdx(idx));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="function"><span class="built_in">string</span> <span class="title">petName</span><span class="params">(<span class="string">"Darla"</span>)</span></span>; <span class="comment">//下面三个都调用了logAndAdd(T&amp;&amp;)</span></span><br><span class="line"></span><br><span class="line">logAddAdd(petName);</span><br><span class="line"></span><br><span class="line">logAndAdd(<span class="built_in">std</span>::<span class="built_in">string</span>(<span class="string">"Persephone"</span>));</span><br><span class="line"></span><br><span class="line">logAddAdd(<span class="string">"Patty Dog"</span>);</span><br><span class="line"></span><br><span class="line">logAndAdd(<span class="number">22</span>); <span class="comment">// 调用了logAndAdd(int)</span></span><br></pre></td></tr></table></figure><br>其实这是有问题的。假设有如下的调用:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">short nameIdx;</span><br><span class="line"></span><br><span class="line">logAndAdd(nameIdx); <span class="comment">// 出错！</span></span><br></pre></td></tr></table></figure><br>我们来分析下为什么会出错。首先由两个重载函数，其中一个的参数是全体引用，这个函数的T可以被推导为short。因此编译器就使用这个全体引用为参数的函数，因为它匹配得更加精准了。而int为参数的函数因为short要匹配上它还需要进行到更大范围的类型的转换，因此优先使用精准匹配那个，也就是logAndAdd(T&amp;&amp;)了。但是在这个函数中，name被std::forward到了emplace函数当中，因此在这时，就会执行std::string类型的构造函数，并且参数为short。因为std::string没有这样的构造函数，所以编译失败。这个错误的根源是全体引用为参数的函数因为自动推导是的模板函数变成比其它重载函数有更加准确的类型的参数的函数。参数类型是全体引用的函数是C++中最贪心的函数。它们会推导生成参数类型和实际调用的参数相同的函数。这个导致了重载参数是全体引用的函数是一个不明智的选择。</p>
-<p>特别是使用完美转发构造函数(perfect forwarding constructor)时最容易栽进这样的坑里。想想一个Person类，拥有几个构造函数来替代一个只能使用std::string或者index的构造函数:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="comment">// 完美转发构造函数</span></span><br><span class="line">		<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">			explicit Person(T&amp;&amp; n) : name(std::forward&lt;T&gt;(n))&#123; &#125;</span><br><span class="line"></span><br><span class="line">		explicit Persion(int idx) : name(nameFromIdx(idx))&#123; &#125; </span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>不过还是和前面一样，如上代码中如果传递给logAndAdd是一个整数类型或者其它数字类型，还是调用全体引用函数，从而编译失败。但是更糟糕的是，这里还有很多看不到的编译器自动生成的重载函数。</p>
-<p>在前面(<a href="/2018/10/03/理解C++11中特别成员函数的生成/">理解C++11中特别成员函数的生成</a>)讲过，在合适的情况下，编译器将会生成复制和移动构造函数，并且在有模板函数能生成复制或者移动构造函数时仍然会生成。如果Person类的复制构造函数和移动构造函数生成了，Person类将会看上去更加高效:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">			<span class="function"><span class="keyword">explicit</span> <span class="title">Person</span><span class="params">(T&amp;&amp; n)</span> <span class="comment">// 完美转发构造函数</span></span></span><br><span class="line">			:name(std::forward&lt;T&gt;(n))&#123; &#125;</span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">explicit</span> <span class="title">Persion</span><span class="params">(<span class="keyword">int</span> idx)</span></span>; <span class="comment">// int为参数的构造函数 </span></span><br><span class="line">		Person(<span class="keyword">const</span> Person&amp; rhs); <span class="comment">// 编译器自动生成的复制构造函数</span></span><br><span class="line">		Person(Person&amp;&amp; rhs); <span class="comment">// 编译器自动生成的移动构造函数</span></span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>如果这样调用:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Person <span class="title">p</span><span class="params">(<span class="string">"Nancy"</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">cloneOfP</span><span class="params">(p)</span></span>; <span class="comment">// 根据p复制新的Person对象，但这不会编译成功</span></span><br></pre></td></tr></table></figure><br>这里我们尝试根据一个Person对象生成另一个Person对象。但是代码不会调用复制构造函数，而是调用完美转发函数。这个函数尝试使用Person对象创建Person中的std::string成员变量，也就是name。因为不存在从Person到std::string的转换方法，因此编译器报错。<br>为什么会出现这样的问题呢？因为这是C++规则规定：<strong>cloneOfP为非const类型的左值，因此这就意味着模板构造函数可以生成一个非const左值为参数的Person构造函数。</strong>也就是Person看上去是这个样子的:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		explicit Person(Person&amp; n) : name(std::forward&lt;Person&amp;&gt;(n));</span><br><span class="line">		<span class="function"><span class="keyword">explicit</span> <span class="title">Persion</span><span class="params">(<span class="keyword">int</span> idx)</span></span>;</span><br><span class="line">		Person(<span class="keyword">const</span> Person&amp; rhs);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function">Person <span class="title">p</span><span class="params">(<span class="string">"Nancy"</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">cloneOfP</span><span class="params">(p)</span></span>;</span><br></pre></td></tr></table></figure><br><strong>cloneOfP可能传给复制构造函数或者模板生成的函数。而调用复制构造函数则需要p为const类型的，而模板生成的函数则没有这个要求，所以编译器选择了模板生成的完美转发函数。</strong></p>
-<p>当然我们还可以给p一个const属性:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">explicit</span> <span class="title">Person</span><span class="params">(<span class="keyword">const</span> Person&amp; n)</span></span>;</span><br><span class="line">		Person(<span class="keyword">const</span> Person&amp; rhs);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">const</span> Person <span class="title">cp</span><span class="params">(<span class="string">"Nancy"</span>)</span></span>;</span><br><span class="line"><span class="function"><span class="keyword">auto</span> <span class="title">cloneOfP</span><span class="params">(cp)</span></span>; <span class="comment">// 此时就会调用复制构造函数</span></span><br></pre></td></tr></table></figure><br>因为p现在是const类型的，根据选取最佳参数匹配函数的原则应该选参数为const Person&amp;的构造函数。但这时候有两个这样的构造函数，根据C++的规则，我们优先选择非模板生成的函数，也就是选择复制构造函数。</p>
-<p>完美转发构造函数和编译器自动生成的复制移动函数经常会导致一系列问题，尤其在继承时。例如在继承类初始化时，复制或移动会导致一些你意想不到的问题:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SpecialPerson</span> :</span> <span class="keyword">public</span> Person</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		SpecialPerson(<span class="keyword">const</span> SpecialPerson&amp; rhs) :Person(rhs) &#123; &#125;</span><br><span class="line">		SpecialPerson(SpecialPerson&amp;&amp; rhs) :Person(<span class="built_in">std</span>::<span class="built_in">move</span>(rhs)) &#123; &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>在上面代码中继承类构造时指定基类的构造方式，并且使用继承类的对象作为基类的构造参数。这种情况下，继承类的复制和移动操作不调用基类的任何移动或者复制构造函数。它们调用的是基类的完美转发构造函数。因为继承类传给基类的是SpecialPerson类型的对象，而基类的不是模板的构造函数都是以Person作为参数类型的。完美转发函数的模板会生成一个完美匹配参数的函数，所以完美转发函数得到调用。</p>
-<p>根据上面的讲述，应该可以理解为什么要避免重载全体引用为参数的函数。如果重载参数为全体引用的函数是一个错误的做法，对于需要转发大量参数类型的函数时你该怎么做呢？对于重载参数为全体引用的函数你可以尽量避免，但当无法避免时我们有什么技巧可以使得程序既不会出现上面的问题，又可以达到转发大量参数类型的目的？请参看下一章：<a href="/2018/10/25/重载参数为全体引用的函数的替代方法/">重载参数为全体引用的函数的替代方法</a>。</p>
-<p><strong>总结</strong></p>
-<ul>
-<li>重载参数为全体引用的函数可能会导致重载发生的次数超乎你想象，因为模板函数的参数类型推测结果可能精准匹配你的实参。</li>
-<li>完美转发函数尤其可能会导致问题。因为它可以更完美地生成适合非const左值的复制函数，并且可能会劫持继承类调用父类的复制或移动构造函数。</li>
-</ul>
-
+          <p>有这样一段代码用于在日志中记录当前的时间和日期，然后添加名字到整体的一个数据结构中:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">multiset</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; names;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">logAndAdd</span><span class="params">(<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; name)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">auto</span> now = <span class="built_in">std</span>::chrono::system_clock::now();</span><br><span class="line">	</span><br><span class="line">	<span class="built_in">log</span>(now, <span class="string">"logAndAdd"</span>);</span><br><span class="line">	</span><br><span class="line">	names.emplace(name);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>考虑如下的调用之后，你会发现代码的效率并不是很高:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="function"><span class="built_in">string</span> <span class="title">petName</span><span class="params">(<span class="string">"Darla"</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">logAddAdd(petName);</span><br><span class="line"></span><br><span class="line">logAndAdd(<span class="built_in">std</span>::<span class="built_in">string</span>(<span class="string">"Persephone"</span>));</span><br><span class="line"></span><br><span class="line">logAddAdd(<span class="string">"Patty Dog"</span>);</span><br></pre></td></tr></table></figure><br>在第一个调用中，petName被绑定到了引用参数name。在logAndAdd中，name被赋值给了names.emplace函数。因为name是左值，所以name被复制到了names里。这个复制是没有办法避免的，因为name是一个左值引用。<br>在第二个调用中，参数name绑定到了由“Persephone”显式构造的std::string上，这是一个右值。name本身是一个左值，所以被复制到了names中。但是理论上我们可以感觉到，这个name可以移动到names中，因为name引用的是一个右值。<br>在第三个调用中，参数name绑定了一个右值，但是这一次的std::string是隐式从“Patty Dog”构造的。然后就和第二次调用一样，把name复制到names中。因为这一次使用的是直接使用字面的字符串，所以没有必要创造这个临时的std::string，而是应该将这个字面的字符串直接传给emplace函数来构造一个std::string。所以在第三种调用中完全没有必要使用任何的复制和移动std::string的操作。<br>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/10/22/%E9%81%BF%E5%85%8D%E9%87%8D%E8%BD%BD%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E4%B8%BA%E5%8F%82%E6%95%B0%E7%9A%84%E5%87%BD%E6%95%B0/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -400,7 +657,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-07 22:24:42" itemprop="dateModified" datetime="2020-01-07T22:24:42+08:00">2020-01-07</time>
+                <time title="Modified: 2020-01-08 20:45:54" itemprop="dateModified" datetime="2020-01-08T20:45:54+08:00">2020-01-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -431,7 +688,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <p>右值引用只会绑定到将要被移动的对象上。对于一个右值引用的参数，可以肯定被引用的对象是要被移动过来的:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		Widget(Widget&amp;&amp; rhs);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>如上面的代码中，你可能想要传递对象给函数调用，为了利用右值的优势你就想要用移动操作。为了你想实现上面的功能，你就需要将绑定的对象转换成右值形式。我们使用std::move来完成这项工作:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		Widget(Widget&amp;&amp; rhs) : name(<span class="built_in">std</span>::<span class="built_in">move</span>(rhs.name)), p(<span class="built_in">std</span>::<span class="built_in">move</span>(rhs.p)) &#123; &#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;SomeDataStructure&gt; p;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>另外，一个全体引用可能被绑定到一个可移动的对象。当右值绑定到全体引用时，全体引用就成了一个右值应用，这时应该使用std::forward:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="keyword">void</span> <span class="title">setName</span><span class="params">(T&amp;&amp; newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			name = <span class="built_in">std</span>::forward&lt;T&gt;(newName);</span><br><span class="line">		&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>上面的两种情况说明：右值引用的变量通过std::move转发，而全体引用使用的右值通过std::forward转发。<br>
+          <p>右值引用只会绑定到将要被移动的对象上。对于一个右值引用的参数，可以肯定被引用的对象是要被移动过来的:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		Widget(Widget&amp;&amp; rhs);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>如上面的代码中，你可能想要传递对象给函数调用，为了利用右值的优势你就想要用移动操作。为了你想实现上面的功能，你就需要将绑定的对象转换成右值形式。我们使用std::move来完成这项工作:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		Widget(Widget&amp;&amp; rhs) : name(<span class="built_in">std</span>::<span class="built_in">move</span>(rhs.name)), p(<span class="built_in">std</span>::<span class="built_in">move</span>(rhs.p)) &#123; &#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> name;</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;SomeDataStructure&gt; p;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>另外，一个全体引用可能被绑定到一个可移动的对象。当右值绑定到全体引用时，全体引用就成了一个右值引用，这时应该使用std::forward:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="keyword">void</span> <span class="title">setName</span><span class="params">(T&amp;&amp; newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			name = <span class="built_in">std</span>::forward&lt;T&gt;(newName);</span><br><span class="line">		&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>上面的两种情况说明：右值引用的变量通过std::move转发，而全体引用使用的右值通过std::forward转发。<br>
           <!--noindex-->
             <div class="post-button">
               <a class="btn" href="/2018/10/21/%E5%AF%B9%E4%BA%8E%E5%B7%A6%E5%80%BC%E5%BC%95%E7%94%A8%E4%BD%BF%E7%94%A8std_move%EF%BC%8C%E5%AF%B9%E4%BA%8E%E5%85%A8%E4%BD%93%E5%BC%95%E7%94%A8%E4%BD%BF%E7%94%A8std_forward/#more" rel="contents">
@@ -578,7 +835,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-07 18:10:45" itemprop="dateModified" datetime="2020-01-07T18:10:45+08:00">2020-01-07</time>
+                <time title="Modified: 2020-01-08 20:55:44" itemprop="dateModified" datetime="2020-01-08T20:55:44+08:00">2020-01-08</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -810,272 +1067,11 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
-    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/09/shared_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="CrazySpy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="CrazySpy's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/10/09/shared_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">shared_ptr的使用</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-10-09 21:57:23" itemprop="dateCreated datePublished" datetime="2018-10-09T21:57:23+08:00">2018-10-09</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-02 18:00:22" itemprop="dateModified" datetime="2020-01-02T18:00:22+08:00">2020-01-02</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>前面讲到过unique_ptr的使用，它对指向的对象是有拥有权的，也就是说，unique_ptr被销毁，那么指向的对象也销毁，并且指向的对象不可共享。但是有时候我们需要对指向的对象进行共享，这时候就要用到C++11中另外一个智能指针—shared_ptr了。<br>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/10/09/shared_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
-    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/07/unique_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="CrazySpy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="CrazySpy's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/10/07/unique_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">unique_ptr的使用</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-10-07 15:45:04" itemprop="dateCreated datePublished" datetime="2018-10-07T15:45:04+08:00">2018-10-07</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-12-27 17:06:53" itemprop="dateModified" datetime="2019-12-27T17:06:53+08:00">2019-12-27</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-                  , 
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
-                    <span itemprop="name">Effective Modern C++</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>在C++11中，智能指针特性中有一个最方便使用的指针:unique_ptr。这个指针的作用就是用来表示指针对某个对象的拥有权。也就是这个智能指针对象的存亡是和指向对象的存亡是捆绑的。因为这个指针是拥有指向的对象的，当智能指针销毁了，那么它指向的对象也销毁。用户因此也不用考虑动态构造的对象的销毁问题，智能指针已经帮我们包办了。<br>又因为unique_ptr是对于一个对象有拥有权，所以它是没有办法复制的，只能通过移动的方式传递。当一个智能指针将指向的对象移动给另一个智能指针，那么原只能指针就指向了nullptr了。<br>另外，这个unique_ptr，它的大小和传统指针是一样的。它是传统指针的一个包装类(wrapper)，所以它很小巧的。<br>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/10/07/unique_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
-    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/03/%E7%90%86%E8%A7%A3C++11%E4%B8%AD%E7%89%B9%E5%88%AB%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E7%9A%84%E7%94%9F%E6%88%90/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="CrazySpy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="CrazySpy's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/10/03/%E7%90%86%E8%A7%A3C++11%E4%B8%AD%E7%89%B9%E5%88%AB%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E7%9A%84%E7%94%9F%E6%88%90/" class="post-title-link" itemprop="url">理解C++11中特别成员函数的生成</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-10-03 23:13:55" itemprop="dateCreated datePublished" datetime="2018-10-03T23:13:55+08:00">2018-10-03</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-12-27 16:03:31" itemprop="dateModified" datetime="2019-12-27T16:03:31+08:00">2019-12-27</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-                  , 
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
-                    <span itemprop="name">Effective Modern C++</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>特别成员函数指的是类中可能会默认生成的函数。在C++98中，它们分别是默认构造函数、默认析构函数、复制操作。C++11添加了重要新特性—移动，所以在C++11中还新添加了移动操作。这几个特别成员函数中，复制操作和移动操作又分成复制构造函数(constructor)、复制等号操作符(assignmeng operator)和移动构造函数、移动等号操作符。<br>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/10/03/%E7%90%86%E8%A7%A3C++11%E4%B8%AD%E7%89%B9%E5%88%AB%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E7%9A%84%E7%94%9F%E6%88%90/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -1141,7 +1137,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">40</span>
+          <span class="site-state-item-count">43</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
