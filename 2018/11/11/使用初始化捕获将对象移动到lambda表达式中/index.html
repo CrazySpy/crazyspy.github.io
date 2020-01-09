@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="有时，你既不想使用按值捕获，也不想使用按址捕获。例如：你有一个只可以移动的对象（std::unique_ptr或者std::future等），你想把它移动进lambda表达式中，C++11中没有办法实现这些，而如果复制这些对象又需要大量的消耗，移动显然是最佳选择。虽然C++14中支持直接将对象移动到表达式中，可是C++11没有办法实现，这时应该怎么办？">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用初始化捕获将对象移动到lambda表达式中">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/11/11/%E4%BD%BF%E7%94%A8%E5%88%9D%E5%A7%8B%E5%8C%96%E6%8D%95%E8%8E%B7%E5%B0%86%E5%AF%B9%E8%B1%A1%E7%A7%BB%E5%8A%A8%E5%88%B0lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%B8%AD/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="有时，你既不想使用按值捕获，也不想使用按址捕获。例如：你有一个只可以移动的对象（std::unique_ptr或者std::future等），你想把它移动进lambda表达式中，C++11中没有办法实现这些，而如果复制这些对象又需要大量的消耗，移动显然是最佳选择。虽然C++14中支持直接将对象移动到表达式中，可是C++11没有办法实现，这时应该怎么办？">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-11-11T13:49:04.000Z">
+<meta property="article:modified_time" content="2020-01-09T16:34:14.355Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/11/11/%E4%BD%BF%E7%94%A8%E5%88%9D%E5%A7%8B%E5%8C%96%E6%8D%95%E8%8E%B7%E5%B0%86%E5%AF%B9%E8%B1%A1%E7%A7%BB%E5%8A%A8%E5%88%B0lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%B8%AD/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>使用初始化捕获将对象移动到lambda表达式中 | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/11/11/%E4%BD%BF%E7%94%A8%E5%88%9D%E5%A7%8B%E5%8C%96%E6%8D%95%E8%8E%B7%E5%B0%86%E5%AF%B9%E8%B1%A1%E7%A7%BB%E5%8A%A8%E5%88%B0lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%B8%AD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          使用初始化捕获将对象移动到lambda表达式中
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-11-11 21:49:04" itemprop="dateCreated datePublished" datetime="2018-11-11T21:49:04+08:00">2018-11-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-10 00:34:14" itemprop="dateModified" datetime="2020-01-10T00:34:14+08:00">2020-01-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>有时，你既不想使用按值捕获，也不想使用按址捕获。例如：你有一个只可以移动的对象（std::unique_ptr或者std::future等），你想把它移动进lambda表达式中，C++11中没有办法实现这些，而如果复制这些对象又需要大量的消耗，移动显然是最佳选择。虽然C++14中支持直接将对象移动到表达式中，可是C++11没有办法实现，这时应该怎么办？<br><a id="more"></a><br>缺少移动捕获一直被认为是C++11的短板。这个短板在C++14中得到了弥补，但是C++标准委员会选择了其它的方法。在C++14中，引入了一个新的、更灵活的捕获机制，这个新的机制不光只有移动捕获，它被被称为<strong>初始化捕获(init capture)</strong>。除了默认捕获模式捕获，C++11中其它可以做的事情，初始化捕获都可以做到，而且还可以做更多。对于默认模式捕获在之前我们说过，我们应该尽量不使用默认捕获模式（请参看：<a href="/2018/11/09/避免使用lambda的默认捕获模式/">避免使用lambda的默认捕获模式</a>）。</p>
+<p>使用初始化捕获，你需要指定两个东西:</p>
+<ul>
+<li>在lambda中的数据成员的名称。</li>
+<li>用于初始化lambda中数据成员的表达式。</li>
+</ul>
+<p>下面举例如何通过初始化捕获移动一个std::unique_ptr到一个lambda表达式中:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">bool</span> <span class="title">isValidated</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line">		<span class="function"><span class="keyword">bool</span> <span class="title">isProcessed</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line">		<span class="function"><span class="keyword">bool</span> <span class="title">isArchived</span><span class="params">()</span> <span class="keyword">const</span></span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> pw = <span class="built_in">std</span>::make_unique&lt;Widget&gt;(); <span class="comment">// 使用std::make_unique创建一个Widget</span></span><br><span class="line"></span><br><span class="line">… <span class="comment">// 配置pw指针</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> func = [pw = <span class="built_in">std</span>::<span class="built_in">move</span>(pw)] <span class="comment">// 注意没有写参数的括号</span></span><br><span class="line">&#123; </span><br><span class="line">	<span class="keyword">return</span> pw-&gt;isValidated() &amp;&amp; pw-&gt;isArchived();</span><br><span class="line">&#125;;</span><br><span class="line">```    </span><br><span class="line"></span><br><span class="line">上面代码中“pw = <span class="built_in">std</span>::<span class="built_in">move</span>(pw)”部分就是初始化捕获。等号左侧是表达式中数据成员的名称，这个是由你自由决定的。等号右侧是初始化表达式，用于初始化数据成员。等号左右两侧的作用域是不同的，左侧的作用域在lambda表达式中，而右侧的作用域在表达式定义的区域。在上面的例子中，等号左侧的pw指的是lambda中的数据成员，而右侧则是在lambda表达式上方定义的pw。因此“pw = <span class="built_in">std</span>::<span class="built_in">move</span>(pw)”意味着在lambda中创建一个数据成员pw，并且用<span class="built_in">std</span>::<span class="built_in">move</span>一个本地变量的pw以初始化这个数据成员。</span><br><span class="line"></span><br><span class="line">在lambda代码块中使用的pw就是lambda的数据成员。注释中的“配置pw指针”的意思就是在Widget通过<span class="built_in">std</span>::make\_unique创建之后，在<span class="built_in">std</span>::unique\_ptr被lambda捕获之前，这个Widget对象可以用任意方式修改。如果不需要配置这个Widget对象，也就是这个Widget在被使用<span class="built_in">std</span>::make\_unique创建之前的状态就已经是适合被lambda捕捉的的状态了，这个本地变量pw就没有必要存在了，表达式可以写成这样:  </span><br><span class="line">```c++</span><br><span class="line"><span class="keyword">auto</span> func = [pw = <span class="built_in">std</span>::make_unique&lt;Widget&gt;()]</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> pw-&gt;isValidated() &amp;&amp; pw-&gt;isArchived();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>这个例子可以表明C++14的“捕获”是从C++11的“捕获”普遍化而来的，因为在C++11中，捕获一个表达式的结果是不可能的。因此，“初始化捕获”的另一个名字叫做普遍化的lambda捕获(generalized lambda capture)。</p>
+<p>但如果你的编译器缺乏对C++14的支持，这时该怎么实现初始化捕获的行为呢？你首先要记住，lambda表达式只是简单地生成了一个类和这个类的对象。没有什么是lambda能做而你不能用别的方式做到的。例如下面的一段C++14的代码:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">IsValAndArch</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">using</span> DataType = <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;Widget&gt;;</span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">explicit</span> <span class="title">IsValAndArch</span><span class="params">(DataType&amp;&amp; ptr)</span></span></span><br><span class="line">			:pw(std::move(ptr)) &#123;&#125;</span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">bool</span> <span class="title">operator</span><span class="params">()</span><span class="params">()</span> <span class="keyword">const</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			<span class="keyword">return</span> pw-&gt;isValidated() &amp;&amp; pw-&gt;isArchived();</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		DataType pw;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> func = IsValAndArch(<span class="built_in">std</span>::make_unique&lt;Widget&gt;());</span><br></pre></td></tr></table></figure></p>
+<p>这明显不如lambda表达式来得简洁，但是这可以很好地在C++中实现移动初始化其中的数据成员。</p>
+<p>如果你坚持想在C++11中使用lambda表达式，移动捕获可以使用下面的方式模拟：</p>
+<ul>
+<li>将要被移动捕获的对象通过std::bind变成函数对象以捕获  </li>
+<li>给lambda表达式一个指向要被捕获对象的引用</li>
+</ul>
+<p>如果你熟悉std::bind，代码就非常简单了。</p>
+<p>假设你想要创建一个本地的std::vector，然后向其中放入合适的值，并将其移动到lambda表达式中。在C++14中，代码很简单:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="keyword">double</span>&gt; data; <span class="comment">// 将要移动到lambda中的对象</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> func = [data = <span class="built_in">std</span>::<span class="built_in">move</span>(data)] <span class="comment">// C++14的初始化捕获</span></span><br><span class="line">&#123; <span class="comment">/* 使用data */</span> &#125;;</span><br></pre></td></tr></table></figure><br>等价的C++11代码（使用了std::bind）如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="keyword">double</span>&gt; data;</span><br><span class="line"><span class="keyword">auto</span> func = <span class="built_in">std</span>::bind(</span><br><span class="line">	[](<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="keyword">double</span>&gt;&amp; data) <span class="comment">// C++11中模拟使用初始化捕获</span></span><br><span class="line">	&#123; <span class="comment">/* 对data的使用 */</span> &#125;,</span><br><span class="line">	<span class="built_in">std</span>::<span class="built_in">move</span>(data)</span><br><span class="line">);</span><br></pre></td></tr></table></figure><br>和lambda表达式一样，std::bind生成了函数对象。我们这个有std::bind返回来的函数对象为绑定对象(bind object)。std::bind的第一个参数是一个可调用的对象，后面依次更正传给这个可调用对象的参数。</p>
+<p>一个绑定对象包含了所有传进std::bind参数的副本。对于每一个左值参数，在绑定对象中的相关参数被复制构造；对于每一个右值参数，它们会被移动构造。在这个例子中，第二个参数是一个右值（std::move的结果），因此data是被移动构造到绑定对象中去的。因为上述代码移动一个右值到绑定对象中，这个移动构造是模拟移动捕获的关键点，解决了C++11的lambda无法将右值移动到lambda表达式。</p>
+<p>当绑定对象是可调用的（例如定义了函数调用操作符），那么绑定对象存储的参数就被传给可调用对象。在上面的例子中，当func（绑定对象）被调用，func中移动构造的data的副本就作为一个参数传给了lambda。</p>
+<p>由std::bind绑定完的绑定对象就和C++14中的lambda一样，因为参数已经被添加到了模拟的移动捕获对象中了，所以除了绑定对象不需要参数data外没有不同之处。参数在绑定对象中是一个左值引用，引用了data的副本（尽管这个表达式初始化data是用右值“std::move(data)”初始化的，但是data副本本身是一个左值），lambda内部的data其实是data的副本。</p>
+<p>一般来说，由lambda生成的类的括号操作符（operator()）成员函数是const类型的，因此lambda的所有成员变量在lambda中均为const，是受到保护不可以被修改的。而在绑定对象中，移动构造的副本data不是const，std::bind返回的类型的括号操作符不是const的。如果lambda被定义成mutable，括号操作符（operator()）将不会被定义成const，这时就不会将lambda的成员变量定义成const了，因此在使用std::bind时使用mutable也是合理的:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> func = <span class="built_in">std</span>::bind(</span><br><span class="line">	[](<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="keyword">double</span>&gt;&amp; data) <span class="keyword">mutable</span></span><br><span class="line">	&#123; <span class="comment">/* 对data的使用 */</span> &#125;,</span><br><span class="line">	<span class="built_in">std</span>::<span class="built_in">move</span>(data)</span><br><span class="line">);</span><br></pre></td></tr></table></figure><br>因为绑定对象存储的是所有传递给std::bind的参数的副本。在我们的例子中，绑定对象包含了一个lambda表达式的副本，因此表达式的生命周期和绑定对象是一样的。这非常重要，因为这意味着只要表达式存在着，包含着模拟移动捕获的对象的绑定对象就也一定存在。</p>
+<p>如果这是你第一次接触到std::bind，你可能要纠结于C++11的语法，但是有几点你需要明确：</p>
+<ul>
+<li>C++11中无法使用初始化捕获的lambda，但是可以通过std::bind将属于移动到lambda中。</li>
+<li>在C++11中模仿移动捕获的步骤是：移动构造一个对象到绑定对象中，然后通过引用传递移动构造的对象到lambda表达式中。  因为绑定对象的生命周期和lambda表达式是一样的，所以可以把绑定对象的中的元素看成是在lambda中的。  </li>
+</ul>
+<p>再举一个std::bind模拟移动捕获的例子。例如对于C++14的代码:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> func = [pw = <span class="built_in">std</span>::make_unique&lt;Widget&gt;()]</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> pw-&gt;isValidated() &amp;&amp; pw-&gt;isArchived(); </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>用C++11中模拟:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> func = <span class="built_in">std</span>::bind(</span><br><span class="line">	[](<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;Widget&gt;&amp; pw)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">return</span> pw-&gt;isValidated() &amp;&amp; pw-&gt;isArchived();</span><br><span class="line">	&#125;,</span><br><span class="line">	<span class="built_in">std</span>::make_unique&lt;Widget&gt;()</span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+<p>当然上面的代码对于有经验的程序员是不会写出的，我这里只是展示在C++11lambda的限制下如何使用std::bind，因为之后我们说明，要使用lambda表达式替换std::bind。但是在C++11中std::bind还是非常有用的，不过在C++14中初始化捕获和auto类型参数已经淘汰了这些。</p>
+<p><strong>总结</strong></p>
+<ul>
+<li>使用C++14的初始化捕获以移动对象到lambda表达式中。  </li>
+<li>在C++11中们可以通过std::bind来模拟初始化捕获</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/11/06/%E5%87%A0%E4%B8%AA%E5%AE%8C%E7%BE%8E%E8%BD%AC%E5%8F%91%E5%A4%B1%E8%B4%A5%E7%9A%84%E6%9D%A1%E4%BB%B6/" rel="prev" title="几个完美转发失败的条件">
+      <i class="fa fa-chevron-left"></i> 几个完美转发失败的条件
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/02/18/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="next" title="正则表达式基础">
+      正则表达式基础 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">48</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

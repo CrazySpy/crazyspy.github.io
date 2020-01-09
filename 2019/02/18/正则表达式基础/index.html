@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="正则表达式在计算机的学习中是一项必不可少的环节。之前一直有一些接触，但是始终还是处于要用了查文档的阶段，没有系统的学习。这次就抽空系统学习正则表达式。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="正则表达式基础">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2019/02/18/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%80/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="正则表达式在计算机的学习中是一项必不可少的环节。之前一直有一些接触，但是始终还是处于要用了查文档的阶段，没有系统的学习。这次就抽空系统学习正则表达式。">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2019-02-17T16:19:32.000Z">
+<meta property="article:modified_time" content="2020-01-09T13:34:20.858Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2019/02/18/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%80/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>正则表达式基础 | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2019/02/18/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%80/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          正则表达式基础
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-02-18 00:19:32" itemprop="dateCreated datePublished" datetime="2019-02-18T00:19:32+08:00">2019-02-18</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-09 21:34:20" itemprop="dateModified" datetime="2020-01-09T21:34:20+08:00">2020-01-09</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/" itemprop="url" rel="index">
+                    <span itemprop="name">正则表达式</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>正则表达式在计算机的学习中是一项必不可少的环节。之前一直有一些接触，但是始终还是处于要用了查文档的阶段，没有系统的学习。这次就抽空系统学习正则表达式。<br><a id="more"></a></p>
+<h2 id="特殊字符"><a href="#特殊字符" class="headerlink" title="特殊字符"></a>特殊字符</h2><h3 id="文字字符"><a href="#文字字符" class="headerlink" title="文字字符"></a>文字字符</h3><p>所谓文字字符就是没有特殊意义的字符，它是相对于特殊字符，具体可以查看特殊字符部分。<strong>对于文字字符，匹配的结果是字符在目标字符串中第一次的出现。</strong></p>
+<p>例如：正则表达式_a_，它是一个文字字符。对于字符串_Bach is a man_，它会匹配第一个Bach中的a，而man中的a则不会进行匹配，因为它不是出现在第一个。</p>
+<p>同理对于正则表达式_dog_，对于字符串_Hot dog is not a dog_，它会匹配第一个Hot dog中的dog，而不会匹配a dog中的dog。</p>
+<h3 id="特殊字符-1"><a href="#特殊字符-1" class="headerlink" title="特殊字符"></a>特殊字符</h3><p>特殊字符就是指在正则中有特殊作用的字符，它就和C语言中的函数printf中的“%”一样。它的存在是为了让正则能更简洁地表达。</p>
+<p><strong>在正则表达式中，一共有12个特殊字符，它们也被_元字符_</strong>：</p>
+<p>反斜杠<strong>\</strong>、脱字号<strong>^</strong>、美元符号<strong>$</strong>、点<strong>.</strong>、垂直符号<strong>|</strong>、问号<strong>?</strong>、星号<strong>*</strong>、加号<strong>+</strong>、开括号<strong>(</strong>、闭括号<strong>)</strong>、开方括号<strong>[</strong>以及开花括号<strong>{</strong>。</p>
+<p>通常在单独使用这些元字符时是会发生错误的。但<strong>如果你只想使用这些特殊字符的字面含义的时候，你可以在它们之前加一个一个反斜杠\\。</strong></p>
+<p>例如：你想匹配1+1=2这个字符串，你就可以使用_1\+1=2_这个正则来完成。如果你没有这么做，那么就会得到一个错误提示。</p>
+<p>但是有一个例外。对于花括号，通常解析正则表达式时除非它是重复操作符的一部分，否则就会把它当成一个文字字符，例如：_a{1,5}_。不过还是建议使用反斜杠以区别，因为在Java等许多语言中还是会出现问题，它们不会像上面那样。</p>
+<p>同样的，对于闭方括号<strong>]</strong>，如果它在字符类外，那么它就是一个文字字符，但如果在字符类内，那么就会使用另一套规则。不过还是一样，推荐使用反斜杠区别文字字符和特殊字符的闭括号，因为在Ruby等语言中不会如上所做。</p>
+<p><strong>除了特殊字符外，其它字符请不要使用反斜杠\\，因为反斜杠也是一个特殊字符，它结合一个文字字符会有特殊含义，例如：\\d就是匹配单独0-9数字的缩写。</strong></p>
+<p><strong>我们还可以使用\\Q和\\E使特殊字符变成文字字符。</strong>例如：对于正则表达式_\\Q<em>\\d+</em>\\E_，它会匹配上字符串<em>\\d+</em>，也就是\\Q和\\E之间的部分全部解释成了文字字符。还有，就是\\E可以忽略，也就是正则_\\Q<em>\\d+</em>_和_\\Q<em>\\d+</em>\\E_是一样的，这在PHP、Java等中是支持在字符类内和外使用这种写法。</p>
+<p>另外还要注意，在编程时有时要分别注意反斜杠在编程语言和正则中的规则。例如对于正则表达式_1\+1=2_，在C语言中，如果你要使用一个字符串存储这个正则，那么你就要写成_1\\+1=2_。因为在C语言字符串中反斜杠也是一个特殊字符。</p>
+<h2 id="不可显示的字符"><a href="#不可显示的字符" class="headerlink" title="不可显示的字符"></a>不可显示的字符</h2><p>不可显示的字符是指的例如换行、水平制表符、tab符等无法打印出具体字符的字符。  </p>
+<p>对于这些字符的处理是比较凌乱的。例如换行符，在Windows和Unix中是不一样的，Windows使用\\r\\n，而Unix使用\\n。这里就要结合具体情况了，就比如一段Windows上编码的文本在Unix下进行正则匹配，那么就要使用Windows的规则。</p>
+<p><strong>对于这些特殊字符还可以使用\\cA到\\cZ的方法进行匹配</strong>，也就是使用反斜杠加小写c加一个大写的字母组成，代表着Control+A到Control+Z。当然也可以使用\\x01到\\x1A来表示，它们是等价的。例如：\\cM匹配了一个回车，它也可以使用\\x0D、\\r和\\u000D替代。</p>
+<p>不过使用\\c的方法不是非常推荐，因为在不用的应用中行为可能不一样。有的应用支持\\c后加任何字符而有的只允许ASCII字符，这样有时候有的应用就会需要5位来存储正则代码，而有的可能会指向Unicode的第一字节把它当成一个ASCII处理。还有时有的应用只允许到0x40，然后\\c@到\\c_就会因为超过0x40又代表了0x00到0x1F。</p>
+<p>因此我们要分情况处理，对于支持Unicode的引擎，使用\\uFFFF或者\\x{FFFF}的方式插入Unicode。</p>
+<p><strong>而对于换行符，除了上面介绍的方法之外，我们还可以使用_\\R_</strong>，它包含了Unicode的换行。而且_\\R_匹配的是所有换行符，包括\\r、\\n以及\\r\\n。</p>
+<p>对于_\\R_的使用，要注意一点，它是匹配\\r、\\n以及\\r\\n任一的，也就是说，例如_\\r\\R_的正则，可以匹配字符\\r\\n。</p>
+<h2 id="字符类（字符集）"><a href="#字符类（字符集）" class="headerlink" title="字符类（字符集）"></a>字符类（字符集）</h2><p>字符类，又被成为字符集，是用于告诉正则引擎匹配在几个字符中匹配出一个。例如：对于字符串gray和grey，你可以使用正则_gr[ae]y_进行匹配，而对于字符串graay或graey就不能使用这个正则进行匹配了。</p>
+<p>在字符类中，你可以使用横线。例如：_[0-9]_，它可以匹配一个单独的数字，位于0和9之间；或者你还可以使用一个_[0-9a-fA-F]_匹配一个八进制数字。</p>
+<h3 id="否定字符类"><a href="#否定字符类" class="headerlink" title="否定字符类"></a>否定字符类</h3><p>对于否定字符类，就是指匹配不在所给范围内的字符。它和点（.）不一样，<strong>否定字符类还会隐含匹配换行符</strong>。如果你不希望这样，你需要在否定字符类中指定换行符，例如：_[^0-9\\r\\n]_将会匹配任一非数字和换行符。</p>
+<p>另外还要明确，<strong>否定字符类是需要进行对字符进行匹配的</strong>。例如正则_a[^n]_表示的是“匹配一个a后面跟着一个字符不是n”，而不是“匹配一个后面不是n的a”，也就是说，否定字符类的前提是有字符的存在。</p>
+<h3 id="对于元字符的处理"><a href="#对于元字符的处理" class="headerlink" title="对于元字符的处理"></a>对于元字符的处理</h3><p><strong>在字符类中，只有闭方括号]、反斜杠\\、脱字符^以及连字符-是特殊字符，而其余的字符都是了普通字符。</strong>例如：正则_[+*]_可以匹配1+1=2。</p>
+<p><strong>要想使用这里的特殊字符的字面意义，只要在前面加一个反斜杠即可</strong>，例如：正则_[\\\\-]_可以匹配字符串1\\1=1。</p>
+<p>不过还有可以不使用反斜杠转义就使用特殊字符的字面意义匹配的写法。对于脱字符^，可以把它放到非开方括号的右侧即可，例如：_[x^]_。而闭方括号可以放到开方括号的右侧或者否定字符类的否定脱字符^的右侧，例如：_[]x]_或者_[^]x]_。对于连字符，可以放到开方括号的右侧、闭方括号的左侧以及否定字符类的否定脱字符^的右侧，例如：_[-x]_、_[x-]_以及_[^-x]_、_[^x-]_。</p>
+<h3 id="重复字符类"><a href="#重复字符类" class="headerlink" title="重复字符类"></a>重复字符类</h3><p>之前我们说的字符类仅仅可以匹配一个字符，<strong>如果我们要重复使用这些字符类时，可以使用问号?、星号*以及加号+</strong>。</p>
+<p><strong>问号?表示重复0或1次；星号*表示重复任意次，包括0次；加号+表示重复非零次。</strong></p>
+<p><strong>另外注意，以上三种均为贪婪的。例如：正则表达式</strong>_<strong>ABC+</strong>_<strong>，字符串ABC，匹配结果是ABC，而不是AB。如果如上重复字符符号后面加上一个问号，那么就会变得懒惰。</strong>例如：正则表达式_ABC+?_，字符串ABCCC的结果就是AB；_ABC??_匹配的结果就是AB。</p>
+<h3 id="字符类的减法"><a href="#字符类的减法" class="headerlink" title="字符类的减法"></a>字符类的减法</h3><p>在 XML Schema, XPath, .NET等语言中，还支持一种字符类的减法。就是匹配在一个字符类但不在另一个字符类的字符。它的形式就是_[class-[subtract]]_，也就是如果在某个连字符后面的字符是一个开方括号，那么就自动认为这是一个字符类的减法。</p>
+<p>例如：_[a-z-[aeiou]]_匹配非元音字母，如果不适用字符类的减法，那么将会是_[b-df-hj-np-tv-z]_，明显就很麻烦。</p>
+<p><strong>对于字符类减法的否定字符类，它的规则是先否定，再减法。</strong>例如：_[^1234-[3456]]_，它的顺序是先否定1234，再用否定后的集合减去3456，因此匹配7890。</p>
+<h3 id="字符类的交集"><a href="#字符类的交集" class="headerlink" title="字符类的交集"></a>字符类的交集</h3><p>字符类的交集就是匹配同时满足多个字符类的字符，目前是Java、Ruby1.9之后的版本支持。它的形式是_[class&amp;&amp;[intersect]]_。如果没有脱字符作否定字符类，那么你还可以省略intersect外的方括号，也就是这样：_[class&amp;&amp;intersect]_。</p>
+<p>我们举一个例子：_[a-z&amp;&amp;[^aeiuo]]_可以匹配非元音字符。如果我们不用交集来表示，那么正则表达式就会变成：_[b-df-hj-np-tv-z]_，更加麻烦。</p>
+<p>多个字符类的交集可以合并在一起写，例如：[1-5&amp;&amp;[7-8]&amp;&amp;0]等等。</p>
+<p><strong>在否定字符类的交集当中，规则和不减法一样，这里是先交集，再否定。</strong>例如：_[^1234&amp;&amp;3456]_匹配的就是除了34以外的字符。如果你想做到和减法一样，先否定再减法，那么你可以这么写：_[[^1234]&amp;&amp;3456]_。</p>
+<h3 id="字符类的缩写"><a href="#字符类的缩写" class="headerlink" title="字符类的缩写"></a>字符类的缩写</h3><p>上面我们讲了很多关于字符类的使用，对于一些比较常用的字符类，正则表达式中内置了许多渐变写法。例如：对于数字字符类，我们可以使用_[0-9]_之外，还可以使用_\\d_。</p>
+<p>重要具体的渐变写法有如下：</p>
+<ul>
+<li>\\d ：所有的数字，至少相当于_[0-9]_。在支持Unicode的情况下，\\d还包含Unicode中的数字，例如波斯数字۱۲۳۴۵۶۷۸۹。</li>
+<li>\\w：所有的字符，至少相当于_[A-Za-z0-9_]_。在支持Unicode的情况下，\\w还包含Unicode文字，例如汉字。</li>
+<li>\\s：代表空白字符，它包含了_[ \\t\\r\\n\\f]_（注意\\t前面有一个空格）。在支持Unicode的情况下，还包含Unicode中“<a href="https://www.fileformat.info/info/unicode/category/Zs/list.htm" target="_blank" rel="noopener">sparator</a>”目录下的字符。</li>
+<li>\\D：和_[^\\d]_一样。</li>
+<li>\\W：和_[^\\w]_一样。</li>
+<li>\\S：和_[^\\s]_一样。</li>
+</ul>
+<p>另外在perl中，还引入了_\\h_和_\\v_。_\\h_匹配水平的空白符，这包括了tab和Unicode中“<a href="https://www.compart.com/en/unicode/category/Zs" target="_blank" rel="noopener">space separator</a>”目录下的字符。_\\v_则是匹配垂直空白符，这包括了所有的Unicode中的换行符，它相当于_[\\n\\cK\\f\\r\\x85\\x{2028}\\x{2029}]_。目前PHP、Java8都支持。另外在Ruby1.9之后，_\\h_表示的是十六进制数，也就是相当于_[0-9a-fA-f]_。</p>
+<h2 id="正则表达式引擎的特征"><a href="#正则表达式引擎的特征" class="headerlink" title="正则表达式引擎的特征"></a>正则表达式引擎的特征</h2><p>大多数的正则表达式引擎是“正则表达式指导”的，也有一部分是“文本指导的”。</p>
+<p>对于正则表达式指导的引擎，<strong>正则表达式引擎始终会返回最左边的一个匹配。</strong>它将要匹配的字符串从左往右依次和正则表达式的从左往右依次比较，直到完全匹配才停止。一匹配完就停止，这个特征在垂直线部分尤其重要。</p>
+<h2 id="点（-）特殊字符"><a href="#点（-）特殊字符" class="headerlink" title="点（.）特殊字符"></a>点（.）特殊字符</h2><p><strong>点匹配除了换行符以外_任一_字符。</strong>不匹配换行符的原因是一个历史原因，因为世界上第一款正则匹配工具是基于行为单位的，它是一行行读入字符串文件的。</p>
+<h3 id="单行模式和多行模式"><a href="#单行模式和多行模式" class="headerlink" title="单行模式和多行模式"></a>单行模式和多行模式</h3><p>在单行模式中，我们可以使用点匹配换行符。而在多行模式中，如果检索的字符串包含多行，那么^和$除了匹配整个字符串的开始和结尾之外，还能匹配每行的开始和结尾。</p>
+<p>也就是说单行模式只影响点.，而多行模式影响^和$。两种模式的对象是不一样的。我是这么理解的，正则表达式每次只处理一行，因此单行模式就将字符串看成一行，因此中间的换行符也认为是一个普通字符，可以用点匹配；而多行模式就是讲一串字符传看成多行，因此每次换行符的出现都看成新的一行，因此点不应该匹配换行符，而^和$可以匹配任一行的开头的换行（结尾）。</p>
+<h3 id="星号是贪婪的"><a href="#星号是贪婪的" class="headerlink" title="星号是贪婪的"></a><strong>星号是贪婪的</strong></h3><p>有如下例子：有正则表达式_”.*”_，如果用来匹配Put a “string” between double quotes，那么结果将是”string”；但如果匹配Houston, we have a problem with “string one” and “string two”. Please respond.那么结果将会是”string one” and “string two”。这个原因就是星号是贪婪的。</p>
+<h2 id="脱字符（-）和美元符号（-）特殊字符"><a href="#脱字符（-）和美元符号（-）特殊字符" class="headerlink" title="脱字符（^）和美元符号（$）特殊字符"></a>脱字符（^）和美元符号（$）特殊字符</h2><p>对于这两者，前者表示匹配一行的开头，后者表示匹配一行的结束。通常脱字符是在行首或者换行符的右侧，而美元符号是在行位或者换行符的左侧。</p>
+<p>另外对于_\\A_和_\\Z_，_\\A_仅匹配行首，而_\\Z_仅匹配行尾。它们不会匹配换行。</p>
+<h2 id="字符边界"><a href="#字符边界" class="headerlink" title="字符边界"></a>字符边界</h2><p>元字符_\\b_是一个可以用作匹配一个被称为“字符边界”的位置。字符边界，是指以下三种情况：</p>
+<ul>
+<li>在字符串的第一个字符是文字字符，那么第一个字符之前。</li>
+<li>如果字符串的最后一个字符是文字字符，那么最后一个字符之后。</li>
+<li>如果一个字符串的相邻两个字符中，一个是文字字符，另一个不是文字字符，那么两个字符之间。</li>
+</ul>
+<p>文字字符就是指可以展示文字的字符，也就是\\w可以匹配的字符。</p>
+<p>我们使用_\\b_举个例子：正则_\\b4\\b_，匹配字符串44 sheets of a4。匹配结果将会没有，因为无法找到两个字符边界满足匹配条件。</p>
+<p><strong>另外还有\\B作为\\b的否定字符类。\\B匹配两个相邻文字字符中间的位置以及两个相邻非文字字符中间的位置。</strong></p>
+<h2 id="垂直线（-）特殊符号"><a href="#垂直线（-）特殊符号" class="headerlink" title="垂直线（|）特殊符号"></a>垂直线（|）特殊符号</h2><p>垂直线被用作进行候选匹配。用法是word1|word2。</p>
+<p><strong>垂直线的优先级是最低的</strong>，因此在使用的时候要格外注意其优先级，并要结合括号使用。例如：正则表达式_\\b(cat|dog)\\b_，匹配结果是dog或者cat，并且前后有字符边界。但如果没有使用括号，那么将会匹配_\\bcat_或者_dog\\b_这两个表达式。</p>
+<p>另外要注意的是，因为“正则表达式指导”的正则引擎始终是匹配最先的（在“正则表达式引擎的特征”一部分已经说过）。因此在使用垂直线时，要明确正则引擎会匹配正则式中最长的那个。例如：正则表达式_GetValue|Get|Set|SetValue_，若字符串为SetValue，则匹配结果就是Set，因为Set最先满足条件（正则中的候选项SetValue还没有被尝试匹配）。<strong>因此要注意，垂直线的匹配是按照正则中各项的顺序进行的，匹配最先满足条件的一项。</strong></p>
+<p>而对于“文本指导”的正则引擎，则匹配最长的一项。例如：正则_GetValue|Get|Set|SetValue_匹配字符串SetValue的结果就是SetValue。</p>
+<h2 id="问号（？）特殊符号"><a href="#问号（？）特殊符号" class="headerlink" title="问号（？）特殊符号"></a>问号（？）特殊符号</h2><p>问号是用于表示可选项的，例如：正则表达式_colou?r_匹配color和colour。它相当于{0,1}，也就是<strong>表示某一项出现0次或1次</strong>。</p>
+<p><strong>问号的匹配是贪婪的，也就是说匹配的结果如果可以出现，并且也是最左，那么就匹配这个。</strong>例如：正则表达式_Feb 23(rd)?_，对于字符串Today is Feb 23rd, 2003，它的结果就是Feb 23rd，因为Feb 23和Feb 23rd都是最左匹配结果，但是问号贪婪，匹配最长的结果。</p>
+<h2 id="花括号（-）特殊符号"><a href="#花括号（-）特殊符号" class="headerlink" title="花括号（{}）特殊符号"></a>花括号（{}）特殊符号</h2><p>虽然我们有星号、加号以及问号用来表示重复，但是有时我们需要制定重复的次数，这时就可以使用花括号。它的写法是这样的：_{min,max}_，min指重复最少次数，max指重复最大次数。<strong>如果不需要指定最大时可以</strong>_<strong>{min,}</strong>_<strong>，这表示重复次数大于等于min。</strong>如果重复指定次数，那么就_{time}_。</p>
+<p>这里还要强调一下花括号是贪婪的，它和加号问号星号是一样的。例如：正则表达式_ABC{0,3}_，字符串为ABCCC，那么匹配结果就是ABCCC。</p>
+<p>如果你想避免使用贪婪，也就是变得懒惰，那么你可以在循环符号后面加一个问号。例如：正则表达式_ABC{0,3}?_，字符串ABCCC，匹配结果就是AB。在+后面添加也可以。</p>
+<h2 id="括号（-）特殊符号"><a href="#括号（-）特殊符号" class="headerlink" title="括号（()）特殊符号"></a>括号（()）特殊符号</h2><p>括号一般用于存放部分正则表达式，这是它的一个用处。</p>
+<p><strong>括号还有一个用处就是存储部分匹配的字符串，被存储的字符串就是正则表达式中放在括号中的部分。它们依次分别存放在一个叫做“捕获组”的地方。</strong></p>
+<p>例如：正则表达式Set(Value)?，字符串Set和SetValue，对于前者存储的是空，而对于后者存储的是Value。</p>
+<p><strong>如果你不想使用这个捕获组，你可以在开括号后面加上?:。</strong>例如：_color=(?:red|green|blue)_。</p>
+<p>对于前面的捕获组，我们如何使用？答案就是<strong>使用反斜杠加捕获组编号的方法。</strong></p>
+<p>例如：对于正则表达式_Set(Va)?(lue)?\\1_，字符串SetValueVa，是可以完全匹配的。_\\1_存储的是Va的值，因为_(Va)?_匹配成功，因此\\1存储的是Va，因此这个正则表达式相当于_Set(Va)?(lue)?Va_。</p>
+<p><strong>这里组的编号是固定的，如果某个组没有捕获到，那么它会在相应位置写上空，而不会把自己的位置延续给下一个。</strong></p>
+<p>例如：正则表达式_Set(Value)?(Key)?_，对于字符串SetKey来说，_\\1_捕获组存储的是空，而不是Key，Key始终存在_\\2_。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/11/11/%E4%BD%BF%E7%94%A8%E5%88%9D%E5%A7%8B%E5%8C%96%E6%8D%95%E8%8E%B7%E5%B0%86%E5%AF%B9%E8%B1%A1%E7%A7%BB%E5%8A%A8%E5%88%B0lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%B8%AD/" rel="prev" title="使用初始化捕获将对象移动到lambda表达式中">
+      <i class="fa fa-chevron-left"></i> 使用初始化捕获将对象移动到lambda表达式中
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/02/19/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E7%9A%84%E6%A8%A1%E5%BC%8F/" rel="next" title="正则表达式的模式">
+      正则表达式的模式 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#特殊字符"><span class="nav-number">1.</span> <span class="nav-text">特殊字符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#文字字符"><span class="nav-number">1.1.</span> <span class="nav-text">文字字符</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#特殊字符-1"><span class="nav-number">1.2.</span> <span class="nav-text">特殊字符</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#不可显示的字符"><span class="nav-number">2.</span> <span class="nav-text">不可显示的字符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#字符类（字符集）"><span class="nav-number">3.</span> <span class="nav-text">字符类（字符集）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#否定字符类"><span class="nav-number">3.1.</span> <span class="nav-text">否定字符类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对于元字符的处理"><span class="nav-number">3.2.</span> <span class="nav-text">对于元字符的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#重复字符类"><span class="nav-number">3.3.</span> <span class="nav-text">重复字符类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符类的减法"><span class="nav-number">3.4.</span> <span class="nav-text">字符类的减法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符类的交集"><span class="nav-number">3.5.</span> <span class="nav-text">字符类的交集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字符类的缩写"><span class="nav-number">3.6.</span> <span class="nav-text">字符类的缩写</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#正则表达式引擎的特征"><span class="nav-number">4.</span> <span class="nav-text">正则表达式引擎的特征</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#点（-）特殊字符"><span class="nav-number">5.</span> <span class="nav-text">点（.）特殊字符</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#单行模式和多行模式"><span class="nav-number">5.1.</span> <span class="nav-text">单行模式和多行模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#星号是贪婪的"><span class="nav-number">5.2.</span> <span class="nav-text">星号是贪婪的</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#脱字符（-）和美元符号（-）特殊字符"><span class="nav-number">6.</span> <span class="nav-text">脱字符（^）和美元符号（$）特殊字符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#字符边界"><span class="nav-number">7.</span> <span class="nav-text">字符边界</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#垂直线（-）特殊符号"><span class="nav-number">8.</span> <span class="nav-text">垂直线（|）特殊符号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问号（？）特殊符号"><span class="nav-number">9.</span> <span class="nav-text">问号（？）特殊符号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#花括号（-）特殊符号"><span class="nav-number">10.</span> <span class="nav-text">花括号（{}）特殊符号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#括号（-）特殊符号"><span class="nav-number">11.</span> <span class="nav-text">括号（()）特殊符号</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">48</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
