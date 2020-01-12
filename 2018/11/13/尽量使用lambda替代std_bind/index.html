@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="C++11中的std::bind继承自C++98的std::bind1st和std::bind2nd，它自从2005年起就是标准库的一部分了。这一年C++标准委员会采用了一份叫做TR1的文档，这份文档中包含了bind的描述（在TR1中，bind函数是在不同的命名空间中，所以它叫std::tr1::bind，而不是std::bind）。bind的这段长久历史就意味着有很多程序员已经拥有丰富的经验使用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="尽量使用lambda替代std::bind">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/11/13/%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8lambda%E6%9B%BF%E4%BB%A3std_bind/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="C++11中的std::bind继承自C++98的std::bind1st和std::bind2nd，它自从2005年起就是标准库的一部分了。这一年C++标准委员会采用了一份叫做TR1的文档，这份文档中包含了bind的描述（在TR1中，bind函数是在不同的命名空间中，所以它叫std::tr1::bind，而不是std::bind）。bind的这段长久历史就意味着有很多程序员已经拥有丰富的经验使用">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-11-13T07:48:41.000Z">
+<meta property="article:modified_time" content="2020-01-12T15:58:10.525Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/11/13/%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8lambda%E6%9B%BF%E4%BB%A3std_bind/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>尽量使用lambda替代std::bind | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/11/13/%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8lambda%E6%9B%BF%E4%BB%A3std_bind/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          尽量使用lambda替代std::bind
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-11-13 15:48:41" itemprop="dateCreated datePublished" datetime="2018-11-13T15:48:41+08:00">2018-11-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-12 23:58:10" itemprop="dateModified" datetime="2020-01-12T23:58:10+08:00">2020-01-12</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>C++11中的std::bind继承自C++98的std::bind1st和std::bind2nd，它自从2005年起就是标准库的一部分了。这一年C++标准委员会采用了一份叫做TR1的文档，这份文档中包含了bind的描述（在TR1中，bind函数是在不同的命名空间中，所以它叫std::tr1::bind，而不是std::bind）。bind的这段长久历史就意味着有很多程序员已经拥有丰富的经验使用std::bind.如果你就是其中一个，你可能会不情愿放弃bind这样工具，这也是可以理解的。但是在C++11中你应该改变这种思维，因为lambda总是比std::bind更好的选择。<br><a id="more"></a><br>在这一篇文章里，我已经假设你熟悉std::bind了。</p>
+<p>和在前面文章一样，我们假设称std::bind返回的函数对象叫做绑定对象（bind object）。</p>
+<p>使用lambda而不是std::bind的最重要的理由之一就是lambda可读性更好。例如，我们想写一个函数用于创建闹钟:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 定义一个时间点类型</span></span><br><span class="line"><span class="keyword">using</span> Time = <span class="built_in">std</span>::chrono::steady_clock::time_point;</span><br><span class="line"></span><br><span class="line"><span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">Sound</span> &#123;</span> Beep, Siren, Whistle &#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义一个时间长度类型</span></span><br><span class="line"><span class="keyword">using</span> Duration = <span class="built_in">std</span>::chrono::steady_clock::duration;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在时间t， 发出声音s， 持续d</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setAlarm</span><span class="params">(Time t, Sound s, Duration d)</span></span>;</span><br></pre></td></tr></table></figure><br>假设程序中已经有一些时间点已经设置闹钟，我们还需要在每个现有闹钟后1小时后设置另一个持续30秒的闹钟，至于使用什么声音还没有决定。我们可以写一个lambda修订setAlarm接口，这个接口只需要指定声音:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> setSoundL = [](Sound s) <span class="comment">// setSound的lambda版本</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::chrono;</span><br><span class="line"></span><br><span class="line">	setAlarm(steady_clock::now() + hours(<span class="number">1</span>),</span><br><span class="line">		s,</span><br><span class="line">		seconds(<span class="number">30</span>)</span><br><span class="line">	);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>当然，也可以使用C++14的对秒、毫秒、小时等时间单位的标准结尾:s、ms、h等。这些结尾是补充在C++14的std::literals命名空间中的，代码可以改成如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> setSoundL = [](Sound s)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::chrono;</span><br><span class="line">	<span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::literals; <span class="comment">// 为了使用C++14的结尾</span></span><br><span class="line"></span><br><span class="line">	setAlarm(steady_clock::now() + <span class="number">1</span>h, <span class="comment">// C++14写法，和上面代码效果一样</span></span><br><span class="line">		s,</span><br><span class="line">	<span class="number">30</span>s);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>如果尝试使用std::bind来写上面的代码，将会是下面的样子，当然下面的代码有一个错误，会在稍后进阶解决，正确的代码会比下面错误的代码更复杂:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::chrono;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::literals;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::placeholders; <span class="comment">// 需要使用“_1”占位符</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> setSoundB = <span class="built_in">std</span>::bind( setAlarm, <span class="comment">// setSound的bind版本</span></span><br><span class="line">	steady_clock::now() + <span class="number">1</span>h,</span><br><span class="line">	_1,</span><br><span class="line">	<span class="number">30</span>s</span><br><span class="line">);</span><br></pre></td></tr></table></figure><br>因为在定义绑定对象时，setAlarm的第二个参数还没有决定，因此使用占位符“_1”占位。之后对setSoundB调用时，第一个参数就相当于setAlarm的第二个参数传递过去。因此需要知道setAlarm的声明以决定那种参数传递给setSoundB。</p>
+<p>但是之前说了，这段代码不是非常正确。在lambda中，“steady_clock::now() + 1h”是setAlarm的实参，等价于setAlarm的调用时间之后的1小时。在使用std::bind，就相当于在绑定时就决定了这个参数，因此绑定进setAlarm的是绑定的时间，设置的闹钟则是绑定之后1小时后响30秒的。<br>解决这个问题需要告诉std::bind在调用setAlarm时在决定这个参数的值，方法就是在原来的std::bind中嵌套另外两个std::bind:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> setSoundB = <span class="built_in">std</span>::bind( setAlarm,</span><br><span class="line">	<span class="built_in">std</span>::bind( <span class="built_in">std</span>::plus&lt;&gt;(),</span><br><span class="line">		<span class="built_in">std</span>::bind(steady_clock::now),</span><br><span class="line">		<span class="number">1</span>h</span><br><span class="line">	),</span><br><span class="line">	_1,</span><br><span class="line">	<span class="number">30</span>s</span><br><span class="line">);</span><br></pre></td></tr></table></figure><br>如果你知道C++98中std::plus的用法，你可能会对上面的代码惊讶，因为std::plus没有在尖括号中指定类型。<strong>在C++14中，对于标准操作符模板可以忽略模板的类型参数，因此可以不提供类型参数。</strong>上面的代码如果使用C++11的std::bind就相当于:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::chrono;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::placeholders;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> setSoundB =</span><br><span class="line"><span class="built_in">std</span>::bind(setAlarm,</span><br><span class="line">	<span class="built_in">std</span>::bind(<span class="built_in">std</span>::plus&lt;steady_clock::time_point&gt;(),</span><br><span class="line">		<span class="built_in">std</span>::bind(steady_clock::now),</span><br><span class="line">		hours(<span class="number">1</span>)</span><br><span class="line">	),</span><br><span class="line">	_1,</span><br><span class="line">	seconds(<span class="number">30</span>)</span><br><span class="line">);</span><br></pre></td></tr></table></figure></p>
+<p>当setAlarm被重载，新的问题就又出现了。假设有一个重载的函数有第四个参数用来指定闹钟的音量:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">Volume</span> &#123;</span> Time t, Sound s, Duration d, Volume v &#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">setAlarm</span><span class="params">(Time t, Sound s, Duration d, Volume v)</span></span>;</span><br></pre></td></tr></table></figure><br>之前的lambda仍然有效，因为会自动选择正确的三参数的setAlarm。但是如果std::bind就会出错。<strong>因为编译器只能看到一个函数名，所以编译器无法决定std::bind使用哪个版本的setAlarm，因此就会出现二义性。</strong>为了能使std::bind版本能编译，我们必须要指定使用的哪个版本的setAlarm:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> SetAlarm3ParamType = <span class="keyword">void</span>(*)(Time t, Sound s, Duration d);</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> setSoundB = <span class="built_in">std</span>::bind(<span class="keyword">static_cast</span>&lt;SetAlarm3ParamType&gt;(setAlarm), <span class="comment">// 指定使用了哪种setAlarm</span></span><br><span class="line">	<span class="built_in">std</span>::bind(<span class="built_in">std</span>::plus&lt;steady_clock::time_point&gt;(),</span><br><span class="line">		<span class="built_in">std</span>::bind(steady_clock::now),</span><br><span class="line">		hours(<span class="number">1</span>)</span><br><span class="line">	),</span><br><span class="line">	_1,</span><br><span class="line">	seconds(<span class="number">30</span>)</span><br><span class="line">);</span><br></pre></td></tr></table></figure><br>但是这样又带来了一个问题。在调用setSoundL时，对setAlarm的调用是一个普通的函数调用，编译器可以把这个setAlarm内联(inline):<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setSoundL(Sound::Siren); <span class="comment">// setAlarm的函数体可能会被内联到这</span></span><br></pre></td></tr></table></figure><br>而调用std::bind的绑定对象时，调用的是一个函数指针指向的setAlarm，这也就意味着在调用setSoundB时，对setAlarm的调用是通过指针，编译器不太可能会将其内联。:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setSoundB(Sound::Siren); <span class="comment">// setAlarm的函数体不太可能内联到这</span></span><br></pre></td></tr></table></figure><br>这也就导致了lambda会产生比std::bind快速的代码。</p>
+<p>在上面的setAlarm只是一个例子，因此执行的内容就比较简单，如果你想让setAlarm做比较复杂的事情，你就最好使用lambda。例如你要使用下面的C++14的lambda，它会返回是否参数在下限值（lowVal）和上限值（highVal）之间，上限值和下限值都是本地变量:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> betweenL = [lowVal, highVal](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; val)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> lowVal &lt;= val &amp;&amp; val &lt;= highVal; </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>std::bind也可以表示同样的事情。下面就是一段可以达成目的的代码，尽管代码有些晦涩难懂:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::placeholders;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> betweenB = <span class="built_in">std</span>::bind(<span class="built_in">std</span>::logical_and&lt;&gt;(),</span><br><span class="line">	<span class="built_in">std</span>::bind(<span class="built_in">std</span>::less_equal&lt;&gt;(), lowVal, _1),</span><br><span class="line">	<span class="built_in">std</span>::bind(<span class="built_in">std</span>::less_equal&lt;&gt;(), _1, highVal)</span><br><span class="line">);</span><br></pre></td></tr></table></figure><br>而在C++11，则需要指定比较类型，因此代码如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::placeholders;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> betweenB = <span class="built_in">std</span>::bind(<span class="built_in">std</span>::logical_and&lt;<span class="keyword">bool</span>&gt;(),</span><br><span class="line">	<span class="built_in">std</span>::bind(<span class="built_in">std</span>::less_equal&lt;<span class="keyword">int</span>&gt;(), lowVal, _1),</span><br><span class="line">	<span class="built_in">std</span>::bind(<span class="built_in">std</span>::less_equal&lt;<span class="keyword">int</span>&gt;(), _1, highVal)</span><br><span class="line">);</span><br></pre></td></tr></table></figure><br>因为在C++11中不支持lambda使用auto类型的参数，所以C++11的lambda版本的代码是这样的:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> betweenL = [lowVal, highVal](<span class="keyword">int</span> val)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> lowVal &lt;= val &amp;&amp; val &lt;= highVal;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>不论是C++11还是C++14，lambda版本的代码都是又短又容易理解的。</p>
+<p>前面我们提到了std::bind的占位符，但是它们的行为不只是占位符，当然这是一个黑盒。假设我们有一个函数用来创建压缩的Widget副本:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="class"><span class="keyword">class</span> <span class="title">CompLevel</span>&#123;</span> Low, Normal, High &#125;; <span class="comment">// 压缩等级</span></span><br><span class="line"></span><br><span class="line"><span class="function">Widget <span class="title">compress</span><span class="params">(<span class="keyword">const</span> Widget&amp; w, <span class="comment">// 压缩w的副本</span></span></span></span><br><span class="line"><span class="function"><span class="params">	CompLevel lev</span></span></span><br><span class="line"><span class="function"><span class="params">)</span></span>;</span><br></pre></td></tr></table></figure><br>并且我们希望创建一个函数对象，用来指定Widget w要压缩多少。我们使用std::bind来创建这样的一个对象:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Widget w;</span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::placeholders;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> compressRateB = <span class="built_in">std</span>::bind(compress, w, _1);</span><br></pre></td></tr></table></figure><br>现在我们传递给std::bind参数w，w存储在对象compressRateB中，用以稍后作为调用compress的参数。但是如何存储它呢？是存储引用还是存储值呢？这两种方式是由很大的不同的，因为如果w在调用std::bind和调用compressRateB之间发生了改变，存储w的引用将会反映出这个改变，而存储值时则不会发生。<br>答案是存储了值。我们只能通过记忆std::bind的工作流程来理解。我们先来使用lambda方法来完成上面std::bind的行为:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> compressRateL = [w](CompLevel lev) <span class="comment">// w按值捕获，lev是传值</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> compress(w, lev);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>这里很清楚lev是传值传参，因此:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">compressRateL(CompLevel::High); <span class="comment">// 参数按值传递</span></span><br></pre></td></tr></table></figure></p>
+<p>在调用std::bind返回的对象时，它是如何传参的？<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">compressRateB(CompLevel::High);</span><br></pre></td></tr></table></figure><br><strong>所有传递给std::bind的参数都是按引用传递，因为函数调用操作符使用的是完美转发。</strong></p>
+<p>和lambda对比，使用std::bind的代码会令人觉得可读性很差，并且有可能带来低效率。在C++14中没有理由使用std::bind。在C++11中，std::bind可以适用于两种条件下:</p>
+<ol>
+<li>移动捕获：C++11不提供移动捕获，但是可以通过std::bind模拟这一行为。而在C++14中lambda支持初始化捕获，这也就淘汰了模拟移动捕获。</li>
+<li>复合函数对象：因为绑定对象的函数调用操作符使用完美转发时，可以接受任何类型的参数（完美转发的使用限制详见：<a href="/2018/11/06/几个完美转发失败的条件/">几个完美转发失败的条件</a>）。如果你想要绑定一个对象，并定义调用操作符使用它，那么std::bind就非常有用了:<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">PolyWidget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">operator</span><span class="params">()</span><span class="params">(<span class="keyword">const</span> T&amp; param)</span> <span class="keyword">const</span></span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+std::bind可以如下绑定一个PolyWidget:<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">PolyWidget pw;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> boundPW = <span class="built_in">std</span>::bind(pw, _1);</span><br></pre></td></tr></table></figure>
+boundPW可以使用任意参数（有几种失败情况）去调用。而在C++11的lambda中是没有办法做到的。在C++14中，可以轻易达到目的，方式是使用auto类型的参数:<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> boundPW = [pw](<span class="keyword">const</span> <span class="keyword">auto</span>&amp; param)</span><br><span class="line">&#123;</span><br><span class="line">	pw(param);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这两种情况是两种边缘情况，不过你不用纠结，因为C++14的编译器已经很流行了。</p>
+<p><strong>总结</strong></p>
+<ul>
+<li>相较于std::bind，lambda表达式可读性更好，并且有时效率更高。</li>
+<li>只在C++11，std::bind在两种情况下可能会变得有用：模拟移动捕获和绑定了重载调用操作符模板函数的对象。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/11/12/%E5%9C%A8lambda%E4%B8%AD%E5%AF%B9auto&&%E5%8F%82%E6%95%B0%E4%BD%BF%E7%94%A8decltype%E4%BB%A5%E8%BD%AC%E5%8F%91%E5%AE%83%E4%BB%AC/" rel="prev" title="在lambda中对auto&&参数使用decltype以转发它们">
+      <i class="fa fa-chevron-left"></i> 在lambda中对auto&&参数使用decltype以转发它们
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/02/18/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="next" title="正则表达式基础">
+      正则表达式基础 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
