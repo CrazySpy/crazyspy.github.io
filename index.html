@@ -531,6 +531,103 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/11/22/%E7%A1%AE%E4%BF%9D%E8%B7%B3%E5%87%BA%E4%BD%9C%E7%94%A8%E5%9F%9F%E6%97%B6std_thread%E6%98%AF%E4%B8%8D%E5%8F%AF%E8%BF%9E%E6%8E%A5%E7%9A%84%EF%BC%88unjoinable%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/11/22/%E7%A1%AE%E4%BF%9D%E8%B7%B3%E5%87%BA%E4%BD%9C%E7%94%A8%E5%9F%9F%E6%97%B6std_thread%E6%98%AF%E4%B8%8D%E5%8F%AF%E8%BF%9E%E6%8E%A5%E7%9A%84%EF%BC%88unjoinable%EF%BC%89/" class="post-title-link" itemprop="url">确保跳出作用域时std::thread是不可连接的（unjoinable）</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-11-22 20:03:23" itemprop="dateCreated datePublished" datetime="2018-11-22T20:03:23+08:00">2018-11-22</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-14 01:00:00" itemprop="dateModified" datetime="2020-01-14T01:00:00+08:00">2020-01-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>每个std::thread对象都有两种状态，可连接(joinable)和不可连接(unjoinable)。<strong>可连接的std::thread对象与可以被执行或正在执行的底层异步线程相通信。当一个std::thread对象对应的底层线程被阻塞或者正在等待被调度时也是可连接的。例如：正在等待底层线程执行完毕的std::thread也被看做是可连接的。</strong></p>
+<p>不可连接的std::thread的情况包括以下几种：</p>
+<ul>
+<li>默认构造的std::thread。这个不难理解，因为这时候std::thread中没有可执行的函数，因此也没有底层运行线程。</li>
+<li>已经被移走的std::thread。移动一个std::thread对象到另一个std::thread对象就意味着底层执行线程现在与另一个std::thread通信。</li>
+<li>std::thread已经被连接过（执行过join函数）了。在执行过join函数之后，std::thread在底层线程执行完毕后，不再对应某个底层执行线程了。</li>
+<li>std::thread已经被分开（执行过detach）了。detach会切断std::thread和底层执行线程的连接。</li>
+</ul>
+<p>为什么我们要知道一个std::thread是否可连接呢？原因就是当一个可连接的线程被销毁，这个程序也将终止。
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/11/22/%E7%A1%AE%E4%BF%9D%E8%B7%B3%E5%87%BA%E4%BD%9C%E7%94%A8%E5%9F%9F%E6%97%B6std_thread%E6%98%AF%E4%B8%8D%E5%8F%AF%E8%BF%9E%E6%8E%A5%E7%9A%84%EF%BC%88unjoinable%EF%BC%89/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
     <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/11/21/%E5%A6%82%E6%9E%9C%E4%BB%BB%E5%8A%A1%E5%BF%85%E9%A1%BB%E6%89%A7%E8%A1%8C%EF%BC%8C%E8%AF%B7%E6%8C%87%E5%AE%9A%E4%BD%BF%E7%94%A8std_launch_async%E5%90%AF%E5%8A%A8%E7%AD%96%E7%95%A5/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -972,95 +1069,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
-    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/11/09/%E9%81%BF%E5%85%8D%E4%BD%BF%E7%94%A8lambda%E7%9A%84%E9%BB%98%E8%AE%A4%E6%8D%95%E8%8E%B7%E6%A8%A1%E5%BC%8F/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="CrazySpy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="CrazySpy's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/11/09/%E9%81%BF%E5%85%8D%E4%BD%BF%E7%94%A8lambda%E7%9A%84%E9%BB%98%E8%AE%A4%E6%8D%95%E8%8E%B7%E6%A8%A1%E5%BC%8F/" class="post-title-link" itemprop="url">避免使用lambda的默认捕获模式</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-11-09 12:11:28" itemprop="dateCreated datePublished" datetime="2018-11-09T12:11:28+08:00">2018-11-09</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-11 22:38:24" itemprop="dateModified" datetime="2020-01-11T22:38:24+08:00">2020-01-11</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-                  , 
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
-                    <span itemprop="name">Effective Modern C++</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>在C++11中有两种默认的捕获模式：按址和按值。默认的按址捕获会导致悬空引用，而默认的按值捕获确实可以避免这个问题，但是这也将让你的lambda表达式变得脱离外部数据（本地变量、参数等）的。<br>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/11/09/%E9%81%BF%E5%85%8D%E4%BD%BF%E7%94%A8lambda%E7%9A%84%E9%BB%98%E8%AE%A4%E6%8D%95%E8%8E%B7%E6%A8%A1%E5%BC%8F/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -1131,7 +1139,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-count">55</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
