@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="如果你想异步运行函数doAsyncWork，你有两种最基本的选择。一个是创建一个std::thread，然后再在这个线程上运行doAsyncWork，这种方法称为基于线程的，代码如下:123int doAsyncWork();std:: thread t(doAsyncWork);或者你可以传递给std::async参数doAsyncWork，这叫做基于任务的:1auto fut &#x3D; std::a">
+<meta property="og:type" content="article">
+<meta property="og:title" content="尽量使用基于任务的编程替代基于线程的编程">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/11/16/%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8%E5%9F%BA%E4%BA%8E%E4%BB%BB%E5%8A%A1%E7%9A%84%E7%BC%96%E7%A8%8B%E6%9B%BF%E4%BB%A3%E5%9F%BA%E4%BA%8E%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%96%E7%A8%8B/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="如果你想异步运行函数doAsyncWork，你有两种最基本的选择。一个是创建一个std::thread，然后再在这个线程上运行doAsyncWork，这种方法称为基于线程的，代码如下:123int doAsyncWork();std:: thread t(doAsyncWork);或者你可以传递给std::async参数doAsyncWork，这叫做基于任务的:1auto fut &#x3D; std::a">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-11-16T14:16:06.000Z">
+<meta property="article:modified_time" content="2020-01-13T12:57:27.953Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/11/16/%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8%E5%9F%BA%E4%BA%8E%E4%BB%BB%E5%8A%A1%E7%9A%84%E7%BC%96%E7%A8%8B%E6%9B%BF%E4%BB%A3%E5%9F%BA%E4%BA%8E%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%96%E7%A8%8B/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>尽量使用基于任务的编程替代基于线程的编程 | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/11/16/%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8%E5%9F%BA%E4%BA%8E%E4%BB%BB%E5%8A%A1%E7%9A%84%E7%BC%96%E7%A8%8B%E6%9B%BF%E4%BB%A3%E5%9F%BA%E4%BA%8E%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%96%E7%A8%8B/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          尽量使用基于任务的编程替代基于线程的编程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-11-16 22:16:06" itemprop="dateCreated datePublished" datetime="2018-11-16T22:16:06+08:00">2018-11-16</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-13 20:57:27" itemprop="dateModified" datetime="2020-01-13T20:57:27+08:00">2020-01-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>如果你想异步运行函数doAsyncWork，你有两种最基本的选择。一个是创建一个std::thread，然后再在这个线程上运行doAsyncWork，这种方法称为<strong>基于线程</strong>的，代码如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">doAsyncWork</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>:: <span class="function">thread <span class="title">t</span><span class="params">(doAsyncWork)</span></span>;</span><br></pre></td></tr></table></figure><br>或者你可以传递给std::async参数doAsyncWork，这叫做<strong>基于任务</strong>的:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> fut = <span class="built_in">std</span>::async(doAsyncWork); <span class="comment">// fut是future的缩写</span></span><br></pre></td></tr></table></figure><br><a id="more"></a><br>上面的调用中，传递给std::async的函数对象就被看作是一个任务（task）。</p>
+<p>基于任务的方法通常要比基于线程的方法要好。首先从<strong>代码的长短上</strong>就能看出一些优势。这里的doAsyncWork产生了一个返回值，<strong>如果我们需要这个返回值，使用基于线程的方法就没有直接的办法做到，而如果使用基于任务的方法，这就变得很容易了。基于任务的方法中，有std::async返回的future提供了get方法用于获取返回值。</strong>这个get方法在doAsyncWork<strong>抛出异常时还可以对异常进行访问。</strong>而是用基于线程的方法时，如果soAsyncWork抛出异常，程序就消亡了（执行了std::terminate）。</p>
+<p>还有一个看上去更加底层的区别就是基于任务的方法相比具有更高的抽象，可以解决例如“超额认购”(oversubscription)的问题。它可以让你从线程管理中解脱出来。我这里先来说在C++并发软件中的三种“线程”的意思：</p>
+<ul>
+<li>硬件线程：是计算机中真实进行计算的线程。并发的计算机体系中，每个CPU核心提供一个或多个的硬件线程</li>
+<li>软件线程：也称作为操作系统线程和系统线程。它们是由操作系统管理的线程，横贯所有的在硬件线程上执行时的处理和调度。软件线程的数量可以大于硬件线程的数量，因为软件线程的可以被阻塞（例如：在I/O时或者等待信号量的时候），因此程序的效率也可以通过阻塞线程、执行其它线程来实现。</li>
+<li>std::thread：是C++中依赖于软件线程实现处理的对象。一些std::thread代表了对“null”的处理，也就是没有和任何软件线程通信，这是也默认构造的状态，代表没有函数在执行、被移到其它std::thread（被移到的std::thread将会接替原来的继续依赖底层的软件线程处理）、被join了（这个函数被用于阻塞进程直到线程执行结束）或者是被detach了（这个函数用于切断std::thread和它正依赖的软件线程之间的依赖）。<br>软件线程的数量是有限制的。如果你试着创建超过系统能承受数量的软件线程，系统就会抛出一个std::system_error异常。如果你的函数不能抛出异常，std::system_error还是会抛出。例如doAsyncWork是nonexcept的:<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">doAsyncWork</span><span class="params">()</span> <span class="keyword">noexcept</span></span>;</span><br></pre></td></tr></table></figure>
+这句话可能就引发异常:<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="function">thread <span class="title">t</span><span class="params">(doAsyncWork)</span></span>; <span class="comment">// 如果没有足够的软件线程可用，仍然会抛出异常</span></span><br></pre></td></tr></table></figure>
+优秀的代码应该避免超过系统承受的软件线程的问题。一个方法是在当前线程上运行doAsyncWork。但是这可能会导致不均衡的负载，如果当前的线程是一个GUI线程，那么可能还会导致响应能力的问题。另一个方法就是等待一些已经存在的软件线程执行完毕，然后再试着创建一个新的std::thread。但是这个方法可能就造成死锁，因为可能会存在线程等待doAsyncWork执行完成的情况。</li>
+</ul>
+<p>即使你没有运行过多的线程，你也会有“超额认购”（oversubscription）的麻烦。当你有比硬件线程数量多的就绪的软件线程时，就会出现超额认购。当超额认购发生时，线程调度器（操作系统的一部分）分配给硬件上的软件线程时间片。当一个线程的时间片用完时，另一个线程就开始，线程切换时会进行上下文切换。这个上下文切换增加了系统线程管理的负担。尤其在被调度的软件线程所在的硬件线程在不同的核心上时，就会耗费更多的资源。并且在这种情况下，通常只有极少的cache命中线程的数据和指令，新的软件线程的运行“污染”了这个核心上运行的老的、有可能会在这课核心上再次运行的软件线程留下的cache。</p>
+<p>避免超额认购问题是非常困难的。因为软件线程和硬件线程数量的比值取决于软件线程的运行频率并且这个频率是动态的，例如：当程序从运行在密集I/O的部分到密集计算部分时。最佳的比值还取决于上下文切换的消耗以及软件线程使用cache的频率。当然还离不开硬件线程的数量以及cache的具体情况（例如缓存的大小以及读写速度），这些都依赖于机器的结构。因此即使你的应用在某一平台上避免了超额认购的问题，在其它平台上还是有可能出问题的。</p>
+<p>如果你使用std::async,例如：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> fut = <span class="built_in">std</span>::async(doAsyncWork);</span><br></pre></td></tr></table></figure><br>调用就会使用C++标准库来管理线程。例如，超过系统承受的最大软件线程异常就会减少很多，因为使用上面的调用就不会发生这样的异常。std::async在调用时不保证会创建一个新的软件线程，它只是允许线程调度器为某个函数安排一个新线程用以获取结果，如果软件线程数量超出了系统的承受范围，系统将有自由不分配软件线程。</p>
+<p>如果你相信“将函数运行在需要它运行结果的线程上”这种话时，你很有可能会写出有负载均衡问题的代码。这时你可以使用std::async，运行时调度比你更清楚机器发生了什么，因为它管理着来自所有处理器的线程，不只是你的代码正在运存的那个线程。</p>
+<p>如果使用std::async，对于GUI线程的响应度的问题仍然无法解决。因为调度器无法知道哪一个线程有更高的优先级，这时你可以传递std::launch::async启动策略，它将会确保你要运行的GUI绘制是在一个不同的线程上，而不是get调用的线程上，并且还是立即执行（请参看：<a href="/2018/11/21/如果任务必须执行，请指定使用stdlaunchasync启动策略/">如果任务必须执行，请指定使用std::launch::async启动策略</a>，言外之意就是说，默认的std::async可能导致线程不执行或者延迟执行，导致GUI响应度降低。）。</p>
+<p>线程调度使用了和系统线程最大数一样的线程池用以避免超额认购，以及使用工作窃取算法（work-stealing algorithm）提升负载均衡。C++标准没有要求使用线程池或者工作窃取，但是在标准库中许多容器中已经使用了这项技术。如果你使用了一个基于任务的方法编程，你肯定会感叹于它的方便。而你如果直接使用std::thread，你将要解决一堆线程资源的耗尽、超额认购以及负载均衡的问题，而且还要考虑如何在其它机器上也能解决这些问题。</p>
+<p><strong>和基于线程编程相比，使用基于任务的设计可以让你从一堆手动要解决的线程管理问题上解脱，而且还提供了自然方法去检验函数的异步执行情况。</strong></p>
+<p>不过std::thread还是有它独特的使用场景的。下面列举几种：</p>
+<ul>
+<li>你需要使用依赖的线程实现的API。C++并发的API通常都是根据平台选择底层API实现的，例如pthread或者Windows的线程。这些API比C++的要丰富。（例如C++没有线程的优先级）为了访问这些底层实现的线程API，你就要使用std::thread对象中提供的native_handle成员函数，其中没有和std::future功能类似的函数。</li>
+<li>你需要并且有能力优化你应用中线程的使用。</li>
+<li>你需要跨越C++并发API实现某个线程技术。例如：在C++没有实现的平台上实现线程池。</li>
+</ul>
+<p><strong>总结</strong></p>
+<ul>
+<li>std::thread的API没有提供方法用于获取异步执行的函数的返回值，并且如果这些函数抛出异常，就立刻中止程序。</li>
+<li>基于线程的调用需要你手动管理线程耗尽、超额认购、负载均衡以及新平台适配等问题。基于任务的编程可以将这些问题交给系统解决。</li>
+<li>使用通过std::async的基于任务的编程时，默认的策略解决了几乎你要考虑的所有问题。响应优先级问题可以通过std::launch::async启动策略解决。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/11/13/%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8lambda%E6%9B%BF%E4%BB%A3std_bind/" rel="prev" title="尽量使用lambda替代std::bind">
+      <i class="fa fa-chevron-left"></i> 尽量使用lambda替代std::bind
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/11/21/%E5%A6%82%E6%9E%9C%E4%BB%BB%E5%8A%A1%E5%BF%85%E9%A1%BB%E6%89%A7%E8%A1%8C%EF%BC%8C%E8%AF%B7%E6%8C%87%E5%AE%9A%E4%BD%BF%E7%94%A8std_launch_async%E5%90%AF%E5%8A%A8%E7%AD%96%E7%95%A5/" rel="next" title="如果任务必须执行，请指定使用std::launch::async启动策略">
+      如果任务必须执行，请指定使用std::launch::async启动策略 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

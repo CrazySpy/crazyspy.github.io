@@ -46,15 +46,15 @@
   };
 </script>
 
-  <meta name="description" content="欧几里得算法欧几里得算法可以用于计算两个数的最大公约数。它的具体形式如下： gcd(a, b) &#x3D; gcd(b, a \% b)实现如果用C语言实现，它的代码可以如下：1234int gcd(int a, int b)&amp;#123;	return b ? gcd(b, a % b) : a;&amp;#125; 证明设r &#x3D; a \% b，则a &#x3D; k * b + r，移项得r &#x3D; a - k * b。再设">
+  <meta name="description" content="欧几里得算法欧几里得算法可以用于计算两个数的最大公约数。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="欧几里得算法与扩展欧几里得算法">
 <meta property="og:url" content="https://newblog.jiangxiwen.me/2019/03/21/%E6%AC%A7%E5%87%A0%E9%87%8C%E5%BE%97%E7%AE%97%E6%B3%95%E4%B8%8E%E6%89%A9%E5%B1%95%E6%AC%A7%E5%87%A0%E9%87%8C%E5%BE%97%E7%AE%97%E6%B3%95/index.html">
 <meta property="og:site_name" content="CrazySpy&#39;s blog">
-<meta property="og:description" content="欧几里得算法欧几里得算法可以用于计算两个数的最大公约数。它的具体形式如下： gcd(a, b) &#x3D; gcd(b, a \% b)实现如果用C语言实现，它的代码可以如下：1234int gcd(int a, int b)&amp;#123;	return b ? gcd(b, a % b) : a;&amp;#125; 证明设r &#x3D; a \% b，则a &#x3D; k * b + r，移项得r &#x3D; a - k * b。再设">
+<meta property="og:description" content="欧几里得算法欧几里得算法可以用于计算两个数的最大公约数。">
 <meta property="og:locale" content="zh">
 <meta property="article:published_time" content="2019-03-21T06:42:41.000Z">
-<meta property="article:modified_time" content="2020-01-11T12:49:30.522Z">
+<meta property="article:modified_time" content="2020-01-13T15:57:03.986Z">
 <meta property="article:author" content="CrazySpy">
 <meta name="twitter:card" content="summary">
 
@@ -224,7 +224,7 @@
                   <i class="fa fa-calendar-check-o"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-11 20:49:30" itemprop="dateModified" datetime="2020-01-11T20:49:30+08:00">2020-01-11</time>
+                <time title="Modified: 2020-01-13 23:57:03" itemprop="dateModified" datetime="2020-01-13T23:57:03+08:00">2020-01-13</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -255,7 +255,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <h1 id="欧几里得算法"><a href="#欧几里得算法" class="headerlink" title="欧几里得算法"></a>欧几里得算法</h1><p>欧几里得算法可以用于计算两个数的最大公约数。它的具体形式如下：</p>
+        <h1 id="欧几里得算法"><a href="#欧几里得算法" class="headerlink" title="欧几里得算法"></a>欧几里得算法</h1><p>欧几里得算法可以用于计算两个数的最大公约数。<a id="more"></a>它的具体形式如下：</p>
 <script type="math/tex; mode=display">gcd(a, b) = gcd(b, a \% b)</script><h2 id="实现"><a href="#实现" class="headerlink" title="实现"></a>实现</h2><p>如果用C语言实现，它的代码可以如下：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">gcd</span><span class="params">(<span class="keyword">int</span> a, <span class="keyword">int</span> b)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">return</span> b ? gcd(b, a % b) : a;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <h2 id="证明"><a href="#证明" class="headerlink" title="证明"></a>证明</h2><p>设<script type="math/tex">r = a \% b</script>，则<script type="math/tex">a = k * b + r</script>，移项得<script type="math/tex">r = a - k * b</script>。再设<script type="math/tex">d = gcd\left(a, b\right)</script>，显然<script type="math/tex">d | a</script>且<script type="math/tex">d | b</script>，由此可以推出<script type="math/tex">d | r</script>，即<script type="math/tex">d | a \% b</script>。因此可得a、b的公约数也是b、a % b的公约数。</p>
 <p>如何证明是最大的公约数呢？假设b和 <script type="math/tex">a \% b</script> 存在更大的公约数q，<script type="math/tex">q | b</script>并且 <script type="math/tex">q | (a - k * b)</script> ，可得<script type="math/tex">q | a</script> 。所以如果假设成立，那么存在更大的公约数q，使得 <script type="math/tex">q | a</script> 且 <script type="math/tex">q | b</script> 。因为d已经是a、b的最大公约数，所以 <script type="math/tex">q = b</script> 。因此得证。</p>
@@ -374,7 +374,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">52</span>
+          <span class="site-state-item-count">54</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

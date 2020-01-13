@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="当你调用std::async执行一个函数时，你通常意图异步执行这个函数。但是std::async的行为并不是你真正需要的，因为你可能仅仅需要的是在std::async启动策略下运行。C++中一共有两种策略，每一个都被std::launch中的一个enum所枚举。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如果任务必须执行，请指定使用std::launch::async启动策略">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/11/21/%E5%A6%82%E6%9E%9C%E4%BB%BB%E5%8A%A1%E5%BF%85%E9%A1%BB%E6%89%A7%E8%A1%8C%EF%BC%8C%E8%AF%B7%E6%8C%87%E5%AE%9A%E4%BD%BF%E7%94%A8std_launch_async%E5%90%AF%E5%8A%A8%E7%AD%96%E7%95%A5/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="当你调用std::async执行一个函数时，你通常意图异步执行这个函数。但是std::async的行为并不是你真正需要的，因为你可能仅仅需要的是在std::async启动策略下运行。C++中一共有两种策略，每一个都被std::launch中的一个enum所枚举。">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-11-21T11:33:03.000Z">
+<meta property="article:modified_time" content="2020-01-13T15:27:07.795Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/11/21/%E5%A6%82%E6%9E%9C%E4%BB%BB%E5%8A%A1%E5%BF%85%E9%A1%BB%E6%89%A7%E8%A1%8C%EF%BC%8C%E8%AF%B7%E6%8C%87%E5%AE%9A%E4%BD%BF%E7%94%A8std_launch_async%E5%90%AF%E5%8A%A8%E7%AD%96%E7%95%A5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>如果任务必须执行，请指定使用std::launch::async启动策略 | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/11/21/%E5%A6%82%E6%9E%9C%E4%BB%BB%E5%8A%A1%E5%BF%85%E9%A1%BB%E6%89%A7%E8%A1%8C%EF%BC%8C%E8%AF%B7%E6%8C%87%E5%AE%9A%E4%BD%BF%E7%94%A8std_launch_async%E5%90%AF%E5%8A%A8%E7%AD%96%E7%95%A5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          如果任务必须执行，请指定使用std::launch::async启动策略
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-11-21 19:33:03" itemprop="dateCreated datePublished" datetime="2018-11-21T19:33:03+08:00">2018-11-21</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-13 23:27:07" itemprop="dateModified" datetime="2020-01-13T23:27:07+08:00">2020-01-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>当你调用std::async执行一个函数时，你通常意图异步执行这个函数。但是std::async的行为并不是你真正需要的，因为你可能仅仅需要的是在std::async启动策略下运行。C++中一共有两种策略，每一个都被std::launch中的一个enum所枚举。<a id="more"></a>假设把函数f传递给std::async运行，<strong>std::launch::async策略意味着f必须异步运行，也就是在不同线程下运行；std::launch::deferred策略意味着f只会在调用了std::async返回的future的get和wait方法时运行。这也就是说，f的运行是延迟的，直到需要使用其结果再执行。</strong>当get和wait方法执行时，f将同步执行，也就是说调用者将会被阻塞，直到f完成运行。如果get和wait都没有被调用过，那么f永远不会执行。<br>你可能会惊讶，std::async默认启动策略不是两种启动策略之一，而是两种启动策略都有。下面的代码将表达同一种意思:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> fut1 = <span class="built_in">std</span>::async(f);</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> fut2 = <span class="built_in">std</span>::async(<span class="built_in">std</span>::launch::async | <span class="built_in">std</span>::launch::deferred,</span><br><span class="line">	f</span><br><span class="line">);</span><br></pre></td></tr></table></figure><br>默认策略因此允许f在异步或同步中的一个下运行。std::async和标准库中的线程管理组件被允许灵活地负责线程的创建和销毁，并且避免超额认购以及负载均衡。这就让使用std::async的应用变得很方便了。这个灵活的机制会根据系统的负载情况决定是立刻创建新线程执行，还是延迟、在get或wait被调用时在当前线程上执行。</p>
+<p>但是使用上面这种默认启动策略却有一些隐含意义。如下代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> fut = <span class="built_in">std</span>::async(f); <span class="comment">// f使用默认的启动策略</span></span><br></pre></td></tr></table></figure><br>它有如下的隐含意义：</p>
+<ul>
+<li>无法预测f是否立即运行，因为f可能被调度成延迟运行。</li>
+<li>无法预测f是否在执行fut的get或者wait的线程上运行。如果在线程t上执行fut的get和wait，那么是否f运行在t上面是无法预测的。因为如果系统负荷低，调度器选择了立即创建新线程执行，也就是std::launch::async，那么f就会在新线程上执行。</li>
+<li>无法预测f是否会运行，因为可能无法保证每个fut都会被调用get或wait。</li>
+</ul>
+<p>默认的启动策略的调度机制和thread_local混合得不是很好，因为如果f要读或者写线程内本地存储（thread-local storage，TLS，就是某个生命周期在线程内的变量），是无法预测哪个线程的thread_local变量被访问的，可能是独立线程的TLS，也有可能指的是调用了fut的get或wait的线程的TLS被访问。</p>
+<p>默认的启动策略还影响基于wait设置超时的循环，因为<strong>调用延迟任务的wait_for或者wait_until会是future为std::future_status::defered状态</strong>。这也就是说下面的循环看上去应该是即时的，但是事实上却可能永远循环下去:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> <span class="built_in">std</span>::literals;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">f</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="built_in">std</span>::this_thread::sleep_for(<span class="number">1</span>s);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> fut = <span class="built_in">std</span>::async(f);</span><br><span class="line"></span><br><span class="line"><span class="keyword">while</span>(fut.wait_for(<span class="number">100</span>ms) != <span class="built_in">std</span>::future_status::<span class="built_in">ready</span>)</span><br><span class="line">&#123;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>如果f线程以std::async策略调用，那么运行结果是没有问题的；而如果是以std::deferred策略调用，那么就会出现一直循环的情况，因为fut的状态一直都是std::future_status::deferred。<br>在开发和单元测试环节中这些问题都很有可能被忽视，因为只有在系统高负载时才会被发现。因为超额认购或者线程达到上限问题而推迟了线程的运行，这时就会出现上面的死循环。<br>而修复这个问题的方案也很简单，只要检查std::async构造的future是不是延迟的任务，如果是，避免使用超时的循环。不过遗憾的是没有办法直接询问future任务是不是延迟的。你可以通过使用一个基于超时的函数来检查future是不是延迟的，例如使用wait_for，时间设置成0。很明显这里使用wait_for不是为了真的等待什么，而是检查它的返回值是不是std::future_status::deferred:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> fut = <span class="built_in">std</span>::async(<span class="built_in">std</span>::launch::async | <span class="built_in">std</span>::launch::deferred, f);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span>(fut.wait_for(<span class="number">0</span>s) == <span class="built_in">std</span>::future_status::deferred)</span><br><span class="line">&#123;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">while</span>(fut.wait_for(<span class="number">100</span>ms) != <span class="built_in">std</span>::future_status::<span class="built_in">ready</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		...</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>以上诸多考虑的结果就是，在以下几种情况下使用默认启动策略的std::async：</p>
+<ul>
+<li>该任务不需要与调用get或wait的线程同时运行。</li>
+<li>对于读或写哪个线程的thread_local变量无所谓。</li>
+<li>保证对于std::async返回的future有get或者wait中的一个被执行，或者接受线程没有被执行过。</li>
+<li>使用wait_for或者wait_until等要注意延迟状态。</li>
+</ul>
+<p>如果你没有上面的条件，而可能希望保证std::async将任务调度成真正的异步，那么使用的方法就是将std::launch::async作为第一个参数，调用如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> fut = <span class="built_in">std</span>::async(<span class="built_in">std</span>::launch::async, f);</span><br></pre></td></tr></table></figure><br>事实上，如果std::async的第一个参数默认就是std::launch::async，就会使std::async成为一个非常方便的工具，所以我们可以这样写:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> F, <span class="keyword">typename</span>... Ts&gt;</span><br><span class="line"><span class="keyword">inline</span> <span class="built_in">std</span>::<span class="built_in">future</span>&lt;<span class="keyword">typename</span> <span class="built_in">std</span>::result_of&lt;F(Ts...)&gt;::type&gt;</span><br><span class="line">reallyAsync(F&amp;&amp; f, Ts&amp;&amp;... params)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">std</span>::async(<span class="built_in">std</span>::launch::async,</span><br><span class="line">		<span class="built_in">std</span>::forward&lt;F&gt;(f),</span><br><span class="line">		<span class="built_in">std</span>::forward&lt;Ts&gt;(params)...</span><br><span class="line">	);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>这就是一个普通的完美转发，对于返回的future的类型的推测也非常简单，直接使用std::result_of即可。</p>
+<p>改写成C++14的风格的话，代码如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> F, <span class="keyword">typename</span>... Ts&gt;</span><br><span class="line"><span class="keyword">inline</span></span><br><span class="line"><span class="keyword">auto</span></span><br><span class="line">reallyAsync(F&amp;&amp; f, Ts&amp;&amp;... params)</span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">std</span>::async(<span class="built_in">std</span>::launch::async,</span><br><span class="line">		<span class="built_in">std</span>::forward&lt;F&gt;(f),</span><br><span class="line">		<span class="built_in">std</span>::forward&lt;Ts&gt;(params)...</span><br><span class="line">	);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p><strong>总结</strong></p>
+<ul>
+<li>std::async的默认启动策略是同步和异步混合的任务执行。</li>
+<li>默认启动策略可能会使访问哪个线程的thread_local是不确定的。这也意味着，任务可能永远不执行，并且这也有可能在使用超时函数作为逻辑判断的条件时出问题。在延迟启动策略时，超时函数会使future状态为std::future_status::deferred。</li>
+<li>如果任务必须异步执行，请指定std::async的参数为std::launch::async。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/11/16/%E5%B0%BD%E9%87%8F%E4%BD%BF%E7%94%A8%E5%9F%BA%E4%BA%8E%E4%BB%BB%E5%8A%A1%E7%9A%84%E7%BC%96%E7%A8%8B%E6%9B%BF%E4%BB%A3%E5%9F%BA%E4%BA%8E%E7%BA%BF%E7%A8%8B%E7%9A%84%E7%BC%96%E7%A8%8B/" rel="prev" title="尽量使用基于任务的编程替代基于线程的编程">
+      <i class="fa fa-chevron-left"></i> 尽量使用基于任务的编程替代基于线程的编程
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/02/18/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="next" title="正则表达式基础">
+      正则表达式基础 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">54</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
