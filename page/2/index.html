@@ -190,6 +190,95 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/11/11/%E4%BD%BF%E7%94%A8%E5%88%9D%E5%A7%8B%E5%8C%96%E6%8D%95%E8%8E%B7%E5%B0%86%E5%AF%B9%E8%B1%A1%E7%A7%BB%E5%8A%A8%E5%88%B0lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%B8%AD/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/11/11/%E4%BD%BF%E7%94%A8%E5%88%9D%E5%A7%8B%E5%8C%96%E6%8D%95%E8%8E%B7%E5%B0%86%E5%AF%B9%E8%B1%A1%E7%A7%BB%E5%8A%A8%E5%88%B0lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%B8%AD/" class="post-title-link" itemprop="url">使用初始化捕获将对象移动到lambda表达式中</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-11-11 21:49:04" itemprop="dateCreated datePublished" datetime="2018-11-11T21:49:04+08:00">2018-11-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-10 22:57:09" itemprop="dateModified" datetime="2020-01-10T22:57:09+08:00">2020-01-10</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>有时，你既不想使用按值捕获，也不想使用按址捕获。例如：你有一个只可以移动的对象（std::unique_ptr或者std::future等），你想把它移动进lambda表达式中，C++11中没有办法实现这些，而如果复制这些对象又需要大量的消耗，移动显然是最佳选择。虽然C++14中支持直接将对象移动到表达式中，可是C++11没有办法实现，这时应该怎么办？<br>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/11/11/%E4%BD%BF%E7%94%A8%E5%88%9D%E5%A7%8B%E5%8C%96%E6%8D%95%E8%8E%B7%E5%B0%86%E5%AF%B9%E8%B1%A1%E7%A7%BB%E5%8A%A8%E5%88%B0lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E4%B8%AD/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
     <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/11/09/%E9%81%BF%E5%85%8D%E4%BD%BF%E7%94%A8lambda%E7%9A%84%E9%BB%98%E8%AE%A4%E6%8D%95%E8%8E%B7%E6%A8%A1%E5%BC%8F/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -982,95 +1071,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
-    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/14/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E4%B8%ADmake_xxx%E5%87%BD%E6%95%B0%E5%92%8Cnew%E7%9A%84%E4%BD%BF%E7%94%A8/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="CrazySpy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="CrazySpy's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/10/14/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E4%B8%ADmake_xxx%E5%87%BD%E6%95%B0%E5%92%8Cnew%E7%9A%84%E4%BD%BF%E7%94%A8/" class="post-title-link" itemprop="url">智能指针中make_xxx函数和new的使用</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-10-14 15:11:51" itemprop="dateCreated datePublished" datetime="2018-10-14T15:11:51+08:00">2018-10-14</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-06 17:00:11" itemprop="dateModified" datetime="2020-01-06T17:00:11+08:00">2020-01-06</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-                  , 
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
-                    <span itemprop="name">Effective Modern C++</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>在前面的std::unique_ptr、std::shared_ptr智能指针的介绍中，都介绍了使用new的方式构造智能指针。接下来我们会着重将使用new构造智能指针的方式和使用std::make_unique、std::make_share的方式进行比较。<br>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/10/14/%E6%99%BA%E8%83%BD%E6%8C%87%E9%92%88%E4%B8%ADmake_xxx%E5%87%BD%E6%95%B0%E5%92%8Cnew%E7%9A%84%E4%BD%BF%E7%94%A8/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -1141,7 +1141,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">55</span>
+          <span class="site-state-item-count">56</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>

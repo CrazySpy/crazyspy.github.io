@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="在之前我们说到，一个可连接的（joinable）std::thread有一个对应系统底层的执行线程。一个非延迟任务的future也和底层系统线程有一个相似的关系。因此std::thread对象和future对象都可以被看作是系统线程的两个使用处理方式。 之前我们还说过，std::thread在遇到可连接线程跳出作用域时，采取的策略是程序直接终止运行，而不是隐式执行join或者detach。而在fu">
+<meta property="og:type" content="article">
+<meta property="og:title" content="请注意不同的线程处理方式的析构函数行为">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/12/02/%E8%AF%B7%E6%B3%A8%E6%84%8F%E4%B8%8D%E5%90%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E7%9A%84%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E8%A1%8C%E4%B8%BA/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="在之前我们说到，一个可连接的（joinable）std::thread有一个对应系统底层的执行线程。一个非延迟任务的future也和底层系统线程有一个相似的关系。因此std::thread对象和future对象都可以被看作是系统线程的两个使用处理方式。 之前我们还说过，std::thread在遇到可连接线程跳出作用域时，采取的策略是程序直接终止运行，而不是隐式执行join或者detach。而在fu">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-12-02T15:10:42.000Z">
+<meta property="article:modified_time" content="2020-01-14T15:56:45.571Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/12/02/%E8%AF%B7%E6%B3%A8%E6%84%8F%E4%B8%8D%E5%90%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E7%9A%84%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E8%A1%8C%E4%B8%BA/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>请注意不同的线程处理方式的析构函数行为 | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/12/02/%E8%AF%B7%E6%B3%A8%E6%84%8F%E4%B8%8D%E5%90%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E7%9A%84%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E8%A1%8C%E4%B8%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          请注意不同的线程处理方式的析构函数行为
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-12-02 23:10:42" itemprop="dateCreated datePublished" datetime="2018-12-02T23:10:42+08:00">2018-12-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-14 23:56:45" itemprop="dateModified" datetime="2020-01-14T23:56:45+08:00">2020-01-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在之前我们说到，一个可连接的（joinable）std::thread有一个对应系统底层的执行线程。一个非延迟任务的future也和底层系统线程有一个相似的关系。因此std::thread对象和future对象都可以被看作是系统线程的两个使用处理方式。</p>
+<p>之前我们还说过，std::thread在遇到可连接线程跳出作用域时，采取的策略是程序直接终止运行，而不是隐式执行join或者detach。<strong>而在future中，则是有可能隐式执行join，也有可能隐式执行detach，甚至也有可能什么都不做。反正future是不会导致程序终止。</strong>下面我们就来细讲future的这种策略。<br><a id="more"></a><br>future会将程序的结果保存在一个叫做std::promise的对象中，也就是说被调用者就是通过std::promise对象与调用者进行通信以传递结果。但是有一个问题，就是被调用者的结果存放在哪才能响应调用者执行get呢？如果这个结果存放在被调用者的std::promise中，那么在被调用完之后std::promise就会随着被调用对象而销毁；这个结果如果存放在调用者的future中，因为std::future会被用于创建一个std::shared_future（被调用者的结果的拥有权从std::future转交给std::shared_future），这会导致原std::future销毁后还会被复制许多次，又因为不是所有结果的类型是可拷贝的，所以这样做也不是很合适。那么哪一个和被调用者相关的future存放结果呢？<br>所以被调用者执行结果既不是适合存放在被调用者相关的对象中，也不是适合存放在调用者相关的对象中。而是存放在两者之外的一个地方，这个地方被称为<strong>共享状态</strong>（shared state）。共享状态是一块堆中的对象，它的类型、接口以及实现方式在标准中没有指定，因此标准库编写者可以随心所欲地实现它。</p>
+<p>共享状态的存在是非常重要的，因为它直接决定了future的销毁方式。具体的来说：</p>
+<ul>
+<li>最后一个使用某个非延迟任务的共享状态的future的销毁会通过std::async阻塞到任务完成。在必要时，对这个future的销毁会在异步运行的线程上隐式调用join。</li>
+<li>其它的future就简单地直接销毁future对象。在异步运行的线程上，这就像在对应的线程上隐式执行了detach。在延迟执行的对象上，这就相当于不执行这个任务。</li>
+</ul>
+<p>这些规则听上去很复杂，但是我们可以用一个“普通”规则和一个“特殊”规则来描述：<br>“普通”规则：只有future的数据成员会被销毁，在销毁时不会执行join、detach甚至是运行任何东西（事实上还是会做一件事的，那就是会递减共享状态的引用计数器，这步操作是由使用了这个共享状态的future和被调用者的std::promise共同完成的，这个引用计数器记录了何时可以销毁共享状态）。</p>
+<p>如果一个future满足了下面所有的条件时就会实行“特殊”：</p>
+<ul>
+<li>这个future必须是引用了由std::async创造的共享状态</li>
+<li>任务的启动策略必须是std::launch::async。不论是系统在运行时选择的还是在std::async中选择的。</li>
+<li>这个future是最后一个引用某个共享状态的一个。std::future永远都是满足条件的。但是std::shared_future就会对是否是最后一个引用进行判断。</li>
+</ul>
+<p>只有当所有的条件都满足了，future的销毁才会使用“特殊”行为。“特殊”行为就是阻塞线程，直到异步运行的任务完成。更具体的说就是，就是类似于在std::async启动策略创建的任务上调用join。</p>
+<p>为什么会对非延迟任务、并有std::async启动的分享状态有一条特殊的规则呢？这是因为标准委员会希望避免默认detach带来的问题，但是他们又不希望使用激进的策略作为命令控制编程。所以他们妥协使用隐式的join。这个决定是充满争议的，因此在C+14指定是也存在强烈的呼声禁用这个特殊的行为，不过最终还是没有做出任何改变。</p>
+<p>在future提供的API中，没有一个是可以确定future是否引用了由std::async创建的分享状态，所以给你一个future对象，你是无法确定系统是否会在销毁异步运行的任务时使用阻塞。</p>
+<p>这种行为不确定就会带来问题，下面讲如何避免这种不确定。<br>有如下的补全代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">future</span>&lt;<span class="keyword">void</span>&gt;&gt; futs;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::shared_future&lt;<span class="keyword">double</span>&gt; fut;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>当然如果你有方法知道future不会满足上面的三个条件以在销毁时执行特殊行为（例如通过程序逻辑），你确实可以保证future不会再销毁时阻塞。不过这里可以使用一种方法，上面讲到，必须是引用std::async创建的共享状态的future会发生阻塞，而能创建共享状态的方式不只有std::async，还有例如std::packaged_task。std::packaged_task对象会通过包装要异步执行的函数，然后使得它的结果会被放到共享状态中。之后可以通过std::packaged_task的get_future函数获取引用了分享状态的future：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">calcValue</span><span class="params">()</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::packaged_task&lt;<span class="keyword">int</span>()&gt; pt(calcValue); <span class="comment">// 包装calcValue，使得它可以异步执行</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> fut = pt.get_future(); <span class="comment">// 获取pt的future</span></span><br></pre></td></tr></table></figure><br><strong>这里的fut的共享状态不是有std::async创建的，因此它的销毁也会遵循“常规”行为。</strong></p>
+<p>只要创建了，std::packaged_task pt就可以在线程上运行了。（它可以通过std::async运行，但是如果你希望通过std::async运行某个任务，就没有必要使用std::packaged_task。因为std::async做了std::packaged_task做的任何事情。）</p>
+<p>std::packaged_task是不可拷贝的，因此当pt传递给std::thread的构造函数时，它必须要转换成右值：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="function">thread <span class="title">t</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">move</span>(pt))</span></span>;</span><br></pre></td></tr></table></figure></p>
+<p>在知道std::packaged_task特性之后，我们就可以使用其来保证future的销毁时遵循普通行为了。在下面的代码中我们要做一个有趣的分析，我们把代码放在一个作用域中：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">	<span class="built_in">std</span>::packaged_task&lt;<span class="keyword">int</span>()&gt; pt(calcValue);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">auto</span> fut = pt.get_future();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">std</span>::<span class="function">thread <span class="title">t</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">move</span>(pt))</span></span>;</span><br><span class="line"></span><br><span class="line">	... <span class="comment">// 作用域的结尾。在下面会讨论这里的三种情况。</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>代码中的“…”部分是在std::thread的创建之后、作用域结束之前，我们要进行讨论。t这里可能会有三种情况：</p>
+<ul>
+<li>t没有发生什么。在这里t将会变得是可以join的，这就会导致程序终止。</li>
+<li>t执行了join。那么就没有必要在fut的析构函数中进行阻塞，因为调用者已经执行join。</li>
+<li>t执行了detach。那么就没有必要在fut的析构函数中执行detach。因为调用者已经执行detach。</li>
+</ul>
+<p>换句话说，<strong>如果future的共享状态是由std::packaged_task生成的，通常是没有必要考虑销毁策略。因为究竟是终止程序、join还是detach的选择将会在std::thread对象创建后进行指定，与std::packaged_task无关。</strong></p>
+<p><strong>总结</strong></p>
+<ul>
+<li>future的销毁通常只是销毁数据成员。</li>
+<li>最后一次使用某个引用了分享状态的future，并且这个分享状态是非延迟任务的、通过std::async启动的future将会阻塞到任务完成后再销毁自己。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/11/22/%E7%A1%AE%E4%BF%9D%E8%B7%B3%E5%87%BA%E4%BD%9C%E7%94%A8%E5%9F%9F%E6%97%B6std_thread%E6%98%AF%E4%B8%8D%E5%8F%AF%E8%BF%9E%E6%8E%A5%E7%9A%84%EF%BC%88unjoinable%EF%BC%89/" rel="prev" title="确保跳出作用域时std::thread是不可连接的（unjoinable）">
+      <i class="fa fa-chevron-left"></i> 确保跳出作用域时std::thread是不可连接的（unjoinable）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/02/18/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="next" title="正则表达式基础">
+      正则表达式基础 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
