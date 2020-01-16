@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="在C++编程中std::atomic经常被用于某个互斥访问的变量，它使用了特殊的机器指令保证了互斥与效率兼具（相比较使用mutex）。下面展示一个使用了std::atomic的例子：123456789std::atomic&lt;int&gt; ai(0);ai &#x3D; 10;std::cout &lt;&lt; ai;++ai;--ai;在执行完上面的代码后，可能的结果只可能是0，10，11。上面的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="对并行使用std::atomic，对特殊内存使用volatile">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/12/09/%E5%AF%B9%E5%B9%B6%E8%A1%8C%E4%BD%BF%E7%94%A8std_atomic%EF%BC%8C%E5%AF%B9%E7%89%B9%E6%AE%8A%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8volatile/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="在C++编程中std::atomic经常被用于某个互斥访问的变量，它使用了特殊的机器指令保证了互斥与效率兼具（相比较使用mutex）。下面展示一个使用了std::atomic的例子：123456789std::atomic&lt;int&gt; ai(0);ai &#x3D; 10;std::cout &lt;&lt; ai;++ai;--ai;在执行完上面的代码后，可能的结果只可能是0，10，11。上面的">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-12-09T11:38:41.000Z">
+<meta property="article:modified_time" content="2020-01-16T12:18:28.804Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/12/09/%E5%AF%B9%E5%B9%B6%E8%A1%8C%E4%BD%BF%E7%94%A8std_atomic%EF%BC%8C%E5%AF%B9%E7%89%B9%E6%AE%8A%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8volatile/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>对并行使用std::atomic，对特殊内存使用volatile | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/12/09/%E5%AF%B9%E5%B9%B6%E8%A1%8C%E4%BD%BF%E7%94%A8std_atomic%EF%BC%8C%E5%AF%B9%E7%89%B9%E6%AE%8A%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8volatile/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          对并行使用std::atomic，对特殊内存使用volatile
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-12-09 19:38:41" itemprop="dateCreated datePublished" datetime="2018-12-09T19:38:41+08:00">2018-12-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-16 20:18:28" itemprop="dateModified" datetime="2020-01-16T20:18:28+08:00">2020-01-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在C++编程中std::atomic经常被用于某个互斥访问的变量，它使用了特殊的机器指令保证了互斥与效率兼具（相比较使用mutex）。下面展示一个使用了std::atomic的例子：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; ai(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">ai = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; ai;</span><br><span class="line"></span><br><span class="line">++ai;</span><br><span class="line"></span><br><span class="line">--ai;</span><br></pre></td></tr></table></figure><br>在执行完上面的代码后，可能的结果只可能是0，10，11。<br>上面的例子说明std::atomic只保证某时对std::atomic的访问是互斥的，并不保证整个过程是互斥的。在“std::cout &lt;&lt; ai”代码中，在ai的值被读之后、复制给标准输出之前，另一个线程可能改变ai的值，因此值除了是10之外还可能是11和0。 另一个值得注意的地方是最后两句代码的行为。这两个是<strong>“读后写”操作（read-modify-write，RMW）</strong>，但是它们的读和写两个操作从外界来看还是原子的。这就是std::atomic最重要的一个特性之一，在std::atomic构造完成之后，保证其所有成员函数包括RMW操作在其它线程看来都是原子的。</p>
+<p>而使用volatile的代码在多线程上没有任何保证任何事情<a id="more"></a>：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">volatile</span> <span class="keyword">int</span> <span class="title">vi</span><span class="params">(<span class="number">0</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">vi = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; vi;</span><br><span class="line"></span><br><span class="line">++vi;</span><br><span class="line"></span><br><span class="line">--vi;</span><br></pre></td></tr></table></figure><br>在代码执行的过程中，任何数字都有可能被输出，因为vi没有被互斥所保护，因此会发生<strong>数据竞赛（data race）</strong>。为了更好地理解上面的代码，有如下代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; ac(<span class="number">0</span>);</span><br><span class="line"><span class="function"><span class="keyword">volatile</span> <span class="keyword">int</span> <span class="title">vc</span><span class="params">(<span class="number">0</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* ---- Thread 1 ---- */</span> <span class="comment">/* ---- Thread 2 ---- */</span></span><br><span class="line">         ++ac;                    ++ac;</span><br><span class="line">         ++vc;                    ++vc;</span><br></pre></td></tr></table></figure><br>当两个线程都执行结束之后，ac的值肯定是2，因为他的每一个自加操作都是原子的。而对于vc则可能不是2，可能在读完vc的值之后另一个线程进来也读取了这个自加之前的值，然后两个线程再各自进行加一操作。并且vc的值还可能是任意值，因为<strong>C++标准中规定数据竞赛可以导致未定义行为</strong>，这也就意味着编译器可能生成做任何事情的代码，而且编译器有时会对有数据竞争的代码进行优化以避免数据竞赛，但是优化后的代码在数据竞赛时的行为仍然是不可预计的。</p>
+<p>RMW不是std::atomic在并发上打败volatile的唯一例子。在为了保证计算的数据在计算完之后才能使用，通常使用std::atomic作为标志用以显示计算是否完成。代码可能看上去是这样的：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">bool</span>&gt; valAvailable(<span class="literal">false</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> imptValue = computeImportantValue();</span><br><span class="line"></span><br><span class="line">valAvailable = <span class="literal">true</span>;</span><br></pre></td></tr></table></figure><br>这段代码读起来似乎没有什么问题，但是编译器看过去就是一对赋值操作。因此编译器可以对代码执行顺序进行打乱，也就是说如果有如下的代码：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a = b;</span><br><span class="line"></span><br><span class="line">x = y;</span><br></pre></td></tr></table></figure>
+<p>进行顺序打乱之后就可能是：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x = y;</span><br><span class="line"></span><br><span class="line">a = b;</span><br></pre></td></tr></table></figure><br>即使编译器不进行打乱操作，底层相关的硬件也可能进行打乱操作，因为这样有时候可以使代码运行更加快速。</p>
+<p><strong>如果使用std::atomic，在进行优化时有许多强制的规定，其中一个就是写入std::atomic数据之前的代码不会在写入之后执行（哪怕是在其它核上执行）。</strong>也就意味着：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> imptValue = computeImportantValue();</span><br><span class="line"></span><br><span class="line">valAvailable = <span class="literal">true</span>;</span><br></pre></td></tr></table></figure><br>编译器必须保证对imptValue和valAvailable赋值操作的顺序，底层相关的硬件也必须保证。因此，将valAvailable定义为std::atomic保证了imptValue在各线程不会再valAvailable之前改变。但是如果把valAvailable定义为volatile，就没有这样类似的打乱顺序的限制：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">volatile</span> <span class="keyword">bool</span> <span class="title">valAvailable</span><span class="params">(<span class="literal">false</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> imptValue = computeImportantValue();</span><br><span class="line"></span><br><span class="line">valAvailable = <span class="literal">true</span>;</span><br></pre></td></tr></table></figure><br>这样编译器可能就会打乱对imptValue和valAvailable赋值操作的顺序，并且底层的硬件也可能会打乱执行顺序，例如让其它CPU核心的线程在imptValue改变之前改变了valAvailable。<br>也就是说，voliate有两个问题，无法保证操作的原子性并且在代码打乱顺序操作上没有限制，这也就是volatile没有在并发编程上有太大用处的原因。<br>但是volatile有它自己的用处，它可以用在特殊行为的内存。在对“普通”内存写入值后，在其它数据覆盖之前是不会有变动的。例如，有一个普通的int变量，并且有如下序列的操作：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> x;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> y = x; <span class="comment">// 对x进行读取</span></span><br><span class="line"></span><br><span class="line">y = x; <span class="comment">// 再次读取x</span></span><br></pre></td></tr></table></figure><br>编译器将通过去除对y的复制来优化生成代码，因为它和y的初始化一样，因此是多余的。“普通”的内存中，如果在往内存里写入值之后不再读这个值，然后又往这个内存写入值时，会去除第一次写的操作，因为这个值没有被使用过。这种冗余读的操作通常被称为<strong>冗余负载（redundant loads）</strong>，而这种多余的写被称为<strong>死储存（dead stores）</strong>。所以例如：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> y = x;</span><br><span class="line"></span><br><span class="line">y = x;</span><br><span class="line"></span><br><span class="line">x = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">x = <span class="number">20</span>;</span><br></pre></td></tr></table></figure><br>编译器将会优化成如下代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> y = x;</span><br><span class="line"></span><br><span class="line">x = <span class="number">20</span>;</span><br></pre></td></tr></table></figure><br>这些冗余的代码可能不是编写出的，而是在经过编译器实例化模板、内联以及各种打乱顺序的优化之后得到的代码里有这样冗余的代码，然后编译器会进行如上的优化。这样的优化通常只会发生在“普通”的内存中，“特殊”的内存不会进行上述的优化。最常见的特殊内存是用于内存映射I/O的内存。这种内存通常和外接的设备进行通信，例如：传感器、显示器、打印机等等这类不进行传统I/O操作的内存。我们再来考虑一下这段看上去进行了冗余读的代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> y = x;</span><br><span class="line"></span><br><span class="line">y = x;</span><br></pre></td></tr></table></figure><br>如果x对应了一个值，这个值来自于温度传感器，第二个x就不是冗余的了，因为温度可能在第一句和第二句代码之间发生改变。也就是说这段看上去冗余的写操作实际上可能进行了如下操作：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">x = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">x = <span class="number">20</span>;</span><br></pre></td></tr></table></figure><br>还有可能x对应的是不同无线电发射器的控制端口，如果将第一个复制进行优化去除，那么就会改变了无线电发射器的发送序列。  </p>
+<p>总之，总结上面，如果读取的或者写入的不是当前内存内的信息时（例如外部内存），就会导致本机无法感知的读或写，这样进行优化无疑是有问题的。而使用volatile就是告诉编译器解决“特殊”内存的问题。它相当于告诉编译器，不要进行任何优化。所以如果x对应的是“特殊”内存，那么应该被定义为volatile。考虑下面这一段代码序列：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">volatile</span> <span class="keyword">int</span> x;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> y = x;</span><br><span class="line"></span><br><span class="line">y = x; <span class="comment">// 再次读取x，不会被优化去除</span></span><br><span class="line"></span><br><span class="line">x = <span class="number">10</span>; <span class="comment">// 再次写入x，不会被优化去除</span></span><br><span class="line"></span><br><span class="line">x = <span class="number">20</span>;</span><br></pre></td></tr></table></figure><br>在这里的y还是volatile int类型的，这个我们从处理特殊内存时要保留冗余负载和死储存可以得出。<br>那么这里为什么不可以用std::atomic呢？首先我们先来看看如果x定义为std::atomic的代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; x;</span><br><span class="line"></span><br><span class="line"><span class="keyword">auto</span> y = x; <span class="comment">// 理论上读取x</span></span><br><span class="line"></span><br><span class="line">y = x; <span class="comment">// 理论上再次读取x</span></span><br><span class="line"></span><br><span class="line">x = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line">x = <span class="number">20</span>;</span><br></pre></td></tr></table></figure><br>代码会被优化成：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">auto</span> y = x;</span><br><span class="line"></span><br><span class="line">x = <span class="number">20</span>;</span><br></pre></td></tr></table></figure><br>这显然对于特殊内存来说是不可接受的行为。而且，这段代码不会被编译通过，因为std::atomic是不可拷贝的。因为之前说过，std::atomic的一切行为都是原子的，为了复制x到y中，编译器会生成代码以原子的操作读x并且写到y，但是硬件没有办法完成这样的操作，因此std::atomic是不可复制的，对于移动操作也是如此，因此std::atomic不存在移动和复制操作。但是还是有方法可以做到将y赋以x的值，只要通过load和store两个函数就行：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; y(x.load()); <span class="comment">// 读x</span></span><br><span class="line"></span><br><span class="line">y.store(x.load()); <span class="comment">// 再次读x</span></span><br></pre></td></tr></table></figure><br>但是这样做又将x的读（x.load()）和y的初始化和存储混在一起，没有理由将它们作为一个原子操作执行。在得到这样的代码之后，编译器将会进行优化，将x的值存入到寄存器中，一面对其读取两次<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">register</span> = x.load();</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; y(<span class="keyword">register</span>);</span><br><span class="line"></span><br><span class="line">y.store(<span class="keyword">register</span>);</span><br></pre></td></tr></table></figure><br>但是对于“特殊”内存，这样的优化是不可以的，因此我们可以使用std::atomic和volatile结合的方式：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">volatile</span> <span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; val;</span><br></pre></td></tr></table></figure><br>这种方法是非常实用的，因为它可以用在例如内存映射的I/O设备被并发访问时。</p>
+<p>最后有一点还想说明一下，有些开发者喜欢使用std::atomic的load和store成员函数，这种偏好甚至会体现在无须使用它们的情况上。这是不合理的，访问std::atomic通常会比访问非std::atomic的变量速度慢，并且之前就已经说明，std::atomic已经阻止了编译器的优化。调用load和store函数可以帮助确定可扩展性的瓶颈，如果在表示与其它线程交换信息的地方（例如：使用了flag表示数据是否可用）没有看到对变量使用store函数，这可能就意味着这个变量本应声明但没有声明为std::atomic。</p>
+<p><strong>总结</strong></p>
+<ul>
+<li>std::atomic可以在不使用mutex的条件下访问多线程的共享数据，它是并发编程的有用工具。并且会在编译器优化时对执行顺序作出限制，例如：写入std::atomic数据之前的代码不会在写入之后执行。</li>
+<li>volatile用于读和写不可以被优化去除的内存中，它是“特殊”内存的有用工具。但是它在编译器优化时不会对执行顺序有限制。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/12/07/%E8%80%83%E8%99%91%E4%BD%BF%E7%94%A8void%E7%B1%BB%E5%9E%8B%E7%9A%84future%E7%9A%84%E4%B8%80%E6%AC%A1%E6%80%A7%E7%9A%84%E4%BA%8B%E4%BB%B6%E9%80%9A%E4%BF%A1/" rel="prev" title="考虑使用void类型的future的一次性的事件通信">
+      <i class="fa fa-chevron-left"></i> 考虑使用void类型的future的一次性的事件通信
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/12/13/%E5%A6%82%E6%9E%9C%E5%8F%AF%E5%A4%8D%E5%88%B6%E7%B1%BB%E5%9E%8B%E5%8F%82%E6%95%B0%E7%A7%BB%E5%8A%A8%E7%9A%84%E4%BB%A3%E4%BB%B7%E4%BD%8E%E5%B9%B6%E4%B8%94%E5%A7%8B%E7%BB%88%E8%A2%AB%E5%A4%8D%E5%88%B6%EF%BC%8C%E8%AF%B7%E8%80%83%E8%99%91%E6%8C%89%E5%80%BC%E4%BC%A0%E5%8F%82/" rel="next" title="如果可复制类型参数移动的代价低并且始终被复制，请考虑按值传参">
+      如果可复制类型参数移动的代价低并且始终被复制，请考虑按值传参 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">59</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>

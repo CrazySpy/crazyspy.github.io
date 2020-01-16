@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="首先声明：下面的“复制”和“拷贝”词语是严格区分的。“复制”指的是传统意义上的复制，“对于对象的复制”就是指对某个对象进行复制构造或者复制赋值。而对于“拷贝”，指的是包括“复制”和“移动”在内的操作。例如将a拷贝到b，这只是强调b和之前的a一模一样，但不保证a还存在。这一点在《Effective modern C++》英文版中的286页注释有说明。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如果可复制类型参数移动的代价低并且始终被复制，请考虑按值传参">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/12/13/%E5%A6%82%E6%9E%9C%E5%8F%AF%E5%A4%8D%E5%88%B6%E7%B1%BB%E5%9E%8B%E5%8F%82%E6%95%B0%E7%A7%BB%E5%8A%A8%E7%9A%84%E4%BB%A3%E4%BB%B7%E4%BD%8E%E5%B9%B6%E4%B8%94%E5%A7%8B%E7%BB%88%E8%A2%AB%E5%A4%8D%E5%88%B6%EF%BC%8C%E8%AF%B7%E8%80%83%E8%99%91%E6%8C%89%E5%80%BC%E4%BC%A0%E5%8F%82/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="首先声明：下面的“复制”和“拷贝”词语是严格区分的。“复制”指的是传统意义上的复制，“对于对象的复制”就是指对某个对象进行复制构造或者复制赋值。而对于“拷贝”，指的是包括“复制”和“移动”在内的操作。例如将a拷贝到b，这只是强调b和之前的a一模一样，但不保证a还存在。这一点在《Effective modern C++》英文版中的286页注释有说明。">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-12-13T12:56:41.000Z">
+<meta property="article:modified_time" content="2020-01-16T15:40:58.777Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/12/13/%E5%A6%82%E6%9E%9C%E5%8F%AF%E5%A4%8D%E5%88%B6%E7%B1%BB%E5%9E%8B%E5%8F%82%E6%95%B0%E7%A7%BB%E5%8A%A8%E7%9A%84%E4%BB%A3%E4%BB%B7%E4%BD%8E%E5%B9%B6%E4%B8%94%E5%A7%8B%E7%BB%88%E8%A2%AB%E5%A4%8D%E5%88%B6%EF%BC%8C%E8%AF%B7%E8%80%83%E8%99%91%E6%8C%89%E5%80%BC%E4%BC%A0%E5%8F%82/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>如果可复制类型参数移动的代价低并且始终被复制，请考虑按值传参 | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/12/13/%E5%A6%82%E6%9E%9C%E5%8F%AF%E5%A4%8D%E5%88%B6%E7%B1%BB%E5%9E%8B%E5%8F%82%E6%95%B0%E7%A7%BB%E5%8A%A8%E7%9A%84%E4%BB%A3%E4%BB%B7%E4%BD%8E%E5%B9%B6%E4%B8%94%E5%A7%8B%E7%BB%88%E8%A2%AB%E5%A4%8D%E5%88%B6%EF%BC%8C%E8%AF%B7%E8%80%83%E8%99%91%E6%8C%89%E5%80%BC%E4%BC%A0%E5%8F%82/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          如果可复制类型参数移动的代价低并且始终被复制，请考虑按值传参
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-12-13 20:56:41" itemprop="dateCreated datePublished" datetime="2018-12-13T20:56:41+08:00">2018-12-13</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-16 23:40:58" itemprop="dateModified" datetime="2020-01-16T23:40:58+08:00">2020-01-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>首先声明：下面的“复制”和“拷贝”词语是严格区分的。“复制”指的是传统意义上的复制，“对于对象的复制”就是指对某个对象进行复制构造或者复制赋值。而对于“拷贝”，指的是包括“复制”和“移动”在内的操作。例如将a拷贝到b，这只是强调b和之前的a一模一样，但不保证a还存在。这一点在《Effective modern C++》英文版中的286页注释有说明。<br><a id="more"></a><br>有些函数的参数是可以拷贝的，例如addName成员函数可能就可以拷贝它的实参到私有的容器中去。为了效率，这样的函数应该左值复制其参数，而不是右值移动参数：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">addName</span><span class="params">(<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			names.push_back(newName);</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">addName</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">string</span>&amp;&amp; newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			names.push_back(<span class="built_in">std</span>::<span class="built_in">move</span>(newName));</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; names;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>这样的写法是可以的，但即使这两个函数做的是一件事，却还不得不写两个。同时这就意味着：要声明两个函数、完成两个函数、写两个函数的文档并且维护两个函数。如果当这两个函数都是内联函数，那么可能对象还不是那么臃肿，但如果这两个函数不是内联函数，那么可能就真的有两个函数在对象的代码中。一个替代方法是使用模板addName，并且参数使用全体引用（universal reference）：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="keyword">void</span> <span class="title">addName</span><span class="params">(T&amp;&amp; newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			names.push_back(<span class="built_in">std</span>::forward&lt;T&gt;(newName)); <span class="comment">// std::forward复制左值，移动右值</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; names;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>这就减少了代码量，但是这么做就带来了其它问题。但作为一个模板，addName函数通常必须在头文件中补全，而且它可能使用对象代码中的几个函数。因为这段代码不光对左值和右值区别实例化，而且还对std::string以及可以转化成std::string的类区别实例化（参看：<a href="/2018/10/21/对于左值引用使用std_move，对于全体引用使用std_forward/">对于左值引用使用std::move，对于全体引用使用std::forward</a>）。如果实参的类型不能传递给全体引用（参看：<a href="/2018/11/06/几个完美转发失败的条件/">几个完美转发失败的条件</a>），或者调用者传递了不合适的实参类型，编译错误可能会变得比较复杂。</p>
+<p>有没有一种方法可以写出只有一个函数，却能复制左值、移动右值，而且还能避免全体引用错误说明不详细的问题的addName呢？有，但你<strong>需要抛弃你在学习C++时的一个观点：避免按值传递用户定义类型的对象</strong>。对于addName的newName参数，传值传参是一个合理的决策。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">addName</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">string</span> newName)</span> <span class="comment">// 获得左值或右值</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			names.push_back(<span class="built_in">std</span>::<span class="built_in">move</span>(newName)); <span class="comment">// 移动参数</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; names;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>这里唯一的是显而易见的部分是对参数newName使用std::move的部分。通常来说，std::move被用于右值引用，但是在这里，我们知道newName是独立于调用者传进来的参数的，所以改变newName不会影响调用者；另外这里是函数中最后使用newName的地方，所以从newName移动不会对函数剩下的部分有影响。这里的代码只是用一个addName函数，没有使用全体引用，因此这个方法也不会让头文件臃肿，也不会出现让人困惑的错误信息。但是效率如何呢？</p>
+<p>在C++98中，无疑这样做的效率肯定是不高的。无论调用者传递进来什么参数都会被使用复制构造函数创造出来。在C++11中，newName只会在传进来左值时复制构造，对于右值将会使用移动构造的方式。假设有如下的调用函数：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Widget w;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="function"><span class="built_in">string</span> <span class="title">name</span><span class="params">(<span class="string">"Bart"</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">w.addName(name);</span><br><span class="line"></span><br><span class="line">w.addName(name + <span class="string">"Jenne"</span>);</span><br></pre></td></tr></table></figure><br>在第一次调用addName时，参数newName使用了左值初始化，就像在C++98中那样，newName进行了复制构造。在第二次调用中，newName的实参是std::string和+操作符执行结果的std::string，这个对象是一个右值因此被移动构造。这样做能使左值参数被复制，右值参数被移动，代码也很精简。</p>
+<p>但是有一些我们需要牢记，我们先用3个版本的addName考虑这个问题：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">addName</span><span class="params">(<span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			names.push_back(newName);</span><br><span class="line">		&#125; </span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">addName</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">string</span>&amp;&amp; newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			names.push_back(<span class="built_in">std</span>::<span class="built_in">move</span>(newName));</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; names; </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; <span class="function"><span class="keyword">void</span> <span class="title">addName</span><span class="params">(T&amp;&amp; newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			names.push_back(<span class="built_in">std</span>::forward&lt;T&gt;(newName)); <span class="comment">// std::forward复制左值，移动右值 </span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>: </span><br><span class="line">		...</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">addName</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">string</span> newName)</span> <span class="comment">// 获得左值或右值</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			names.push_back(<span class="built_in">std</span>::<span class="built_in">move</span>(newName)); <span class="comment">// 移动参数</span></span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>下面是两个调用场景：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Widget w;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="function"><span class="built_in">string</span> <span class="title">name</span><span class="params">(<span class="string">"Bart"</span>)</span></span>;</span><br><span class="line"></span><br><span class="line">w.addName(name);</span><br><span class="line"></span><br><span class="line">w.addName(name + <span class="string">"Jenne"</span>);</span><br></pre></td></tr></table></figure></p>
+<p>现在我们考虑三个addName执行添加名称的代价。这里忽略编译器对复制和移动的优化，因为这样的优化是取决于上下文和编译器的，所以我们这里不进行讨论。</p>
+<ul>
+<li>使用重载时：无论传递过去的是左值还是右值参数，newName引用绑定了实参，这没有花多少代价，我们忽略不计。在左值参数时，newName被复制到了Widget::names中；在右值参数时，newName被移动到Widget::names中去了。因此代价总和是在左值参数时一个复制，在右值参数时一个移动。</li>
+<li>使用全体引用时：和“使用重载时”一样，newName绑定到了实参上，这没有多少花销。因为使用了std::forward，左值std::string被复制到了Widget::names中，右值则被移动进去了。所以这个方法的代价之和是在左值参数时复制，右值参数时移动。<br>而在<a href="/2018/10/21/对于左值引用使用stdmove，对于全体引用使用stdforward/">对于左值引用使用std::move，对于全体引用使用std::forward</a>中说到如果调用者传递的参数是不同于std::string类型的参数，那么参数将会被转发到std::string的构造函数中，并且这会因为没有临时的std::string需要复制或移动而效率提高。因此使用全体引用可能使得程序效率特别高。但是这不关乎我们的分析，我们假设调用者一直传递std::string类型的临时参数。</li>
+<li>传值：无论传的值是左值还是右值，参数newName必须构造。如果传的参数是左值，那么就会需要一次复制构造；如果是一个右值参数，那么就要消耗一个移动构造。在函数体中，newName是无条件移动到Widget::names。代价总和因此在参数为左值时是一个复制和一个移动，在右值时需要两次移动。相比较上面两种方法，分别在参数为左值和右值时多了额外一次移动。</li>
+</ul>
+<p>我们现在在回过头来看标题：<strong>如果可复制类型参数移动的代价低并且始终被复制，请考虑按值传参。</strong></p>
+<p>这么做是有道理，下面对于标题的建议进行分析：</p>
+<ol>
+<li>只需考虑按值传参：这样只需要写一个函数，在对象中也只会生成一个函数，它避免了全体引用作为参数带来的问题。但是它却在某些情况下比其它两种方法需要更多的代价，这我们之后也会讨论。</li>
+<li>只对可复制参数考虑传值：只能移动的参数是排除在标题建议之外的。因为若不可复制，需要拷贝创造副本，那么只能通过移动构造。回忆传值方法相对重载方法的好处，因为传值方法只有一个函数要写，但是对于只移动的参数类型，没有必要在重载方法中提供一个参数为左值的重载函数，因为复制左值需要调用复制构造函数，并且对于只能移动类型来说，复制构造是禁止的。这也就是说只需要有参数为右值的重载函数，使用“重载的方法”只需要写一个重载函数—参数为右值引用的那一个。  例如：有一个类有一个数据成员std::unique_ptr<std::string>以及一个setter函数。而std::unique_ptr是一个只能移动的类型，所以对setter函数使用“重载的方法”只要使用一个函数：<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span> :</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">setPtr</span><span class="params">(<span class="built_in">std</span>::unique&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt;&amp;&amp; str)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			p = <span class="built_in">std</span>::<span class="built_in">move</span>(ptr);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; p;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+对于调用也很方便：<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Widget w;</span><br><span class="line"></span><br><span class="line">w.setPtr(<span class="built_in">std</span>::make_unique&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt;(<span class="string">"Modern C++"</span>));</span><br></pre></td></tr></table></figure>
+在这里由std::make_unique返回的std::unique_ptr被以右值引用传给setPtr，它移动到数据成员p，所有的消耗只是一个移动。 但如果setPtr是按值传参：<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span> :</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">setPtr</span><span class="params">(<span class="built_in">std</span>::unique&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; ptr)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			p = <span class="built_in">std</span>::<span class="built_in">move</span>(ptr);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+这时同样的将会移动构造ptr，并且ptr将会被移动赋值给数据成员p，总共的花费是两次move，也就是使用“重载的方法”的两倍。</li>
+<li>只适用于对于移动非常低代价的参数：当移动代价很低的时候，对于多出来的一个移动操作的消耗就能被接收。但是当移动的代价不低的时候，对于多出来的一个移动操作就变成了负担，反而不如使用复制的操作。</li>
+<li>只有参数只会被复制的时候才考虑传值：为了展示为什么这是必要条件，假设在复制参数到names容器之前，addName检查新的名字是否太短还是太长。如果新名字不符合条件，那么添加名字的请求将会忽略。下面展示这个需求传值的实现：<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>: </span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">addName</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">string</span> newName)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			<span class="keyword">if</span>((newName.length() &gt;= minLen) &amp;&amp; (newName.length() &lt;= maxLen))</span><br><span class="line">			&#123;</span><br><span class="line">				names.push_back(<span class="built_in">std</span>::<span class="built_in">move</span>(newName));</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; names;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+即使newName没有被添加到names里，构造和销毁newName也不可避免。这个代价在使用传引用的方法时就不需要付出。</li>
+</ol>
+<p>不过，即使参数是随时可复制类型、移动代价很低，也会有情况是不适合传值传参的。这是因为一个函数可以有两种方法拷贝它的参数：通过构造函数（包括复制构造函数和移动构造函数）和赋值（包括复制赋值和移动赋值）。addName如果使用了构造函数的方法：它的参数newName传递给了vector::push_back并且在这个函数的内部，newName被拷贝到了一个新的元素，这个新元素在std::vector的尾部，对于使用构造函数的方法，我们前面的分析是全面的。</p>
+<p>当参数是通过赋值的方式拷贝到参数中时，情况就变得非常复杂了。假设我们有一个类代表“密码”，因为密码是可变的，我们提供了一个setter函数changeTo。使用“传值传参的方法”时，代码可能是这样的：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Password</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		explicit Password(std::string pwd) : text(std::move(pwd)) &#123;&#125;</span><br><span class="line"></span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">changeTo</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">string</span> newPwd)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			<span class="built_in">text</span> = <span class="built_in">std</span>::<span class="built_in">move</span>(newPwd);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		...</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> <span class="built_in">text</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>我们先不考虑密码长短这类的安全问题，构造一个Password对象：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="function"><span class="built_in">string</span> <span class="title">initPwd</span><span class="params">(<span class="string">"Supercalifragilisticexpialidocious"</span>)</span></span>;</span><br><span class="line"></span><br><span class="line"><span class="function">Password <span class="title">p</span><span class="params">(initPwd)</span></span>;</span><br></pre></td></tr></table></figure><br>这里我们给p.text构造了一个std::string对象，并且使用了“传值的传参方式”，这相比“重载的方式”需要付出多一些的代价。然后我们改变p的密码值：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">string</span> newPassword = <span class="string">"Beware the Jabberwock"</span>;</span><br><span class="line"></span><br><span class="line">p.changeTo(newPassword);</span><br></pre></td></tr></table></figure><br>无论新的密码是否真的比旧的密码好，我们的changeTo需要使用赋值的方式改变密码。传递给changeTo的是一个左值（newPassword），所以参数newPwd是通过std::string的复制构造函数构造的，这个构造函数分配内存以存放新的密码。newPwd之后将会被移动赋值到text中，这会导致之前已经分配给text的内存被释放。因此有两个动态内存管理动作在changeTo中：一个是为新密码分配内存，另一个是将老密码的内存空间释放。<br>但是在这个例子中，老密码“Supercalifragilisticexpialidocious”比新的密码“Beware the Jabberwock”长，所以没有必要分配或释放任何东西。如果我们使用的“重载的方法”就可能不需要任何代价：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Password</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">changeTo</span><span class="params">(<span class="built_in">std</span>::<span class="built_in">string</span>&amp; newPwd)</span></span></span><br><span class="line"><span class="function">		</span>&#123;</span><br><span class="line">			<span class="built_in">text</span> = newPwd;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">private</span>:</span><br><span class="line">		<span class="built_in">std</span>::<span class="built_in">string</span> <span class="built_in">text</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>在这种情况下，“传值传参的方法”的代价包括额外的内存分配和释放，这个代价超过使用一个std::string的移动操作的代价几个数量级。</p>
+<p>如果老密码比新密码短，“分配-释放”这个操作对通常在赋值时是不可避免的，传值传参时的运行速度和传引用传参差不多。而<strong>基于赋值的参数赋值速度因此依赖于赋值的对象类型。</strong>上面的这种理论可以使用到大多数的动态开辟内存存放数据的参数的类型中，虽然不是全部，但是std::string和std::vector在内。这种隐形的高代价只在参数是左值时会发生，因为需要它内存分配和释放，而内存的分配和释放通常只在进行复制操作时发生。对于右值参数，移动通常不会发生分配和释放。</p>
+<p>因此，在使用赋值的函数中，传值传参相较于传引用传参的额外代价通常是依赖于传递的参数的类型、左值和右值实参的比例、是否类型使用了动态内存以及如果使用了动态内存，对于赋值操作符的实现函数以及赋值目标是否和赋值源是否一样大。对于std::string，这个代价还依赖于是否使用了短字符串优化（small string optimization，SSO），并且被赋值的变量是否适合SSO缓存。</p>
+<p>从上面我们也看出，对于使用复制赋值的参数，分析它的代价是非常复杂的。通常，我们使用“在未证明可行的情况下认为不可行”的策略，因此可以使用除非证明“传值传参的方法”的效率明显高于其它方法，否则使用“重载的方法”或者“全体引用传参的方法”。</p>
+<p><strong>在必须尽可能快的软件中，使用“传值传参的方法”不是一个可行的办法</strong>，因为如果某处可以用移动但是没有使用是不可以接受的。如果使用“传值传参的方法”，有多少移动操作被使用是不可预知的。例如在上面添加名称的例子当中，如果Widget::addName还会调用Widget::validateName，并且这个函数还是通过传值传参，而这个validateName还会调用一个传值传参的函数……这样下去就无法预计。因为每次使用“传值传参的方法”都需要多花费一个移动操作的代价，当有一个惊人数量的调用链之后，你将会难以承受这些多花费的代价。</p>
+<p>另一个值得注意的问题是，传值传参和传引用传参不一样，它容易遭受切割问题（slicing problem）。这是C++98所讨论的问题，这里简单讲一下。如果有一个函数的参数是某个基类以及基类的派生类，你不要使用传值传参的方式传递参数，因为如果你传过去的是派生类对象，那么你将会有属性被“切割”掉：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span> &#123;</span> ... &#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SpecialWidget</span>:</span> <span class="keyword">public</span> Widget &#123; ... &#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">processWidget</span><span class="params">(Widget w)</span></span>; <span class="comment">// 接受基类Widget对象参数，也接受其派生类对象参数</span></span><br><span class="line"></span><br><span class="line">SpecialWidget sw;</span><br><span class="line"></span><br><span class="line">processWidget(sw); <span class="comment">// SpecialWidget独有的属性将会被“切割”</span></span><br></pre></td></tr></table></figure>
+<p>如果你不熟悉切割问题，你可以通过搜索引擎进行搜索。你会发现切割问题是C++98中另一个传值传参不被认可的原因。</p>
+<p>C++11中并没有改变C++98中关于传值传参的内容。通常传值传参任然有许多性能上的问题使得你要去避讳，并且传值传参仍然会导致切割问题。在C++11中新引入的知识左值参数和右值参数。使用了可复制类型的移动语义仍然需要重载或者使用全体引用，虽然两者都有各自的缺点。对于始终复制并且移动代价低的类型、不用考虑切割问题的参数，使用传值传参提供了一个更简单实现而且差不多效率的替换传引用传参的方式，并且能避免传引用传参的不足之处。</p>
+<p><strong>总结</strong></p>
+<ul>
+<li>对于可复制、移动代价低的参数类型，并且参数只会被复制的情况，传值传参可以提供几乎同等效率于传引用传参的能力，并且它更加容易实现，需要更少的代码。</li>
+<li>对于左值参数，传值传参（例如使用复制构造函数）后跟移动操作的代价可能比传引用传参后跟复制操作的代价要高。(修改密码的例子)</li>
+<li>传值传参会导致切割问题，所以对于基类参数类型，“传值传参的方法”通常不适合。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/12/09/%E5%AF%B9%E5%B9%B6%E8%A1%8C%E4%BD%BF%E7%94%A8std_atomic%EF%BC%8C%E5%AF%B9%E7%89%B9%E6%AE%8A%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8volatile/" rel="prev" title="对并行使用std::atomic，对特殊内存使用volatile">
+      <i class="fa fa-chevron-left"></i> 对并行使用std::atomic，对特殊内存使用volatile
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/02/18/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="next" title="正则表达式基础">
+      正则表达式基础 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">59</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
