@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    hostname: new URL('https://newblog.jiangxiwen.me').hostname,
+    root: '/',
+    scheme: 'Muse',
+    version: '7.6.0',
+    exturl: false,
+    sidebar: {"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},
+    copycode: {"enable":false,"show_result":false,"style":null},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    comments: {"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}
+  };
+</script>
+
+  <meta name="description" content="如果你有一个容器中存放了例如std::string这样的对象，使用插入来添加一个新的元素似乎是非常合理的（例如使用insert，push_front，push_back等等），你传递过去的参数也是std::string，和要保存在容器中的是同一种类型，但是上面的想法不是始终正确的。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="考虑使用进驻（emplacement）代替插入（insertion）">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/12/14/%E8%80%83%E8%99%91%E4%BD%BF%E7%94%A8%E8%BF%9B%E9%A9%BB%EF%BC%88emplacement%EF%BC%89%E4%BB%A3%E6%9B%BF%E6%8F%92%E5%85%A5%EF%BC%88insertion%EF%BC%89/index.html">
+<meta property="og:site_name" content="CrazySpy&#39;s blog">
+<meta property="og:description" content="如果你有一个容器中存放了例如std::string这样的对象，使用插入来添加一个新的元素似乎是非常合理的（例如使用insert，push_front，push_back等等），你传递过去的参数也是std::string，和要保存在容器中的是同一种类型，但是上面的想法不是始终正确的。">
+<meta property="og:locale" content="zh">
+<meta property="article:published_time" content="2018-12-14T14:19:16.000Z">
+<meta property="article:modified_time" content="2020-01-17T15:45:56.114Z">
+<meta property="article:author" content="CrazySpy">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/12/14/%E8%80%83%E8%99%91%E4%BD%BF%E7%94%A8%E8%BF%9B%E9%A9%BB%EF%BC%88emplacement%EF%BC%89%E4%BB%A3%E6%9B%BF%E6%8F%92%E5%85%A5%EF%BC%88insertion%EF%BC%89/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true
+  };
+</script>
+
+  <title>考虑使用进驻（emplacement）代替插入（insertion） | CrazySpy's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <!-- hexo-inject:begin --><!-- hexo-inject:end --><div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">CrazySpy's blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="Searching..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/12/14/%E8%80%83%E8%99%91%E4%BD%BF%E7%94%A8%E8%BF%9B%E9%A9%BB%EF%BC%88emplacement%EF%BC%89%E4%BB%A3%E6%9B%BF%E6%8F%92%E5%85%A5%EF%BC%88insertion%EF%BC%89/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          考虑使用进驻（emplacement）代替插入（insertion）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-12-14 22:19:16" itemprop="dateCreated datePublished" datetime="2018-12-14T22:19:16+08:00">2018-12-14</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-17 23:45:56" itemprop="dateModified" datetime="2020-01-17T23:45:56+08:00">2020-01-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>如果你有一个容器中存放了例如std::string这样的对象，使用插入来添加一个新的元素似乎是非常合理的（例如使用insert，push_front，push_back等等），你传递过去的参数也是std::string，和要保存在容器中的是同一种类型，但是上面的想法不是始终正确的。<br><a id="more"></a></p>
+<h1 id="emplace通常效率更高"><a href="#emplace通常效率更高" class="headerlink" title="emplace通常效率更高"></a>emplace通常效率更高</h1><p>考虑这一段代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; vs;</span><br><span class="line"></span><br><span class="line">vs.push_back(<span class="string">"xyzzy"</span>);</span><br></pre></td></tr></table></figure><br>在这里，容器中存放了std::string，但是这里真实想要通过push_back存储的是字面类型的字符串，也就是说你传递过去的参数不是真实的std::string类型。std::vector的push_back是对左值和右值重载的：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="class"><span class="keyword">class</span> <span class="title">T</span>, <span class="title">class</span> <span class="title">Allocator</span> = <span class="title">allocator</span>&lt;T&gt;&gt;</span></span><br><span class="line"><span class="class"><span class="title">class</span> <span class="title">vector</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">		...</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">push_back</span><span class="params">(<span class="keyword">const</span> T&amp; x)</span></span>;</span><br><span class="line">		<span class="function"><span class="keyword">void</span> <span class="title">push_back</span><span class="params">(T&amp;&amp; x)</span></span>;</span><br><span class="line">		...</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>在调用vs.push_back(“xyzzy”);中编译器看到实参的类型（const char[6]）和push_back使用的参数类型（std::string的引用）不匹配，因此就通过从字面的字符串生成临时的std::string解决这种不匹配，然后把这个临时的对象传递给push_back。换句话说，和下面代码类似：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vs.push_back(<span class="built_in">std</span>::<span class="built_in">string</span>(<span class="string">"xyzzy"</span>));</span><br></pre></td></tr></table></figure><br>代码编译之后是可以运行的，但是可以进一步优化性能。</p>
+<p>为了在容器中创建一个新的std::string元素，每次插入新元素都调用了std::string的构造函数，但是上面的代码却不只一次调用了构造函数，而是调用了两次。并且也因此调用了一次析构函数。下面是如上调用push_back之后程序发生的事情：</p>
+<ol>
+<li>有一个临时的std::string对象从字面的字符串“xyzzy”被创建。这个对象没有名字，我们暂且称呼它为temp。构造temp是第一步，因为这是一个临时对象，temp因此是一个右值。</li>
+<li>temp被传递给push_back的右值重载函数，在那里temp被绑定给了右值引用参数x。然后在std::vector的内存中x再次被构造，这个构造的才是真正在std::vector中创建新的对象，这次构造是使用的移动构造函数，因为x是一个右值。</li>
+<li>在push_back返回之后，temp被销毁，因此调用了std::string的析构函数。</li>
+</ol>
+<p>如果有方法可以直接跳到步骤2那么就可以提高程序的效率，因为避免了多余的一次构造temp以及销毁temp。</p>
+<p>因为你是一名C++程序员，对于C++来说效率是它最吸引人的特点，如果你不追求效率，那么你为什么不使用Python呢？所以我们需要让程序效率最大化，而这里的方法是使用emplace_back函数替代push_back。</p>
+<p>emplace_back实现了我们所希望的：无论什么实参传递给std::vector用以构造std::string，始终不会出现临时的对象：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vs.emplace_back(<span class="string">"xyzzy"</span>);</span><br></pre></td></tr></table></figure><br>emplace_back使用了完美转发，所以只要你不突破完美转发的限制（具体可以参看：<a href="/2018/11/06/几个完美转发失败的条件/">几个完美转发失败的条件</a>），你就可以传递类型的参数以及各种组合。例如，如果你想要在vs中通过std::string的构造函数创建一个由单字母和重复次数构成的std::string，代码可能就是这样的：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vs.emplace_back(<span class="number">50</span>, <span class="string">"x"</span>);</span><br></pre></td></tr></table></figure><br>所有的标准容器中，只要支持push_back的都支持emplace_back。类似地，每一个支持push_front的标准容器都支持emplace_front；每一个支持insert的标准容器（但是std::forward_list和std::array例外，std::forward是关联容器）都支持emplace。关联容器（associative container）提供emplace_hint用来实现“线索”迭代器的insert操作，并且std::forward_list有emplace_after用来与insert_after对应。</p>
+<p>因为类型构造所需的参数都由emplace函数传递过去了，因此进驻可以用在需要没有临时对象产生的插入，并且插入和进驻最后的结果是一样的。例如：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="function"><span class="built_in">string</span> <span class="title">queenOfDisco</span><span class="params">(<span class="string">"Donna Summer"</span>)</span></span>;</span><br></pre></td></tr></table></figure><br>下面两个调用都是有效的：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vs.push_back(queenOfDisco);</span><br><span class="line"></span><br><span class="line">vs.emplace_back(queenOfDisco);</span><br></pre></td></tr></table></figure><br>入驻函数可以因此做插入函数能做的任何事情。入驻函数有时会比插入函数效率更高，但是理论上绝对不会效率更低。但即使如此为什么不是一直使用入驻函数呢？</p>
+<h1 id="emplace效率更低的情况"><a href="#emplace效率更低的情况" class="headerlink" title="emplace效率更低的情况"></a>emplace效率更低的情况</h1><p>当然，理论是理论，和实践还是有不一样的。在当前标准库的实现中，有几种情况会导致效率比插入函数低。这样的情况比较难以找出特征，因为这要依赖于实参类型、使用的容器、容器的入驻函数和插入函数的使用位置、存放类型构造函数的容器安全，并且对于容器，容器是否可以存放相同的数据（例如：std::set，std::map，std::unordered_set，set::unordered_map）、值是否已经在容器中也是有影响的。通常，性能调整的建议是：对于入驻和插入进行基准测试。</p>
+<p>当然这种方法不是很令人满意，因此你将要学习一种启发式的方法帮助你判断入驻函数和插入函数哪种更适合。在下面的条件中，如果都满足，入驻将极大可能地有优异的性能：</p>
+<ul>
+<li><strong>值将通过构造的方式添加到容器中，而不是赋值的方式</strong>：在最开篇的例子（添加值为“xyzzy”的std::string到std::vector vs中）当中展示了将值添加到vs的结尾的方法，这个结尾没有对象存在。新的值因此只能通过构造的方法添加进std::vector。如果我们改变例子，新的std::string将会存放到一个已经有对象存在的空间当中，那么事情将会不一样了：<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">string</span>&gt; vs;</span><br><span class="line">...</span><br><span class="line">vs.emplace(vs.<span class="built_in">begin</span>(), <span class="string">"xyzzy"</span>); <span class="comment">// 在vs的开头处添加“xyzzy”</span></span><br><span class="line">```    </span><br><span class="line">在这段代码中，对于已经被<span class="built_in">std</span>::<span class="built_in">string</span>占领的内存vs\[<span class="number">0</span>\]不是通过构造的方式添加进去，而是通过移动赋值的方式放到内存中。但是移动赋值需要有一个移动源，也就是说要有临时的对象被创建以作为移动源。之前之所以说进驻比插入的好就是因为能省去这个临时对象，但是这里无法省去，所以在这时使用入驻就没有好处了。  </span><br><span class="line">对于是否添加一个值到容器是由构造和复制来完成通常都是由实施者来决定，但是启发式方法再一次可以提供帮助。  </span><br><span class="line">基于节点的容器一直都是用构造函数添加新的值，并且大多数标准容器都是基于节点的。只有<span class="built_in">std</span>::<span class="built_in">vector</span>、<span class="built_in">std</span>::<span class="built_in">deque</span>、<span class="built_in">std</span>::<span class="built_in">string</span>不是（虽然<span class="built_in">std</span>::<span class="built_in">array</span>也不是，但是它不支持插入和进驻，所以这里不考虑）。在非节点的容器中，你可以依赖emplace\_back以在添加新值时使用构造以代替赋值。对于<span class="built_in">std</span>::<span class="built_in">deque</span>同样可以使用emplace\_front。</span><br><span class="line">*   **实参类型和容器存放的数据类型不一样**：如果T类型的对象要添加到container&lt;T&gt;中，入驻就不太可能会比插入快，因为不需要创建临时变量以满足插入。</span><br><span class="line">*   **容器不会因为数据重复而拒绝插入**：这就意味着如果容器要不然是允许重复数据存在要不然你保证你插入的值都是独一无二的。这条原则是因为，容器为了检查要添加的数据是否是独一无二的，会在进驻函数创建一个节点，这个节点存放了新的值，这样可以将这个节点的值和已经存在的节点比较。如果这个节点的值没有在容器中，那么这个节点将会被链接进容器，否则就会被销毁，这也就意味着会有一次构造和销毁可能会被浪费。</span><br><span class="line"></span><br><span class="line">下面的调用就满足了上面的几个条件，因此它们也比调用push\_back快：</span><br><span class="line">```c++</span><br><span class="line">vs.emplace_back(<span class="string">"xyzzy"</span>);</span><br><span class="line"></span><br><span class="line">vs.emplace_back(<span class="number">50</span>, <span class="string">'x'</span>);</span><br></pre></td></tr></table></figure>
+当决定是否使用进驻函数，有两点是要记在心中的。第一点就是资源管理。假设有一个容器，存放了std::shared_ptr<Widget>类型的值：<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">list</span>&lt;<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt;&gt; ptrs;</span><br></pre></td></tr></table></figure>
+然后你想添加一个std::shared_ptr，并且这个智能指针是使用指定的销毁函数。之前说过，请可能地使用std::make_shared来创建std::shared_ptr（具体请参看：<a href="/2018/10/14/智能指针中make_xxx函数和new的使用/">智能指针中make_xxx函数和new的使用</a>），但是有时你没有办法使用std::make_shared创建指针，其中一种情况就是当你希望指定销毁函数时，那你就必须直接使用new获得传统指针，这个指针被std::shared_ptr管理。</li>
+</ul>
+<p>如果有如下的销毁函数：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">killWidget</span><span class="params">(Widget* pWidget)</span></span>;</span><br></pre></td></tr></table></figure><br>使用插入函数的代码差不多是这样的：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ptrs.push_back(<span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt;(<span class="keyword">new</span> Widget, killWidget));</span><br></pre></td></tr></table></figure><br>当然也可以写成这样：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ptrs.push_back(&#123; <span class="keyword">new</span> Widget, killWidget &#125;);</span><br></pre></td></tr></table></figure><br>不管使用哪个，都免不了在调用push_back之前构造一个临时的std::shared_ptr。push_back的参数是一个std::shared_ptr的引用，因此必须要有一个std::shared_ptr对象给参数引用。</p>
+<p>如果使用进驻，那么这个std::shared_ptr的临时变量的创建就可以避免。但是在这里这个临时变量有它重要的意义。考虑下面潜在的时间序列：</p>
+<ol>
+<li>在上面的任意一个调用中，临时的std::shared_ptr<Widget>对象被构造用于存放传统指针，这个传统指针是new Widget的运行结果。我们称这个对象叫temp。</li>
+<li>push_back通过引用控制着temp，再分配节点空间用来存放temp的副本时，抛出了一个“内存耗尽”的异常。</li>
+<li>因为异常被抛出，并且冒泡到push_back，temp就会销毁。std::shared_ptr作为对其指向的Widget的唯一引用，它自动释放Widget，因此调用了killWidget。</li>
+</ol>
+<p>即使异常发生了，也没有任何内存泄露发生：在push_back中通过new Widget创建的Widget在管理其的std:shared_ptr销毁时被销毁。</p>
+<p>但如果我们考虑使用emplace_back时什么会发生：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ptrs.emplace_back(<span class="keyword">new</span> Widget, killWidget);</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li>new Widget创建的传统指针被完美转发到了开辟新节点的构造函数上了，然后内存耗尽，抛出异常。</li>
+<li>随着异常冒泡出emplace_back，传统指针是唯一能访问到堆上的Widgetd方法，而这个传统指针丢失了。这个Widget发生了泄露。</li>
+</ol>
+<p>在这个情况下就发生了内存泄露。上面的例子对于std::unique_ptr也是同样成立。从根本上说，资源管理类（如std::shared_ptr以及std::unique_ptr）的有效性取决于资源（例如来自new的传统指针）被立即传递给资源管理对象的构造函数。而std::make_shared和std::make_unique自动完成资源的立即传递也是它们同样重要的原因。</p>
+<p>在调用存放资源管理对象的容器（例如std::list<std::shared_ptr<Widget>&gt;）的插入函数中，函数参数通常确保在获取资源（例如使用new）和构造资源管理对象之间没有其它动作。在进驻函数中，完美转发延迟了资源管理对象的创建，直到它们可以在容器的内存中构造再创建，这也为异常导致内存泄露留下了窗口期。所有标准的容器都可能发生这样的问题，当时用这些容器并且存放资源管理对象时，你必须格外注意到底该使用进驻函数还是插入函数。不要为了效率忽略了异常安全。</p>
+<p>其实坦白地说，你不应该传递类似于“new Widget”这样的表达式给emplace_back或者push_back，甚至大多数函数，因为这会导致异常安全问题（具体参看<a href="/2018/10/14/智能指针中make_xxx函数和new的使用/">智能指针中make_xxx函数和new的使用</a>）。为了避免异常安全问题，我们要将“new Widget”返回的指针用独立的语句放到资源管理对象中，然后将对象作为右值传递给原来要传递“new Widget”的函数。代码类似于这样：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt; spw(<span class="keyword">new</span> Widget, killWidget);</span><br><span class="line"></span><br><span class="line">ptrs.push_back(<span class="built_in">std</span>::<span class="built_in">move</span>(spw));</span><br></pre></td></tr></table></figure><br>emplace_back版本的代码也类似：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">shared_ptr</span>&lt;Widget&gt; spw(<span class="keyword">new</span> Widget, killWidget);</span><br><span class="line"></span><br><span class="line">ptrs.emplace_back(<span class="built_in">std</span>::<span class="built_in">move</span>(spw));</span><br></pre></td></tr></table></figure><br>不管使用哪种方式，都付出了创建和销毁spw的代价。当你添加资源管理对象到容器中时并且确保了没有行为发生在获得资源和将其传给资源管理对象之间，使用进驻函数通常不会比插入函数更有效率。</p>
+<p>另外还有一个指的注意的是进驻函数和explicit是有影响的。在C++11支持的正则表达式中，假设我们创建一个正则表达式对象：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::regex&gt; regexes;</span><br></pre></td></tr></table></figure><br>如果你不小心写出了这样的代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">regexes.emplace_back(<span class="literal">nullptr</span>);</span><br></pre></td></tr></table></figure><br>你在编写时没有注意到这个错误，你编译了这段代码并且通过编译。接下来你就要花大量的时间寻找bug所在。但是为什么一个nullptr可以放到正则表达式的容器中呢？指针毕竟不是正则表达式。但是如果你尝试写这样的代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>:regex r = <span class="literal">nullptr</span>; <span class="comment">// 编译出错</span></span><br></pre></td></tr></table></figure><br>编译器将会报错。但是如果你是用push_back代替emplace_back时：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">regexes.push_back(<span class="literal">nullptr</span>); <span class="comment">// 编译出错</span></span><br></pre></td></tr></table></figure><br>这个奇怪的行为的原因是std::regex对象可以由字符串构造，也就是可以如下构造：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="function">regex <span class="title">upperCaseWord</span><span class="params">(<span class="string">"[A-Z]+"</span>)</span></span>;</span><br></pre></td></tr></table></figure><br>如果通过字符串创建std::regex将会付出很高的代价，所以为了尽量减少无意中发生这些事件的可能，std::regex的参数为const char *的构造函数为explicit。这也就是为什么有几种调用会编译出错的原因了，因为它们尝试将一个指针转换成std::regex，并且explicit阻止了这样的转换。</p>
+<p>然而在调用emplace_back时，我们没有声称传递std::regex对象，我们传递的是std::regex构造函数的实参。这就不会被认为是隐式地转换要求，也就是类似于下面的代码：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::<span class="function">regex <span class="title">r</span><span class="params">(<span class="literal">nullptr</span>)</span></span>; <span class="comment">// 可以通过</span></span><br></pre></td></tr></table></figure><br>上面的代码虽然可以编译通过，但是会导致未定义行为。std::regex要求 const char*是非空的，nullptr会导致运行时程序的崩溃。</p>
+<p>抛开emplace_back和push_back不说，我们看看两个非常相似的初始化带来的不同结果：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::regex r1 = <span class="literal">nullptr</span>; <span class="comment">// 编译失败</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="function">regex <span class="title">r2</span><span class="params">(<span class="literal">nullptr</span>)</span></span>; <span class="comment">// 编译通过</span></span><br></pre></td></tr></table></figure><br>在标准的术语中，前者r1使用的是<strong>复制初始化（copy initialization）</strong>，后者r2使用的是<strong>直接初始化（direct initialization）</strong>。复制初始化是不可以使用explicit构造函数的，而直接初始化可以。这也就是为什么两者结果不一样的原因了。</p>
+<p>而在进驻函数和插入函数中，进驻函数使用的是直接初始化，而插入函数使用的是复制初始化，因此：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">regexes.emplace_back(<span class="literal">nullptr</span>); <span class="comment">// 编译通过</span></span><br><span class="line"></span><br><span class="line">regexes.push_back(<span class="literal">nullptr</span>); <span class="comment">// 编译失败</span></span><br></pre></td></tr></table></figure><br>对于explicit构造函数请务必注意，因为你有可能定义了explicit，编译器还将你有问题的代码转化成可编译的类型。</p>
+<p><strong>总结</strong></p>
+<ul>
+<li>在实践中，进驻函数应该在某些时刻比插入函数效率更高，并且进驻至少不会比插入效率低。</li>
+<li>在实践中，进驻函数在以下条件同时满足时效率往往会高：1.被添加的值是构造到容器中，而不是赋值过去的。2.传递过去的实参类型和容器容纳的数据类型不同。 3.容器不会拒绝与已有值相同的值的插入。</li>
+<li>进驻函数可能在explicit的构造函数下进行类型转换，而插入函数无法做到。</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/12/13/%E5%A6%82%E6%9E%9C%E5%8F%AF%E5%A4%8D%E5%88%B6%E7%B1%BB%E5%9E%8B%E5%8F%82%E6%95%B0%E7%A7%BB%E5%8A%A8%E7%9A%84%E4%BB%A3%E4%BB%B7%E4%BD%8E%E5%B9%B6%E4%B8%94%E5%A7%8B%E7%BB%88%E8%A2%AB%E5%A4%8D%E5%88%B6%EF%BC%8C%E8%AF%B7%E8%80%83%E8%99%91%E6%8C%89%E5%80%BC%E4%BC%A0%E5%8F%82/" rel="prev" title="如果可复制类型参数移动的代价低并且始终被复制，请考虑按值传参">
+      <i class="fa fa-chevron-left"></i> 如果可复制类型参数移动的代价低并且始终被复制，请考虑按值传参
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/02/18/%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%9F%BA%E7%A1%80/" rel="next" title="正则表达式基础">
+      正则表达式基础 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#emplace通常效率更高"><span class="nav-number">1.</span> <span class="nav-text">emplace通常效率更高</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#emplace效率更低的情况"><span class="nav-number">2.</span> <span class="nav-text">emplace效率更低的情况</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">CrazySpy</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">60</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">categories</span>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">CrazySpy</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">Theme – <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> v7.6.0
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script><!-- hexo-inject:begin --><!-- hexo-inject:end -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+</body>
+</html>
