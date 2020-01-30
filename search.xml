@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>golang中，调用包中函数总是出现cannot refer to unexported name xxx</title>
+    <url>/2020/01/31/golang%E4%B8%AD%EF%BC%8C%E8%B0%83%E7%94%A8%E5%8C%85%E4%B8%AD%E5%87%BD%E6%95%B0%E6%80%BB%E6%98%AF%E5%87%BA%E7%8E%B0cannot%20refer%20to%20unexported%20name%20xxx/</url>
+    <content><![CDATA[<p>今天学习了golang的package编写，但是在调用package中的函数时总是出现问题：</p>
+<blockquote>
+<p>cannot refer to unexported name xxx<br>undefined xxx</p>
+</blockquote>
+<p>找了好久都没有发现问题，一直纠结于目录结构和import包的方式，结果发现问题在于<strong>golang中，导出函数名称必须首字母大写。</strong></p>
+]]></content>
+      <categories>
+        <category>golang</category>
+      </categories>
+  </entry>
+  <entry>
     <title>卡特兰数的应用</title>
     <url>/2019/09/10/%E5%8D%A1%E7%89%B9%E5%85%B0%E6%95%B0%E7%9A%84%E5%BA%94%E7%94%A8/</url>
     <content><![CDATA[<p>2015年考研有一题：先序遍历为abcd的不同二叉树的个数是（）</p>

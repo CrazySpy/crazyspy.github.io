@@ -190,6 +190,80 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2020/01/31/golang%E4%B8%AD%EF%BC%8C%E8%B0%83%E7%94%A8%E5%8C%85%E4%B8%AD%E5%87%BD%E6%95%B0%E6%80%BB%E6%98%AF%E5%87%BA%E7%8E%B0cannot%20refer%20to%20unexported%20name%20xxx/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/01/31/golang%E4%B8%AD%EF%BC%8C%E8%B0%83%E7%94%A8%E5%8C%85%E4%B8%AD%E5%87%BD%E6%95%B0%E6%80%BB%E6%98%AF%E5%87%BA%E7%8E%B0cannot%20refer%20to%20unexported%20name%20xxx/" class="post-title-link" itemprop="url">golang中，调用包中函数总是出现cannot refer to unexported name xxx</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-01-31 00:12:17 / Modified: 00:19:43" itemprop="dateCreated datePublished" datetime="2020-01-31T00:12:17+08:00">2020-01-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/golang/" itemprop="url" rel="index">
+                    <span itemprop="name">golang</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>今天学习了golang的package编写，但是在调用package中的函数时总是出现问题：</p>
+<blockquote>
+<p>cannot refer to unexported name xxx<br>undefined xxx</p>
+</blockquote>
+<p>找了好久都没有发现问题，一直纠结于目录结构和import包的方式，结果发现问题在于<strong>golang中，导出函数名称必须首字母大写。</strong></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
     <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2019/09/10/%E5%8D%A1%E7%89%B9%E5%85%B0%E6%95%B0%E7%9A%84%E5%BA%94%E7%94%A8/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -974,108 +1048,11 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
-    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/11/22/%E7%A1%AE%E4%BF%9D%E8%B7%B3%E5%87%BA%E4%BD%9C%E7%94%A8%E5%9F%9F%E6%97%B6std_thread%E6%98%AF%E4%B8%8D%E5%8F%AF%E8%BF%9E%E6%8E%A5%E7%9A%84%EF%BC%88unjoinable%EF%BC%89/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="CrazySpy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="CrazySpy's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/11/22/%E7%A1%AE%E4%BF%9D%E8%B7%B3%E5%87%BA%E4%BD%9C%E7%94%A8%E5%9F%9F%E6%97%B6std_thread%E6%98%AF%E4%B8%8D%E5%8F%AF%E8%BF%9E%E6%8E%A5%E7%9A%84%EF%BC%88unjoinable%EF%BC%89/" class="post-title-link" itemprop="url">确保跳出作用域时std::thread是不可连接的（unjoinable）</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-11-22 20:03:23" itemprop="dateCreated datePublished" datetime="2018-11-22T20:03:23+08:00">2018-11-22</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-14 01:00:00" itemprop="dateModified" datetime="2020-01-14T01:00:00+08:00">2020-01-14</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-                  , 
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
-                    <span itemprop="name">Effective Modern C++</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>每个std::thread对象都有两种状态，可连接(joinable)和不可连接(unjoinable)。<strong>可连接的std::thread对象与可以被执行或正在执行的底层异步线程相通信。当一个std::thread对象对应的底层线程被阻塞或者正在等待被调度时也是可连接的。例如：正在等待底层线程执行完毕的std::thread也被看做是可连接的。</strong></p>
-<p>不可连接的std::thread的情况包括以下几种：</p>
-<ul>
-<li>默认构造的std::thread。这个不难理解，因为这时候std::thread中没有可执行的函数，因此也没有底层运行线程。</li>
-<li>已经被移走的std::thread。移动一个std::thread对象到另一个std::thread对象就意味着底层执行线程现在与另一个std::thread通信。</li>
-<li>std::thread已经被连接过（执行过join函数）了。在执行过join函数之后，std::thread在底层线程执行完毕后，不再对应某个底层执行线程了。</li>
-<li>std::thread已经被分开（执行过detach）了。detach会切断std::thread和底层执行线程的连接。</li>
-</ul>
-<p>为什么我们要知道一个std::thread是否可连接呢？原因就是当一个可连接的线程被销毁，这个程序也将终止。
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/11/22/%E7%A1%AE%E4%BF%9D%E8%B7%B3%E5%87%BA%E4%BD%9C%E7%94%A8%E5%9F%9F%E6%97%B6std_thread%E6%98%AF%E4%B8%8D%E5%8F%AF%E8%BF%9E%E6%8E%A5%E7%9A%84%EF%BC%88unjoinable%EF%BC%89/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right" aria-label="Next page"></i></a>
   </nav>
 
 
@@ -1141,12 +1118,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">60</span>
+          <span class="site-state-item-count">61</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
-        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-count">18</span>
         <span class="site-state-item-name">categories</span>
       </div>
       <div class="site-state-item site-state-tags">
