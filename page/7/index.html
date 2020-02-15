@@ -190,6 +190,99 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/04/08/dictScan%E5%87%BD%E6%95%B0%E5%88%86%E6%9E%90/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/04/08/dictScan%E5%87%BD%E6%95%B0%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">dictScan函数分析</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-04-08 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-08T00:00:00+08:00">2018-04-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2019-12-26 01:59:54" itemprop="dateModified" datetime="2019-12-26T01:59:54+08:00">2019-12-26</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis源码分析</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/dict/" itemprop="url" rel="index">
+                    <span itemprop="name">dict</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>dictScan的定义如下:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">long</span> <span class="title">dictScan</span><span class="params">(</span></span></span><br><span class="line"><span class="function"><span class="params">		dict *d,</span></span></span><br><span class="line"><span class="function"><span class="params">		<span class="keyword">unsigned</span> <span class="keyword">long</span> v,</span></span></span><br><span class="line"><span class="function"><span class="params">		dictScanFunction *fn,</span></span></span><br><span class="line"><span class="function"><span class="params">		dictScanBucketFunction* bucketfn,</span></span></span><br><span class="line"><span class="function"><span class="params">		<span class="keyword">void</span> *privdata)</span></span></span><br></pre></td></tr></table></figure>
+<p>这里的扫描分为两个步骤，第一步对桶执行用户自定义函数(bucketfn)，再对桶内每个节点执行用户自定义函数(fn)。</p>
+<p>当进行dictScan时没有进行rehash，那么只要先对0号表的需要scan的桶进行用户自定义的操作，然后对于桶内节点进行遍历执行自定义函数即可。</p>
+<p>如果正在进行rehash，这时候会比较复杂。<br>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/04/08/dictScan%E5%87%BD%E6%95%B0%E5%88%86%E6%9E%90/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
     <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/04/08/dict%E7%9A%84rehash%E6%9C%BA%E5%88%B6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -345,12 +438,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-count">62</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">19</span>
         <span class="site-state-item-name">categories</span>
       </div>
       <div class="site-state-item site-state-tags">

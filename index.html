@@ -190,6 +190,83 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2020/02/15/golang%E6%95%B0%E5%AD%97%E8%BF%90%E7%AE%97%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2020/02/15/golang%E6%95%B0%E5%AD%97%E8%BF%90%E7%AE%97%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/" class="post-title-link" itemprop="url">golang数字运算的注意事项</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2020-02-15 22:45:48 / Modified: 23:35:06" itemprop="dateCreated datePublished" datetime="2020-02-15T22:45:48+08:00">2020-02-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/golang/" itemprop="url" rel="index">
+                    <span itemprop="name">-golang</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在学习golang时，遇到了这样的问题：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a <span class="keyword">float64</span> = <span class="number">9.9</span></span><br><span class="line"><span class="keyword">var</span> b <span class="keyword">int</span> = <span class="number">1</span></span><br><span class="line">fmt.Println(a / (b * <span class="number">9</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">invalid operation: a / (b * 9) (mismatched types float64 and int)</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure><br>出现这样的问题是因为golang在这方面和C++的不同。<br>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2020/02/15/golang%E6%95%B0%E5%AD%97%E8%BF%90%E7%AE%97%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
     <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2020/01/31/golang%E4%B8%AD%EF%BC%8C%E8%B0%83%E7%94%A8%E5%8C%85%E4%B8%AD%E5%87%BD%E6%95%B0%E6%80%BB%E6%98%AF%E5%87%BA%E7%8E%B0cannot%20refer%20to%20unexported%20name%20xxx/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -958,96 +1035,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
-    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/12/02/%E8%AF%B7%E6%B3%A8%E6%84%8F%E4%B8%8D%E5%90%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E7%9A%84%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E8%A1%8C%E4%B8%BA/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="CrazySpy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="CrazySpy's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/12/02/%E8%AF%B7%E6%B3%A8%E6%84%8F%E4%B8%8D%E5%90%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E7%9A%84%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E8%A1%8C%E4%B8%BA/" class="post-title-link" itemprop="url">请注意不同的线程处理方式的析构函数行为</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-12-02 23:10:42" itemprop="dateCreated datePublished" datetime="2018-12-02T23:10:42+08:00">2018-12-02</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-14 23:56:45" itemprop="dateModified" datetime="2020-01-14T23:56:45+08:00">2020-01-14</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-                  , 
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
-                    <span itemprop="name">Effective Modern C++</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>在之前我们说到，一个可连接的（joinable）std::thread有一个对应系统底层的执行线程。一个非延迟任务的future也和底层系统线程有一个相似的关系。因此std::thread对象和future对象都可以被看作是系统线程的两个使用处理方式。</p>
-<p>之前我们还说过，std::thread在遇到可连接线程跳出作用域时，采取的策略是程序直接终止运行，而不是隐式执行join或者detach。<strong>而在future中，则是有可能隐式执行join，也有可能隐式执行detach，甚至也有可能什么都不做。反正future是不会导致程序终止。</strong>下面我们就来细讲future的这种策略。<br>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/12/02/%E8%AF%B7%E6%B3%A8%E6%84%8F%E4%B8%8D%E5%90%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E7%9A%84%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E8%A1%8C%E4%B8%BA/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -1118,12 +1105,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-count">62</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">19</span>
         <span class="site-state-item-name">categories</span>
       </div>
       <div class="site-state-item site-state-tags">

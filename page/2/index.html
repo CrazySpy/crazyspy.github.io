@@ -190,6 +190,96 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/12/02/%E8%AF%B7%E6%B3%A8%E6%84%8F%E4%B8%8D%E5%90%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E7%9A%84%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E8%A1%8C%E4%B8%BA/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/12/02/%E8%AF%B7%E6%B3%A8%E6%84%8F%E4%B8%8D%E5%90%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E7%9A%84%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E8%A1%8C%E4%B8%BA/" class="post-title-link" itemprop="url">请注意不同的线程处理方式的析构函数行为</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-12-02 23:10:42" itemprop="dateCreated datePublished" datetime="2018-12-02T23:10:42+08:00">2018-12-02</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-14 23:56:45" itemprop="dateModified" datetime="2020-01-14T23:56:45+08:00">2020-01-14</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在之前我们说到，一个可连接的（joinable）std::thread有一个对应系统底层的执行线程。一个非延迟任务的future也和底层系统线程有一个相似的关系。因此std::thread对象和future对象都可以被看作是系统线程的两个使用处理方式。</p>
+<p>之前我们还说过，std::thread在遇到可连接线程跳出作用域时，采取的策略是程序直接终止运行，而不是隐式执行join或者detach。<strong>而在future中，则是有可能隐式执行join，也有可能隐式执行detach，甚至也有可能什么都不做。反正future是不会导致程序终止。</strong>下面我们就来细讲future的这种策略。<br>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/12/02/%E8%AF%B7%E6%B3%A8%E6%84%8F%E4%B8%8D%E5%90%8C%E7%9A%84%E7%BA%BF%E7%A8%8B%E5%A4%84%E7%90%86%E6%96%B9%E5%BC%8F%E7%9A%84%E6%9E%90%E6%9E%84%E5%87%BD%E6%95%B0%E8%A1%8C%E4%B8%BA/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
     <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/11/22/%E7%A1%AE%E4%BF%9D%E8%B7%B3%E5%87%BA%E4%BD%9C%E7%94%A8%E5%9F%9F%E6%97%B6std_thread%E6%98%AF%E4%B8%8D%E5%8F%AF%E8%BF%9E%E6%8E%A5%E7%9A%84%EF%BC%88unjoinable%EF%BC%89/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -996,89 +1086,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
-    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/28/%E7%90%86%E8%A7%A3%E5%BC%95%E7%94%A8%E6%8A%98%E5%8F%A0/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="CrazySpy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="CrazySpy's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/10/28/%E7%90%86%E8%A7%A3%E5%BC%95%E7%94%A8%E6%8A%98%E5%8F%A0/" class="post-title-link" itemprop="url">理解引用折叠</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-10-28 23:00:53" itemprop="dateCreated datePublished" datetime="2018-10-28T23:00:53+08:00">2018-10-28</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-08 23:48:00" itemprop="dateModified" datetime="2020-01-08T23:48:00+08:00">2020-01-08</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>之前我们讲过，模板函数的参数如果为全体引用，那么实参的引用类型取决于实参是左值还是右值。例如下面的代码:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">func</span><span class="params">(T&amp;&amp; param)</span></span>;</span><br></pre></td></tr></table></figure><br>模板参数类型T被编码为什么类型取决于实参是左值还是右值。当左值作为实参，那么T将会被推断为左值引用；当右值作为实参，那么T将会被推断为非引用。<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">Widget <span class="title">widgetFactory</span><span class="params">()</span></span>; <span class="comment">// 函数返回了一个右值</span></span><br><span class="line"></span><br><span class="line">Widget w; <span class="comment">// 一个左值</span></span><br><span class="line"></span><br><span class="line">func(w); <span class="comment">// 使用了左值作为实参，T被推断为Widget&amp;</span></span><br><span class="line"></span><br><span class="line">func(widgetFactory()); <span class="comment">// 使用右值作为了实参，T被推断为Widget</span></span><br></pre></td></tr></table></figure><br>对于func的两个调用，都是传递了Widget，但是因为其中一个Widget是左值，另一个是右值，T被推断为了不同的类型了。这个也决定了全体引用被推断为左值引用还是右值引用，而且这也是std::forward的依赖机制。<br>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/10/28/%E7%90%86%E8%A7%A3%E5%BC%95%E7%94%A8%E6%8A%98%E5%8F%A0/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -1149,12 +1156,12 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">61</span>
+          <span class="site-state-item-count">62</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
       <div class="site-state-item site-state-categories">
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">19</span>
         <span class="site-state-item-name">categories</span>
       </div>
       <div class="site-state-item site-state-tags">

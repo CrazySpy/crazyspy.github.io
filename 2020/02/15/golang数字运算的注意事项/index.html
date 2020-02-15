@@ -46,19 +46,19 @@
   };
 </script>
 
-  <meta name="description" content="特别成员函数指的是类中可能会默认生成的函数。在C++98中，它们分别是默认构造函数、默认析构函数、复制操作。C++11添加了重要新特性—移动，所以在C++11中还新添加了移动操作。这几个特别成员函数中，复制操作和移动操作又分成复制构造函数(constructor)、复制等号操作符(assignmeng operator)和移动构造函数、移动等号操作符。">
+  <meta name="description" content="在学习golang时，遇到了这样的问题：1234567var a float64 &#x3D; 9.9var b int &#x3D; 1fmt.Println(a &#x2F; (b * 9))&#x2F;*invalid operation: a &#x2F; (b * 9) (mismatched types float64 and int)*&#x2F;出现这样的问题是因为golang在这方面和C++的不同。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="理解C++11中特别成员函数的生成">
-<meta property="og:url" content="https://newblog.jiangxiwen.me/2018/10/03/%E7%90%86%E8%A7%A3C++11%E4%B8%AD%E7%89%B9%E5%88%AB%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E7%9A%84%E7%94%9F%E6%88%90/index.html">
+<meta property="og:title" content="golang数字运算的注意事项">
+<meta property="og:url" content="https://newblog.jiangxiwen.me/2020/02/15/golang%E6%95%B0%E5%AD%97%E8%BF%90%E7%AE%97%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/index.html">
 <meta property="og:site_name" content="CrazySpy&#39;s blog">
-<meta property="og:description" content="特别成员函数指的是类中可能会默认生成的函数。在C++98中，它们分别是默认构造函数、默认析构函数、复制操作。C++11添加了重要新特性—移动，所以在C++11中还新添加了移动操作。这几个特别成员函数中，复制操作和移动操作又分成复制构造函数(constructor)、复制等号操作符(assignmeng operator)和移动构造函数、移动等号操作符。">
+<meta property="og:description" content="在学习golang时，遇到了这样的问题：1234567var a float64 &#x3D; 9.9var b int &#x3D; 1fmt.Println(a &#x2F; (b * 9))&#x2F;*invalid operation: a &#x2F; (b * 9) (mismatched types float64 and int)*&#x2F;出现这样的问题是因为golang在这方面和C++的不同。">
 <meta property="og:locale" content="zh">
-<meta property="article:published_time" content="2018-10-03T15:13:55.000Z">
-<meta property="article:modified_time" content="2019-12-27T08:03:31.100Z">
+<meta property="article:published_time" content="2020-02-15T14:45:48.000Z">
+<meta property="article:modified_time" content="2020-02-15T15:35:06.065Z">
 <meta property="article:author" content="CrazySpy">
 <meta name="twitter:card" content="summary">
 
-<link rel="canonical" href="https://newblog.jiangxiwen.me/2018/10/03/%E7%90%86%E8%A7%A3C++11%E4%B8%AD%E7%89%B9%E5%88%AB%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E7%9A%84%E7%94%9F%E6%88%90/">
+<link rel="canonical" href="https://newblog.jiangxiwen.me/2020/02/15/golang%E6%95%B0%E5%AD%97%E8%BF%90%E7%AE%97%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/">
 
 
 <script id="page-configurations">
@@ -70,7 +70,7 @@
   };
 </script>
 
-  <title>理解C++11中特别成员函数的生成 | CrazySpy's blog</title>
+  <title>golang数字运算的注意事项 | CrazySpy's blog</title>
   
 
 
@@ -194,7 +194,7 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh">
-    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/10/03/%E7%90%86%E8%A7%A3C++11%E4%B8%AD%E7%89%B9%E5%88%AB%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E7%9A%84%E7%94%9F%E6%88%90/">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2020/02/15/golang%E6%95%B0%E5%AD%97%E8%BF%90%E7%AE%97%E7%9A%84%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -207,7 +207,7 @@
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          理解C++11中特别成员函数的生成
+          golang数字运算的注意事项
         </h1>
 
         <div class="post-meta">
@@ -216,30 +216,18 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
+              
 
-              <time title="Created: 2018-10-03 23:13:55" itemprop="dateCreated datePublished" datetime="2018-10-03T23:13:55+08:00">2018-10-03</time>
+              <time title="Created: 2020-02-15 22:45:48 / Modified: 23:35:06" itemprop="dateCreated datePublished" datetime="2020-02-15T22:45:48+08:00">2020-02-15</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2019-12-27 16:03:31" itemprop="dateModified" datetime="2019-12-27T16:03:31+08:00">2019-12-27</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="fa fa-folder-o"></i>
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-                  , 
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
-                    <span itemprop="name">Effective Modern C++</span>
+                  <a href="/categories/golang/" itemprop="url" rel="index">
+                    <span itemprop="name">-golang</span>
                   </a>
                 </span>
             </span>
@@ -255,16 +243,22 @@
     <div class="post-body" itemprop="articleBody">
 
       
-        <p>特别成员函数指的是类中可能会默认生成的函数。在C++98中，它们分别是默认构造函数、默认析构函数、复制操作。C++11添加了重要新特性—移动，所以在C++11中还新添加了移动操作。这几个特别成员函数中，复制操作和移动操作又分成复制构造函数(constructor)、复制等号操作符(assignmeng operator)和移动构造函数、移动等号操作符。<br><a id="more"></a><br>以默认移动构造函数和默认移动等号操作符来举例，两种方法的形式如下:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">	Widget(Widget&amp;&amp; rhs); <span class="comment">// move constructor</span></span><br><span class="line">	Widget&amp; <span class="keyword">operator</span> = (Widget&amp;&amp; rhs); <span class="comment">// move assignment operator</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br><strong>通常我们认为默认复制构造函数和默认复制等号操作符的两种方法是互相独立的。</strong>也就是说，即使手动定义了构造函数，如果还需要使用复制等号操作符的方式，这时候编译器会自动生成复制等号操作符的方式。这个是C++98中的定义，在C++11中同样延续了这种做法。<br>但是<strong>在移动构造函数和移动等号操作符上，两种方式是不互相独立的。</strong>也就是说，如果你定义了其中一个，但是要用到另外一个时，编译器是不会自动生成另外一个的默认函数。这种做法可以这样理解：因为自定义了其中的一个方式，意味着默认的移动可能会导致问题，所以另一个移动的方式就不能使用默认的。<br>另外，<strong>移动构造函数和移动等号操作符在自定义了复制构造函数或复制等号操作符的类中是不会自动生成的。</strong>这也是可以理解的：因为默认的复制是有问题的，所以有理由判断默认的移动也是有问题的，所以要求自定义移动的函数。同样的，<strong>如果自定义了移动构造函数或移动等号操作符，那么这个类中也不会自动生成复制构造函数或复制等号操作符。</strong>理解方式和上面类似。<br>在理论上还有一个“三条定理”(Rule of Three)。这个三条定理说明了<strong>复制构造函数、复制等号操作符以及析构函数应该一起定义。</strong>因为无论你定义了任何一个复制操作就意味着你可能对另一个复制操作也需要自定义，因为复制操作不是默认的。而且此时析构函数也应该根据他们自定义的复制操作进行自定义的析构操作。 但是这个定理虽然正确，却因为出现的比C++98晚，所以C++98没有采用。而C++11也没有采用这个定理，是因为这样可能会导致老标准的代码升级C++11语法会导致很多问题，为了保证兼容性，也没有采用这套标准。所以我们的代码中应该对C++标准加强，遵守这一定理。 </p>
-<p>C++11中特别成员函数的生成规则总结起来如下:</p>
-<ul>
-<li>默认构造函数：和C++98标准中一样，只有用户没有定义构造函数时(包括复制构造函数和移动构造函数)会自动生成。</li>
-<li>析构函数：和C++98标准一样，但有一点：生成的析构函数是默认noexcept的。另外强调，C++98中基类的析构函数如果是virtual的，那么继承类的自动生成的函数也是virtual的。</li>
-<li>复制构造函数：和C++98标准一样。在用户没有自定义复制构造函数的时候会进行默认生成，当类中定义了移动的相关操作（对移动等号操作符和移动构造函数中的一个进行自定义），那么就不会自动生成。如果类中存在自定义析构函数或者复制等号操作符时，即使可以自动生成复制构造函数，但也请不要这样使用，这是因为“三条定理”的缘故。</li>
-<li>复制等号操作符：和C++98标准一样。在用户没有自定义复制等号操作符的时候会进行默认生成，当类中定义了移动的相关操作（对移动等号操作符和移动构造函数中的一个进行自定义），那么就不会自动生成。如果类中存在自定义析构函数或者复制构造函数时，即使可以自动生成复制等号操作符，但也请不要这样使用，请遵守“三条定理”。</li>
-<li>移动构造函数和移动等号操作符：只有当类中没有用户定义的复制的操作、移动的操作或者析构函数时会自动生成。</li>
+        <p>在学习golang时，遇到了这样的问题：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a <span class="keyword">float64</span> = <span class="number">9.9</span></span><br><span class="line"><span class="keyword">var</span> b <span class="keyword">int</span> = <span class="number">1</span></span><br><span class="line">fmt.Println(a / (b * <span class="number">9</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">invalid operation: a / (b * 9) (mismatched types float64 and int)</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure><br>出现这样的问题是因为golang在这方面和C++的不同。<br><a id="more"></a><br>golang中有两种基本的数字类型：整数型和浮点型。不光如此，如果一个数是常量或者是字面类型，那么它还要与定义过的变量加以区分。例如：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这几种都是未定义的“字面型数字”</span></span><br><span class="line"><span class="number">100</span></span><br><span class="line"><span class="number">100.1</span></span><br><span class="line"><span class="keyword">const</span> a = <span class="number">100</span></span><br><span class="line"><span class="keyword">const</span> b = <span class="number">100.1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 这几种都是定义过的“变量”</span></span><br><span class="line"><span class="keyword">var</span> c <span class="keyword">int</span> = <span class="number">10</span></span><br><span class="line"><span class="keyword">var</span> d <span class="keyword">float64</span> = <span class="number">10.1</span></span><br></pre></td></tr></table></figure></p>
+<p>为什么要区分上面，这是因为它们在进行基本运算的时候是有区别的。</p>
+<ol>
+<li>对于字面型数字和字面型数字的运算，规则和C++相同的：<ul>
+<li>如果运算符左右两侧都是整数型或都是浮点型，那么运算结果就是原类型。例如：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">_ = <span class="number">10</span> / <span class="number">3</span>	<span class="comment">// 结果是整数3</span></span><br><span class="line">_ = <span class="number">10.0</span> / <span class="number">3.0</span>	<span class="comment">// 结果是浮点数3.333333333...</span></span><br></pre></td></tr></table></figure></li>
+<li>如果一个是整数型，一个是浮点型，那么运算结果就是浮点型。例如：<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">_ = <span class="number">10</span> / <span class="number">3.0</span>	<span class="comment">// 结果是浮点数3.333333333...</span></span><br></pre></td></tr></table></figure>
+也就是说，如果运算符两侧有“字面”的浮点数，那么结果就是浮点数。</li>
 </ul>
-<p>还有一种特殊的情况:<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Widget</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">	<span class="keyword">public</span>:</span><br><span class="line">	<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; Widget(<span class="keyword">const</span> T&amp; rhs);</span><br><span class="line">	<span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt; Widget&amp; <span class="keyword">operator</span>= (<span class="keyword">const</span> T&amp;rhs);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure><br>当T为Widget类型时，上面的两个函数看上去就是复制操作了，但是这种情况编译器还是会生成默认的复制构造函数和默认的复制等号操作符。这个以后会讨论。</p>
+</li>
+<li><p>对于字面型数字和变量的运算：<br> 运算时会将字面型数字转换成变量的类型再进行运算。如果无法转换（字面浮点型转化成整数型），就编译错误。例如：</p>
+ <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a <span class="keyword">float64</span> = <span class="number">3.0</span></span><br><span class="line"><span class="keyword">var</span> b <span class="keyword">int</span> = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">_ = <span class="number">10</span> / a	<span class="comment">// 结果是浮点数3.333333333...，运算过程是字面的10转化成浮点型，相当于10.0 / 3.0</span></span><br><span class="line">_ = b / <span class="number">3.3</span>	<span class="comment">// 会抛出错误“constant 3.3 truncated to integer”，因为字面的3.3无法转换成整数型</span></span><br></pre></td></tr></table></figure>
+<p> 这里注意一个特例，转换只是追求量相等，可以表示相等的量就可以转换。例如：</p>
+ <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a <span class="keyword">int</span> = <span class="number">10</span></span><br><span class="line"></span><br><span class="line">_ = a / <span class="number">3.0</span>	<span class="comment">// 字面3.0可以用整数型的3表示，所以可以转换，结果是整数型3</span></span><br></pre></td></tr></table></figure></li>
+<li>对于变量和变量的运算：<br> 运算符两侧必须均为浮点型或者均为整数型。例如： <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> a, b <span class="keyword">int</span> = <span class="number">11</span>, <span class="number">10</span></span><br><span class="line"><span class="keyword">var</span> c, d <span class="keyword">float64</span> = <span class="number">3.2</span>, <span class="number">3.3</span></span><br><span class="line">_ = a / b <span class="comment">// 可以编译通过</span></span><br><span class="line">_ = c / d <span class="comment">// 可以编译通过</span></span><br><span class="line"></span><br><span class="line">_ = a / c <span class="comment">// 编译失败，因为运算符两侧一个是float64，一个是int。“invalid operation: a / c (mismatched types int and float64)”</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
 
     </div>
 
@@ -280,13 +274,10 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2018/10/02/%E7%A1%AE%E4%BF%9Dconst%E6%88%90%E5%91%98%E5%87%BD%E6%95%B0%E7%BA%BF%E7%A8%8B%E5%AE%89%E5%85%A8/" rel="prev" title="确保const成员函数线程安全">
-      <i class="fa fa-chevron-left"></i> 确保const成员函数线程安全
+    <a href="/2020/01/31/golang%E4%B8%AD%EF%BC%8C%E8%B0%83%E7%94%A8%E5%8C%85%E4%B8%AD%E5%87%BD%E6%95%B0%E6%80%BB%E6%98%AF%E5%87%BA%E7%8E%B0cannot%20refer%20to%20unexported%20name%20xxx/" rel="prev" title="golang中，调用包中函数总是出现cannot refer to unexported name xxx">
+      <i class="fa fa-chevron-left"></i> golang中，调用包中函数总是出现cannot refer to unexported name xxx
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2018/10/07/unique_ptr%E7%9A%84%E4%BD%BF%E7%94%A8/" rel="next" title="unique_ptr的使用">
-      unique_ptr的使用 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
