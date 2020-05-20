@@ -1,6 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>康拓展开及其逆运算</title>
+    <url>/2020/05/20/%E5%BA%B7%E6%8B%93%E5%B1%95%E5%BC%80%E5%8F%8A%E5%85%B6%E9%80%86%E8%BF%90%E7%AE%97/</url>
+    <content><![CDATA[<h1 id="康拓展开"><a href="#康拓展开" class="headerlink" title="康拓展开"></a>康拓展开</h1><p>康拓展开用于计算某一排列在所有从小到大的全排序中的顺序，例如求：[1,3,2]在其全排列：[1,2,3]、[1,3,2]、[2,1,3]、[2,3,1]、[3,1,2]以及[3,2,1]的位置，这里显然是在第二个。</p>
+<p><strong>另外注意：应用康拓展开的数列中不可以有重复的数字。</strong></p>
+<p>康拓展开可以用于哈希压缩，例如有一组连续数字组成的无重复元素的排列，我们可以根据康拓展开将其压缩为其在全排列中的位置。</p>
+<h2 id="公式"><a href="#公式" class="headerlink" title="公式"></a>公式</h2><p>康拓展开的基本公式如下：</p>
+<script type="math/tex; mode=display">
+X = a_{1} * (n - 1)! + a_{2} * (n - 2)! + ... + a_{n} * 0!</script><p>其中<script type="math/tex">a_{i}</script>表示在当前排列中，第i位之后的数中小于第i位数的个数。</p>
+<h2 id="举例"><a href="#举例" class="headerlink" title="举例"></a>举例</h2><p>例如：排列[2,5,4,1,3]，求其在全排序中的顺序，我们套用如上公式：<script type="math/tex">X = 1 * 4! + 3 * 3! + 2 * 2! + 0 * 1! + 0 * 0! = 22</script>，也就是从初试排列[1,2,3,4,5]到此排列需要经过22次排序换位，是全排列中的第23个。<br>这里解释一下上面公式的代入：<br>第一个2的后面只有1比它小，以1开头的排列有4!个，因此第一项为1*4!。<br>第二个5的后面有1、3、4比它小，因为2已经出现在了5前面，因此不考虑。这样的排列有3!个，因此第二项为3 * 3!。<br>以此类推。</p>
+<h1 id="康拓展开的逆运算"><a href="#康拓展开的逆运算" class="headerlink" title="康拓展开的逆运算"></a>康拓展开的逆运算</h1><p>康拓展开逆运算就是求某一排序位置的排序。</p>
+<h2 id="举例-1"><a href="#举例-1" class="headerlink" title="举例"></a>举例</h2><p>例如有一个由5个数组成的从0开始连续的不含重复元素的序列，要求它第96个的排列，我们可以如下处理：</p>
+<p>由于第96个排列需要从初始位置进行95次换序，因此96-1。<br>用95除以4!，得3余23，说明目标排列有3个数比第1个数小，因此第1个数取4。<br>用23除以3!，得3余5，说明目标排列有3个数字比第2个数小，而4已经取过，因此第2个数取5。<br>用5除以2!，得2余1，类似如上所述可得3。<br>用1除以1!，得1余0，可得2。<br>最后一位只能是1。<br>因此目标排列为[4,5,3,2,1]。</p>
+]]></content>
+      <categories>
+        <category>算法</category>
+      </categories>
+  </entry>
+  <entry>
     <title>通道（channel）的阻塞和关闭</title>
     <url>/2020/03/07/%E9%80%9A%E9%81%93%EF%BC%88channel%EF%BC%89%E7%9A%84%E9%98%BB%E5%A1%9E%E5%92%8C%E5%85%B3%E9%97%AD/</url>
     <content><![CDATA[<h1 id="通道的阻塞"><a href="#通道的阻塞" class="headerlink" title="通道的阻塞"></a>通道的阻塞</h1><h2 id="触发条件"><a href="#触发条件" class="headerlink" title="触发条件"></a>触发条件</h2><p>在Golang中，如果不给通道设置buffer大小，那么不论是向通道发送还是从通道接收数据时都会发生阻塞等待。发送时阻塞的时长取决于何时从通道接收数据；接收时等待的时长取决于何时向通道发送数据。<br><a id="more"></a><br>例如有如下的代码：<br><figure class="highlight go"><table><tr><td class="code"><pre><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">"fmt"</span></span><br><span class="line">	<span class="string">"time"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">receive</span><span class="params">(ch <span class="keyword">chan</span> <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">// time.Sleep(1e9)</span></span><br><span class="line">	fmt.Println(&lt;- ch)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">send</span><span class="params">(ch <span class="keyword">chan</span> <span class="keyword">int</span>)</span></span> &#123;</span><br><span class="line">	<span class="comment">// time.Sleep(1e9)</span></span><br><span class="line">	ch &lt;- <span class="number">10</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">	ch := <span class="built_in">make</span>(<span class="keyword">chan</span> <span class="keyword">int</span>)</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">go</span> receive(ch)</span><br><span class="line">	<span class="keyword">go</span> send(ch)</span><br><span class="line"></span><br><span class="line">	time.Sleep(<span class="number">10e9</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><br>receive和send函数中的两处注释只要有一处解除，结果“10”都会延迟1秒以后显示。</p>

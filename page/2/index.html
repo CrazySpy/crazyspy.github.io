@@ -190,6 +190,96 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
+    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/12/09/%E5%AF%B9%E5%B9%B6%E8%A1%8C%E4%BD%BF%E7%94%A8std_atomic%EF%BC%8C%E5%AF%B9%E7%89%B9%E6%AE%8A%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8volatile/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="CrazySpy">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="CrazySpy's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/12/09/%E5%AF%B9%E5%B9%B6%E8%A1%8C%E4%BD%BF%E7%94%A8std_atomic%EF%BC%8C%E5%AF%B9%E7%89%B9%E6%AE%8A%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8volatile/" class="post-title-link" itemprop="url">对并行使用std::atomic，对特殊内存使用volatile</a>
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2018-12-09 19:38:41" itemprop="dateCreated datePublished" datetime="2018-12-09T19:38:41+08:00">2018-12-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">Edited on</span>
+                <time title="Modified: 2020-01-16 20:18:28" itemprop="dateModified" datetime="2020-01-16T20:18:28+08:00">2020-01-16</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/" itemprop="url" rel="index">
+                    <span itemprop="name">C/C++</span>
+                  </a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
+                    <span itemprop="name">Effective Modern C++</span>
+                  </a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在C++编程中std::atomic经常被用于某个互斥访问的变量，它使用了特殊的机器指令保证了互斥与效率兼具（相比较使用mutex）。下面展示一个使用了std::atomic的例子：<br><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">std</span>::atomic&lt;<span class="keyword">int</span>&gt; ai(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">ai = <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="built_in">std</span>::<span class="built_in">cout</span> &lt;&lt; ai;</span><br><span class="line"></span><br><span class="line">++ai;</span><br><span class="line"></span><br><span class="line">--ai;</span><br></pre></td></tr></table></figure><br>在执行完上面的代码后，可能的结果只可能是0，10，11。<br>上面的例子说明std::atomic只保证某时对std::atomic的访问是互斥的，并不保证整个过程是互斥的。在“std::cout &lt;&lt; ai”代码中，在ai的值被读之后、复制给标准输出之前，另一个线程可能改变ai的值，因此值除了是10之外还可能是11和0。 另一个值得注意的地方是最后两句代码的行为。这两个是<strong>“读后写”操作（read-modify-write，RMW）</strong>，但是它们的读和写两个操作从外界来看还是原子的。这就是std::atomic最重要的一个特性之一，在std::atomic构造完成之后，保证其所有成员函数包括RMW操作在其它线程看来都是原子的。</p>
+<p>而使用volatile的代码在多线程上没有任何保证任何事情
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/12/09/%E5%AF%B9%E5%B9%B6%E8%A1%8C%E4%BD%BF%E7%94%A8std_atomic%EF%BC%8C%E5%AF%B9%E7%89%B9%E6%AE%8A%E5%86%85%E5%AD%98%E4%BD%BF%E7%94%A8volatile/#more" rel="contents">
+                Read more &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+        
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
     <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/12/07/%E8%80%83%E8%99%91%E4%BD%BF%E7%94%A8void%E7%B1%BB%E5%9E%8B%E7%9A%84future%E7%9A%84%E4%B8%80%E6%AC%A1%E6%80%A7%E7%9A%84%E4%BA%8B%E4%BB%B6%E9%80%9A%E4%BF%A1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -996,95 +1086,6 @@
   
   
 
-        
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block home" lang="zh">
-    <link itemprop="mainEntityOfPage" href="https://newblog.jiangxiwen.me/2018/11/06/%E5%87%A0%E4%B8%AA%E5%AE%8C%E7%BE%8E%E8%BD%AC%E5%8F%91%E5%A4%B1%E8%B4%A5%E7%9A%84%E6%9D%A1%E4%BB%B6/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.gif">
-      <meta itemprop="name" content="CrazySpy">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="CrazySpy's blog">
-    </span>
-      <header class="post-header">
-        <h1 class="post-title" itemprop="name headline">
-          
-            <a href="/2018/11/06/%E5%87%A0%E4%B8%AA%E5%AE%8C%E7%BE%8E%E8%BD%AC%E5%8F%91%E5%A4%B1%E8%B4%A5%E7%9A%84%E6%9D%A1%E4%BB%B6/" class="post-title-link" itemprop="url">几个完美转发失败的条件</a>
-        </h1>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              <span class="post-meta-item-text">Posted on</span>
-
-              <time title="Created: 2018-11-06 12:23:22" itemprop="dateCreated datePublished" datetime="2018-11-06T12:23:22+08:00">2018-11-06</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-calendar-check-o"></i>
-                </span>
-                <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2020-01-09 15:00:15" itemprop="dateModified" datetime="2020-01-09T15:00:15+08:00">2020-01-09</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">In</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/" itemprop="url" rel="index">
-                    <span itemprop="name">C/C++</span>
-                  </a>
-                </span>
-                  , 
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/C-C/Effective-Modern-C/" itemprop="url" rel="index">
-                    <span itemprop="name">Effective Modern C++</span>
-                  </a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>C++11中最醒目的功能之一就是完美转发。“完美”转发，它是完美的，但只有正确运用它才是完美的。<br>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2018/11/06/%E5%87%A0%E4%B8%AA%E5%AE%8C%E7%BE%8E%E8%BD%AC%E5%8F%91%E5%A4%B1%E8%B4%A5%E7%9A%84%E6%9D%A1%E4%BB%B6/#more" rel="contents">
-                Read more &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
-        
-      
-    </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
-
   </div>
 
   
@@ -1155,7 +1156,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">63</span>
+          <span class="site-state-item-count">64</span>
           <span class="site-state-item-name">posts</span>
         </a>
       </div>
