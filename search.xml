@@ -82,22 +82,26 @@ X = a_{1} * (n - 1)! + a_{2} * (n - 2)! + ... + a_{n} * 0!</script><p>其中<scr
     <url>/2019/09/10/%E5%8D%A1%E7%89%B9%E5%85%B0%E6%95%B0%E7%9A%84%E5%BA%94%E7%94%A8/</url>
     <content><![CDATA[<p>2015年考研有一题：先序遍历为abcd的不同二叉树的个数是（）</p>
 <p>对于这一题，先明确：先序遍历和中序遍历确定唯一的二叉树。所以这一题相当于求中序遍历结果有几种，也或者说四个节点的二叉树有几种形状。</p>
-<p>这是很常见的一种卡特兰数的应用。一开始书后答案写的是用入栈出栈的方式解释，让我有些摸不着头脑。后来网上搜索了下资料，了解了一下卡特兰数。<br><a id="more"></a><br>卡特兰数的形式是一种递归：</p>
+<p>这是很常见的一种卡特兰数的应用。一开始书后答案写的是用入栈出栈的方式解释，让我有些摸不着头脑。后来网上搜索了下资料，了解了一下卡特兰数。<br><a id="more"></a></p>
+<h1 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h1><p>卡特兰数定义如下：</p>
 <script type="math/tex; mode=display">
+H_{n} = \frac{C_{2n}^n}{n+1} \nonumber</script><p>推导过程这里不去追究。</p>
+<h1 id="性质"><a href="#性质" class="headerlink" title="性质"></a>性质</h1><script type="math/tex; mode=display">
 \begin{align}
-g(n)
-&=g(0) \cdot g(n-1)+g(1) \cdot g(n-2)+...+g(n-1) \cdot g(0) \nonumber\\
-&=\sum_{i=1}^{n}g(i-1) \cdot g(n-i) \nonumber\\
-&=\frac{C_{2n}^n}{n+1} \nonumber
-\end{align}</script><p>它的计算过程这里不去追究，重点对于两种应用进行记录：出栈序列的种数以及n个节点的二叉树形状的种数。</p>
-<h1 id="出栈序列的种数"><a href="#出栈序列的种数" class="headerlink" title="出栈序列的种数"></a>出栈序列的种数</h1><p>先考虑如果进栈序列是a1 a2 … an，g(n)为n项序列出栈的种数。如果第一个出栈的项为ak，那么此时出栈的种类就有f(k)=g(k-1)g(n-k)，也就是前k-1项的出栈种数和后n-k项的出栈种数的乘积。</p>
-<p>因此可得整个序列的出栈的种数就是：</p>
-<script type="math/tex; mode=display">
-g(n)=\sum_{i=1}^{n}f(i)=\sum_{i=1}^{n}g(i-1) \cdot g(n-i)</script><p>也就是等于卡特兰数。</p>
-<h1 id="n个节点的二叉树形状种类"><a href="#n个节点的二叉树形状种类" class="headerlink" title="n个节点的二叉树形状种类"></a>n个节点的二叉树形状种类</h1><p>对于n个节点的二叉树形状的种类问题，思考方式和出栈种类的思考方式差不多。</p>
-<p>考虑一个节点N，以N为根的二叉树有n个节点，有g(n)种组合方式。那么g(n)就是左子树的形状种数和右子树形状种数的乘积。因此类似可得：</p>
-<script type="math/tex; mode=display">
-g(n)=\sum_{i=1}^{n}g(i-1) \cdot g(n-i)</script><p>因此可得n个节点的树形状的种数就是卡特兰数。</p>
+H_{n}
+&=H_{1} \cdot H_{n-1}+H_{2} \cdot H_{n-2}+...+H_{n-1} \cdot H_{1} =\sum_{i=1}^{n}H_{i} \cdot H_{n-i} \\
+
+
+H_{n} &= \frac{H_{n - 1}(4n-2)}{n + 1}\\
+
+
+H_{n} &= C_{2n}^{n} - C_{2n}^{n - 1}
+\end{align}</script><h1 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h1><ol>
+<li>给定进栈序列，求出栈序列的种数。</li>
+<li>n个节点的二叉树形状种类。</li>
+<li>有2n个人买一件5元的东西，有n人有5元纸币，另外n人只有10元纸币，老板没有准备零钱找零，并且互相不会商量一起购买。问买东西的序列有几类。</li>
+<li>有多少种不相交对角线，可以将凸多边形划分三角形。<br>等等</li>
+</ol>
 ]]></content>
       <categories>
         <category>组合数学</category>
