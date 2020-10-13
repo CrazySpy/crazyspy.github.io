@@ -1440,10 +1440,24 @@ int main()
       </categories>
   </entry>
   <entry>
+    <title>素数表的最优实现</title>
+    <url>/2018/06/01/%E7%B4%A0%E6%95%B0%E8%A1%A8%E7%9A%84%E6%9C%80%E4%BC%98%E5%AE%9E%E7%8E%B0/</url>
+    <content><![CDATA[<p>对于素数表的构建，基本思路是：除了1以外的正整数的倍数都不是素数。反之同理，素数不可能是某两个非1整数的积。<br>所以有以下代码：<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= n; ++i) p[i] = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= n; ++i)</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i)</span><br><span class="line">		p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
+<p>然后进行优化:<br>1.i的枚举至多只需要到sqrt(n) + 1即可<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i)</span><br><span class="line">		p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
+<p>2.如果某个数不是素数，那么它的倍数可以用它的素因数表示，所以非素数可以排除<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line">	<span class="keyword">if</span>(p[i]) </span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i) </span><br><span class="line">			p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
+<p>3.j不必从i*2开始筛，在i=2时筛过;也不必在i*3时开始..;不必从i*(i-1)时开始；而是应该从i*i开始<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line">	<span class="keyword">if</span>(p[i]) </span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> j = i * i; j &lt;= n; j += i) </span><br><span class="line">			p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
+<p>经过三轮优化得到的代码是最优的素数表实现代码。</p>
+]]></content>
+      <categories>
+        <category>算法</category>
+        <category>数论</category>
+      </categories>
+  </entry>
+  <entry>
     <title>Eratosthenes筛法</title>
     <url>/2018/06/01/Eratosthenes%E7%AD%9B%E6%B3%95/</url>
     <content><![CDATA[<p>HDU-1019：<a href="http://acm.hdu.edu.cn/showproblem.php?pid=1019" target="_blank" rel="noopener">http://acm.hdu.edu.cn/showproblem.php?pid=1019</a></p>
-<p>大意就是讲求几个数的最小公约数，保证结果在long int范围内。</p>
+<p>大意就是讲求几个数的最小公倍数，保证结果在long int范围内。</p>
 <p>原来的思路是使用</p>
 <script type="math/tex; mode=display">
 \begin{align}
@@ -1457,20 +1471,6 @@ a&=p_{1}^{n_{a1}}p_{2}^{n_{a2}}p_{3}^{n_{a3}}...p_{m}^{n_{am}} \nonumber \\
 b&=p_{1}^{n_{b1}}p_{2}^{n_{b2}}p_{3}^{n_{b3}}...p_{m}^{n_{bm}} \ \  (p_{1}，p_{2}...p_{m}均为素数) \nonumber \\
 LCM(a,b)&=p_{1}^{max(n_{a1},n_{b1})}p_{2}^{max(n_{a2},n_{b2})}...p_{m}^{max(n_{am},n_{bm})} \nonumber
 \end{align}</script><p>素数表的最优实现可以参考这篇博客：<a href="../素数表的最优实现">素数表的最优实现</a><br>这个原理得出LCM(a,b)的素因数分解结果，从而得出最后的结论。</p>
-]]></content>
-      <categories>
-        <category>算法</category>
-        <category>数论</category>
-      </categories>
-  </entry>
-  <entry>
-    <title>素数表的最优实现</title>
-    <url>/2018/06/01/%E7%B4%A0%E6%95%B0%E8%A1%A8%E7%9A%84%E6%9C%80%E4%BC%98%E5%AE%9E%E7%8E%B0/</url>
-    <content><![CDATA[<p>对于素数表的构建，基本思路是：除了1以外的正整数的倍数都不是素数。反之同理，素数不可能是某两个非1整数的积。<br>所以有以下代码：<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= n; ++i) p[i] = <span class="literal">true</span>;</span><br><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt;= n; ++i)</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i)</span><br><span class="line">		p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
-<p>然后进行优化:<br>1.i的枚举至多只需要到sqrt(n) + 1即可<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line">	<span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i)</span><br><span class="line">		p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
-<p>2.如果某个数不是素数，那么它的倍数可以用它的素因数表示，所以非素数可以排除<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line">	<span class="keyword">if</span>(p[i]) </span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> j = i * <span class="number">2</span>; j &lt;= n; j += i) </span><br><span class="line">			p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
-<p>3.j不必从i*2开始筛，在i=2时筛过;也不必在i*3时开始..;不必从i*(i-1)时开始；而是应该从i*i开始<br><figure class="highlight c++"><table><tr><td class="code"><pre><span class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">2</span>; i &lt; <span class="built_in">sqrt</span>(n) + <span class="number">1</span>; ++i)</span><br><span class="line">	<span class="keyword">if</span>(p[i]) </span><br><span class="line">		<span class="keyword">for</span>(<span class="keyword">int</span> j = i * i; j &lt;= n; j += i) </span><br><span class="line">			p[j] = <span class="literal">false</span>;</span><br></pre></td></tr></table></figure></p>
-<p>经过三轮优化得到的代码是最优的素数表实现代码。</p>
 ]]></content>
       <categories>
         <category>算法</category>
